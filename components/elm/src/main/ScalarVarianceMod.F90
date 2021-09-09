@@ -42,7 +42,8 @@ subroutine calculate_scalar_covaiance_het(bounds, &
          eflx_lh_tot, &
          q_ref2m, &
          t_ref2m, &
-         fv_patch, &
+         taux_patch, &
+         tauy_patch, &
          forc_pbot_not_downscaled_grc, &
          forc_rho_not_downscaled_grc, &
          q_ref2m_grc, &
@@ -62,7 +63,10 @@ subroutine calculate_scalar_covaiance_het(bounds, &
 	real(r8), intent(in)  :: eflx_lh_tot( bounds%begp: )  ! input pft array
 	real(r8), intent(in)  :: q_ref2m( bounds%begp: )  ! input pft array
 	real(r8), intent(in)  :: t_ref2m( bounds%begp: )  ! input pft array
-	real(r8), intent(in)  :: fv_patch( bounds%begp: )  ! input pft array
+	!real(r8), intent(in)  :: fv_patch( bounds%begp: )  ! input pft array
+    real(r8), intent(in)  :: taux_patch( bounds%begp: )  ! input pft array
+    real(r8), intent(in)  :: tauy_patch( bounds%begp: )  ! input pft array
+    
 	real(r8), intent(in)  :: forc_pbot_not_downscaled_grc( bounds%begg: )  ! input pft array
 	real(r8), intent(in)  :: forc_rho_not_downscaled_grc( bounds%begg: )  ! input pft array
 	real(r8), intent(in)  :: q_ref2m_grc( bounds%begg: )  ! input pft array
@@ -86,7 +90,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8) :: scale_c2l(bounds%begc:bounds%endc) ! scale factor
     real(r8) :: scale_l2g(bounds%begl:bounds%endl) ! scale factor
     real(r8) :: sumwt(bounds%begg:bounds%endg)     ! sum of weights
-    real(r8) :: tsa_pft,pressure,lh_pft,sh_pft,uf_pft,rho_pft,t_pft,q_pft,twa,qwa,thlp2_pft, rtp2_pft, rtpthlp_pft,p_weight
+    real(r8) :: tsa_pft,pressure,lh_pft,sh_pft,taux_pft,tauy_pft,rho_pft,t_pft,q_pft,twa,qwa,thlp2_pft, rtp2_pft, rtpthlp_pft,p_weight
     !------------------------------------------------------------------------
 
     ! Enforce expected array sizes
@@ -180,7 +184,9 @@ subroutine calculate_scalar_covaiance_het(bounds, &
                 lh_pft = eflx_lh_tot(p);
                 sh_pft = eflx_sh_tot(p);
                 rho_pft = forc_rho_not_downscaled_grc(g);
-                uf_pft = fv_patch(p);  !! need to be updated use parameterizaed uf
+                !uf_pft = fv_patch(p);  !! need to be updated use parameterizaed uf
+                taux_pft = taux_patch(p); 
+                tauy_pft = tauy_patch(p); 
                 tsa_pft = t_ref2m(p);
                 pressure =forc_pbot_not_downscaled_grc(g);
                 t_pft = tsa_pft*(100000/pressure)**0.286;
@@ -191,7 +197,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
                 
                 p_weight = scale_p2c(p) * scale_c2l(c) * scale_l2g(l) * veg_pp%wtgcell(p);
                 
-                call calculate_scalar_covaiance_pft_hom(lh_pft, sh_pft, rho_pft, uf_pft,thlp2_pft, rtp2_pft, rtpthlp_pft)
+                call calculate_scalar_covaiance_pft_hom(lh_pft, sh_pft, rho_pft, taux_pft,tauy_pft,thlp2_pft, rtp2_pft, rtpthlp_pft)
 
                 !wp2_het = nansum(p_weight*wp2_pft, 1);
                 thlp2_het_grc(g) = thlp2_het_grc(g) + p_weight*thlp2_pft + p_weight*((t_pft-twa)**2);
@@ -224,10 +230,12 @@ subroutine calculate_scalar_covaiance_het(bounds, &
   
   
 !!! HOM method  
-  subroutine calculate_scalar_covaiance_hom(bounds , &
+  subroutine calculate_scalar_covaiance_hom(bounds, &
          eflx_sh_tot_grc , &
          eflx_lh_tot_grc, &
          fv_grc, &
+         taux_grc, &
+         tauy_grc, &
          forc_rho_not_downscaled_grc, &
          thlp2_hom_grc, &
          rtp2_hom_grc, &
@@ -237,12 +245,15 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     ! Averaging is only done for points that are not equal to "spval".
     !
     ! !ARGUMENTS:
+      
     type(bounds_type), intent(in) :: bounds
 	!!!
-    real(r8), intent(in)  :: eflx_sh_tot_grc( bounds%begg: )  ! input pft array
-	real(r8), intent(in)  :: eflx_lh_tot_grc( bounds%begg: )  ! input pft array
-	real(r8), intent(in)  :: fv_grc( bounds%begg: )  ! input pft array
-	real(r8), intent(in)  :: forc_rho_not_downscaled_grc( bounds%begg: )  ! input pft array
+    real(r8), intent(in)  :: eflx_sh_tot_grc( bounds%begg: )  ! input gridcell array
+	real(r8), intent(in)  :: eflx_lh_tot_grc( bounds%begg: )  ! input gridcell array
+	real(r8), intent(in)  :: fv_grc( bounds%begg: )  ! input gridcell array
+    real(r8), intent(in)  :: taux_grc( bounds%begg: )  ! input gridcell array
+    real(r8), intent(in)  :: tauy_grc( bounds%begg: )  ! input gridcell array
+	real(r8), intent(in)  :: forc_rho_not_downscaled_grc( bounds%begg: )  ! input gridcell array
 	
     real(r8), intent(out) :: thlp2_hom_grc( bounds%begg: )  ! output gridcell array
     real(r8), intent(out) :: rtp2_hom_grc( bounds%begg: )  ! output gridcell array
@@ -257,8 +268,13 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), parameter :: rt_tol=1.e-8 !(kg/kg)
     real(r8), parameter :: w_tol=2.e-2 !(m/s)
     real(r8), parameter :: a_const=1.8_r8
-    real(r8) :: lh, sh, uf, rho
-    real(r8) :: wprtp, wpthlp, wp2_sfc
+    real(r8), parameter :: t0=300._r8
+    real(r8), parameter :: grav=9.80616._r8
+    real(r8), parameter :: z_const=1._r8
+    real(r8), parameter :: ufmin=0.01_r8
+
+    real(r8) :: lh, sh, uf, rho, ustar2, wstar
+    real(r8) :: upwp, vpwp, wprtp, wpthlp, wp2_sfc
 
 
     !------------------------------------------------------------------------
@@ -270,26 +286,43 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     
     do g = bounds%begg,bounds%endg
 
-          if (eflx_sh_tot_grc(g) /= spval .and. eflx_lh_tot_grc(g) /= spval .and. fv_grc(g) /= spval  .and. forc_rho_not_downscaled_grc(g) /= spval) then
-        lh = eflx_lh_tot_grc(g);
-        sh = eflx_sh_tot_grc(g);
-        rho = forc_rho_not_downscaled_grc(g);
-        uf = fv_grc(g); !! need to be updated use parameterizaed uf
+          if (eflx_sh_tot_grc(g) /= spval .and. eflx_lh_tot_grc(g) /= spval .and. taux_grc(g) /= spval  .and. tauy_grc(g) /= spval .and.  forc_rho_not_downscaled_grc(g) /= spval) then
+            lh = eflx_lh_tot_grc(g);
+            sh = eflx_sh_tot_grc(g);
+            rho = forc_rho_not_downscaled_grc(g);
+            !uf = fv_grc(g); !! need to be updated use parameterizaed uf
+            upwp = taux_grc(g)/rho
+            vpwp = tauy_grc(g)/rho
+            
+            wprtp = lh/(lv*rho);
+            wpthlp= sh/(cpair*rho);
+            
+            ustar2 = sqrt(upwp**2 + vpwp**2);
+            
+            if (wpthlp > 0) then 
+                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1.r8/3._r8)
+            else
+                wstar = 0
+            endif
+            
+            uf = sqrt(ustar2 + 0.3 * wstar**2)
+            
+            if (uf <= ufmin) then
+                uf = ufmin
+            end
+            
+            wp2_sfc = a_const * uf**2;
 
-             wprtp = lh/(lv*rho);
-             wpthlp= sh/(cpair*rho);
-             wp2_sfc = a_const * uf**2;
-
-             thlp2_hom_grc(g)=0.4_r8 * a_const * (wpthlp/uf)**2;
-             if (thlp2_hom_grc(g) < thl_tol**2) then
+            thlp2_hom_grc(g)=0.4_r8 * a_const * (wpthlp/uf)**2;
+            if (thlp2_hom_grc(g) < thl_tol**2) then
                 thlp2_hom_grc(g) = thl_tol**2;
-             end if
+            end if
              
-             rtp2_hom_grc(g)=0.4_r8 * a_const * (wprtp/uf)**2;
-             if (rtp2_hom_grc(g) < rt_tol**2) then
+            rtp2_hom_grc(g)=0.4_r8 * a_const * (wprtp/uf)**2;
+            if (rtp2_hom_grc(g) < rt_tol**2) then
                 rtp2_hom_grc(g) = rt_tol**2;
-             end if
-             rtpthlp_hom_grc(g)=0.2_r8*a_const*(wpthlp/uf)*(wprtp/uf);
+            end if
+            rtpthlp_hom_grc(g)=0.2_r8*a_const*(wpthlp/uf)*(wprtp/uf);
 
        end if
     end do
@@ -298,8 +331,8 @@ subroutine calculate_scalar_covaiance_het(bounds, &
   end subroutine calculate_scalar_covaiance_hom
   
   
-  !!! HOM method at pft level
-  subroutine calculate_scalar_covaiance_pft_hom(lh_pft, sh_pft, rho_pft, uf_pft, &
+!!! HOM method at pft level
+  subroutine calculate_scalar_covaiance_pft_hom(lh_pft, sh_pft, rho_pft, taux_pft, tauy_pft, &
          thlp2_pft, &
          rtp2_pft, &
          rtpthlp_pft)
@@ -313,8 +346,10 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), intent(in)  :: lh_pft ! input pft array
 	real(r8), intent(in)  :: sh_pft  ! input pft array
 	real(r8), intent(in)  :: rho_pft  ! input pft array
-	real(r8), intent(in)  :: uf_pft  ! input pft array // !! need to be updated use parameterizaed uf
-	
+	!real(r8), intent(in)  :: uf_pft  ! input pft array // !! need to be updated use parameterizaed uf
+	real(r8), intent(in)  :: taux_pft 
+    real(r8), intent(in)  :: tauy_pft 
+    
     real(r8), intent(out) :: thlp2_pft  ! output gridcell array
     real(r8), intent(out) :: rtp2_pft  ! output gridcell array
     real(r8), intent(out) :: rtpthlp_pft ! output gridcell array
@@ -327,7 +362,12 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), parameter :: rt_tol=1.e-8 !(kg/kg)
     real(r8), parameter :: w_tol=2.e-2 !(m/s)
     real(r8), parameter :: a_const=1.8_r8
-    real(r8) :: wprtp, wpthlp, wp2_sfc
+    real(r8), parameter :: t0=300._r8
+    real(r8), parameter :: grav=9.80616._r8
+    real(r8), parameter :: z_const=1._r8
+    real(r8), parameter :: ufmin=0.01_r8
+    
+    real(r8) :: upwp, vpwp, wprtp, wpthlp, wp2_sfc, uf_pft, ustar2_pft, wstar_pft, ustar2, wstar
 
     !------------------------------------------------------------------------
 
@@ -338,11 +378,28 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     
    
 
-      if (lh_pft /= spval .and. sh_pft /= spval .and. rho_pft /= spval  .and. uf_pft /= spval) then
-       
-
+      if (lh_pft /= spval .and. sh_pft /= spval .and. rho_pft /= spval  .and. taux_pft /= spval  .and. tauy_pft /= spval) then
+             
+             upwp = taux_pft/rho
+             vpwp = tauy_pft/rho
+            
              wprtp = lh_pft/(lv*rho_pft);
              wpthlp= sh_pft/(cpair*rho_pft);
+             
+             ustar2 = sqrt(upwp**2 + vpwp**2);
+            
+            if (wpthlp > 0) then 
+                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1.r8/3._r8)
+            else
+                wstar = 0
+            endif
+            
+            uf_pft = sqrt(ustar2 + 0.3 * wstar**2)
+            
+            if (uf_pft <= ufmin) then
+                uf_pft = ufmin
+            end
+            
              wp2_sfc = a_const * uf_pft**2;
 
              thlp2_pft=0.4_r8 * a_const * (wpthlp/uf_pft)**2;

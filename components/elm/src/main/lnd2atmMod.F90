@@ -298,7 +298,8 @@ contains
     call calculate_scalar_covaiance_hom(bounds, &
          eflx_sh_tot_grc     (bounds%begg:bounds%endg) , &
          eflx_lh_tot_grc    (bounds%begg:bounds%endg), &
-         fv_grc    (bounds%begg:bounds%endg), &
+         taux_grc   (bounds%begg:bounds%endg), &
+         tauy_grc   (bounds%begg:bounds%endg), &
          forc_rho_not_downscaled_grc(bounds%begg:bounds%endg)      , &
          thlp2_hom_grc(bounds%begg:bounds%endg)      , &
          rtp2_hom_grc(bounds%begg:bounds%endg)      , &
@@ -310,7 +311,8 @@ contains
          eflx_lh_tot    (bounds%begp:bounds%endp), &
          q_ref2m    (bounds%begp:bounds%endp), &
          t_ref2m    (bounds%begp:bounds%endp), &
-         fv_patch   (bounds%begp:bounds%endp), &
+         taux   (bounds%begp:bounds%endp), &
+         tauy  (bounds%begp:bounds%endp), &
          forc_pbot_not_downscaled_grc(bounds%begg:bounds%endg)      , &
          forc_rho_not_downscaled_grc(bounds%begg:bounds%endg)      , &
          q_ref2m_grc    (bounds%begg:bounds%endg), &
