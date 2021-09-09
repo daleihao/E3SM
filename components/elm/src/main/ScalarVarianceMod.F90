@@ -180,7 +180,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
                 lh_pft = eflx_lh_tot(p);
                 sh_pft = eflx_sh_tot(p);
                 rho_pft = forc_rho_not_downscaled_grc(g);
-                uf_pft = fv_patch(p);
+                uf_pft = fv_patch(p);  !! need to be updated use parameterizaed uf
                 tsa_pft = t_ref2m(p);
                 pressure =forc_pbot_not_downscaled_grc(g);
                 t_pft = tsa_pft*(100000/pressure)**0.286;
@@ -274,7 +274,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
         lh = eflx_lh_tot_grc(g);
         sh = eflx_sh_tot_grc(g);
         rho = forc_rho_not_downscaled_grc(g);
-        uf = fv_grc(g);
+        uf = fv_grc(g); !! need to be updated use parameterizaed uf
 
              wprtp = lh/(lv*rho);
              wpthlp= sh/(cpair*rho);
@@ -313,7 +313,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), intent(in)  :: lh_pft ! input pft array
 	real(r8), intent(in)  :: sh_pft  ! input pft array
 	real(r8), intent(in)  :: rho_pft  ! input pft array
-	real(r8), intent(in)  :: uf_pft  ! input pft array
+	real(r8), intent(in)  :: uf_pft  ! input pft array // !! need to be updated use parameterizaed uf
 	
     real(r8), intent(out) :: thlp2_pft  ! output gridcell array
     real(r8), intent(out) :: rtp2_pft  ! output gridcell array
