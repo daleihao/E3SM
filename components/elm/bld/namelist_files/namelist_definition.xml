@@ -638,6 +638,27 @@ The same snow shortwave algorithm can be turned on for sea-ice simulation
 with config_use_snicar_ad in mpas-seaice namelist
 </entry>
 
+<entry id="snow_shape_defined" type="integer" category="physics"
+       group="elm_inparm" valid_values="" value="1">
+snow shape: 1=sphere (original SNICAR scheme)
+            2=spheroid; 3=hexagonal plate; 4=koch snowflake
+</entry>
+ 
+<entry id="is_dust_internal_mixing" type="logical" category="physics"
+       group="elm_inparm" valid_values="" value=".false.">
+is_dust_internal_mixing 
+</entry>
+
+<entry id="is_BC_internal_mixing" type="logical" category="physics"
+       group="elm_inparm" valid_values="" value=".false.">
+is_BC_internal_mixing
+</entry>
+
+<entry id="atm_defined" type="integer" category="physics"
+       group="elm_inparm" valid_values="" value="0">
+atm_defined
+</entry>
+
 <entry id="use_extrasnowlayers" type="logical" category="physics"
        group="elm_inparm" valid_values="" value=".false.">
 Toggle to use 16 snow layers instead of 5.  This option enables more realistic
