@@ -51,6 +51,7 @@ module controlMod
   use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
+  use SnowSnicarMod           , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing 
  !
   ! !PUBLIC TYPES:
   implicit none
@@ -301,6 +302,10 @@ contains
 
     namelist /elm_inparm/ &
          use_erosion, ero_ccycle
+
+    ! snow shape
+    namelist /elm_inparm/ &
+         snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing 
 
     ! ----------------------------------------------------------------------
     ! Default values
@@ -799,6 +804,9 @@ contains
     call mpi_bcast (albice, 2, MPI_REAL8,0, mpicom, ier)
     call mpi_bcast (more_vertlayers,1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
+    call mpi_bcast (snow_shape_defined, 1, MPI_LOGICAL, 0, mpicom, ier) ! for snow shape
+    call mpi_bcast (is_dust_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier) ! for snow-dust internal mixing
+    call mpi_bcast (is_BC_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier) ! for snow-BC internal mixing
 
     ! glacier_mec variables
     call mpi_bcast (create_glacier_mec_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
@@ -930,6 +938,9 @@ contains
     write(iulog,*) '    two-way irrigation = ', tw_irr
     write(iulog,*) '    use_snicar_frc = ', use_snicar_frc
     write(iulog,*) '    use_snicar_ad = ', use_snicar_ad
+    write(iulog,*) '    snow_shape_defined = ', snow_shape_defined ! for snow shape
+    write(iulog,*) '    is_dust_internal_mixing = ', is_dust_internal_mixing ! for snow shape
+    write(iulog,*) '    is_BC_internal_mixing = ', is_BC_internal_mixing ! for snow shape
     write(iulog,*) '    use_vancouver = ', use_vancouver
     write(iulog,*) '    use_mexicocity = ', use_mexicocity
     write(iulog,*) '    use_noio = ', use_noio
