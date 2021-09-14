@@ -204,9 +204,9 @@ contains
     index_l2x_Fall_tauy     = mct_avect_indexra(l2x,'Fall_tauy')
     index_l2x_Fall_lat      = mct_avect_indexra(l2x,'Fall_lat')
     index_l2x_Fall_sen      = mct_avect_indexra(l2x,'Fall_sen')
-    index_l2x_Sl_thlp2    = mct_avect_indexra(l2x,'Sl_thlp2') ! scalar variance
-    index_l2x_Sl_rtp2     = mct_avect_indexra(l2x,'Sl_rtp2') ! scalar variance
-    index_l2x_Sl_rtpthlp  = mct_avect_indexra(l2x,'Sl_rtpthlp') ! scalar variance
+    index_l2x_Sl_thlp2     = mct_avect_indexra(l2x,'Sl_thlp2') ! scalar variance
+    index_l2x_Sl_rtp2      = mct_avect_indexra(l2x,'Sl_rtp2') ! scalar variance
+    index_l2x_Sl_rtpthlp   = mct_avect_indexra(l2x,'Sl_rtpthlp') ! scalar variance
     index_l2x_Fall_lwup     = mct_avect_indexra(l2x,'Fall_lwup')
     index_l2x_Fall_evap     = mct_avect_indexra(l2x,'Fall_evap')
     index_l2x_Fall_swnet    = mct_avect_indexra(l2x,'Fall_swnet')
