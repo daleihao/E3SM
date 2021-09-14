@@ -175,7 +175,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
           l = veg_pp%landunit(p)
           g = veg_pp%gridcell(p)
           if (eflx_sh_tot(p) /= spval .and. eflx_sh_tot(p) /= spval .and. q_ref2m(p) /= spval .and. t_ref2m(p) /= spval &
-          .and. fv_patch(p) /= spval .and. forc_pbot_not_downscaled_grc(g) /= spval .and. forc_rho_not_downscaled_grc(g) /= spval) then
+          .and. taux_patch(p) /= spval .and. tauy_patch(p) /= spval .and. forc_pbot_not_downscaled_grc(g) /= spval .and. forc_rho_not_downscaled_grc(g) /= spval) then
              if (sumwt(g) == 0._r8) then
                thlp2_het_grc(g) = 0._r8
                rtp2_het_grc(g) = 0._r8
@@ -219,6 +219,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
           rtpthlp_het_grc(g) = rtpthlp_het_grc(g)/sumwt(g)
        end if
     end do
+    
     if (found) then
        write(iulog,*)'p2g_1d error: sumwt is greater than 1.0 at g= ',index
        call endrun(decomp_index=index, elmlevel=nameg, msg=errMsg(__FILE__, __LINE__))
@@ -233,7 +234,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
   subroutine calculate_scalar_covaiance_hom(bounds, &
          eflx_sh_tot_grc , &
          eflx_lh_tot_grc, &
-         fv_grc, &
+         !fv_grc, &
          taux_grc, &
          tauy_grc, &
          forc_rho_not_downscaled_grc, &
@@ -250,7 +251,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
 	!!!
     real(r8), intent(in)  :: eflx_sh_tot_grc( bounds%begg: )  ! input gridcell array
 	real(r8), intent(in)  :: eflx_lh_tot_grc( bounds%begg: )  ! input gridcell array
-	real(r8), intent(in)  :: fv_grc( bounds%begg: )  ! input gridcell array
+	!real(r8), intent(in)  :: fv_grc( bounds%begg: )  ! input gridcell array
     real(r8), intent(in)  :: taux_grc( bounds%begg: )  ! input gridcell array
     real(r8), intent(in)  :: tauy_grc( bounds%begg: )  ! input gridcell array
 	real(r8), intent(in)  :: forc_rho_not_downscaled_grc( bounds%begg: )  ! input gridcell array
@@ -269,7 +270,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), parameter :: w_tol=2.e-2 !(m/s)
     real(r8), parameter :: a_const=1.8_r8
     real(r8), parameter :: t0=300._r8
-    real(r8), parameter :: grav=9.80616._r8
+    real(r8), parameter :: grav=9.80616_r8
     real(r8), parameter :: z_const=1._r8
     real(r8), parameter :: ufmin=0.01_r8
 
@@ -291,8 +292,8 @@ subroutine calculate_scalar_covaiance_het(bounds, &
             sh = eflx_sh_tot_grc(g);
             rho = forc_rho_not_downscaled_grc(g);
             !uf = fv_grc(g); !! need to be updated use parameterizaed uf
-            upwp = taux_grc(g)/rho
-            vpwp = tauy_grc(g)/rho
+            upwp = taux_grc(g)/rho;
+            vpwp = tauy_grc(g)/rho;
             
             wprtp = lh/(lv*rho);
             wpthlp= sh/(cpair*rho);
@@ -300,16 +301,16 @@ subroutine calculate_scalar_covaiance_het(bounds, &
             ustar2 = sqrt(upwp**2 + vpwp**2);
             
             if (wpthlp > 0) then 
-                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1.r8/3._r8)
+                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1._r8/3._r8)
             else
-                wstar = 0
+                wstar = 0;
             endif
             
             uf = sqrt(ustar2 + 0.3 * wstar**2)
             
             if (uf <= ufmin) then
-                uf = ufmin
-            end
+                uf = ufmin;
+            endif
             
             wp2_sfc = a_const * uf**2;
 
@@ -363,11 +364,11 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     real(r8), parameter :: w_tol=2.e-2 !(m/s)
     real(r8), parameter :: a_const=1.8_r8
     real(r8), parameter :: t0=300._r8
-    real(r8), parameter :: grav=9.80616._r8
+    real(r8), parameter :: grav=9.80616_r8
     real(r8), parameter :: z_const=1._r8
     real(r8), parameter :: ufmin=0.01_r8
     
-    real(r8) :: upwp, vpwp, wprtp, wpthlp, wp2_sfc, uf_pft, ustar2_pft, wstar_pft, ustar2, wstar
+    real(r8) :: upwp, vpwp, wprtp, wpthlp, wp2_sfc, uf_pft, ustar2_pft, wstar_pft, ustar2, wstar, rho
 
     !------------------------------------------------------------------------
 
@@ -380,8 +381,8 @@ subroutine calculate_scalar_covaiance_het(bounds, &
 
       if (lh_pft /= spval .and. sh_pft /= spval .and. rho_pft /= spval  .and. taux_pft /= spval  .and. tauy_pft /= spval) then
              
-             upwp = taux_pft/rho
-             vpwp = tauy_pft/rho
+             upwp = taux_pft/rho_pft;
+             vpwp = tauy_pft/rho_pft;
             
              wprtp = lh_pft/(lv*rho_pft);
              wpthlp= sh_pft/(cpair*rho_pft);
@@ -389,16 +390,16 @@ subroutine calculate_scalar_covaiance_het(bounds, &
              ustar2 = sqrt(upwp**2 + vpwp**2);
             
             if (wpthlp > 0) then 
-                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1.r8/3._r8)
+                 wstar = (1/t0 * grav * wpthlp * z_const) ** (1._r8/3._r8)
             else
-                wstar = 0
+                wstar = 0;
             endif
             
             uf_pft = sqrt(ustar2 + 0.3 * wstar**2)
             
             if (uf_pft <= ufmin) then
-                uf_pft = ufmin
-            end
+                uf_pft = ufmin;
+            endif
             
              wp2_sfc = a_const * uf_pft**2;
 
