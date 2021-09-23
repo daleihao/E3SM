@@ -33,11 +33,6 @@ module SnowSnicarMod
   public :: SnowAge_init     ! Initial read in of snow-aging file
   public :: SnowOptics_init  ! Initial read in of snow-optics file
 
-
-  !$acc declare copyin(snow_shape_defined)
-  !$acc declare copyin(is_dust_internal_mixing)
-  !$acc declare copyin(is_BC_internal_mixing)
-  !$acc declare copyin(atm_defined)
   !
   ! !PUBLIC DATA MEMBERS:
   integer,  public, parameter :: sno_nbr_aer =   8        ! number of aerosol species in snowpack
@@ -1494,7 +1489,7 @@ contains
      subroutine SnowOptics_init( )
 
       use fileutils  , only : getfil
-      use elm_varctl , only : fsnowoptics
+      use elm_varctl , only : fsnowoptics, snicar_atm_type
       use spmdMod    , only : masterproc
       use ncdio_pio  , only : file_desc_t, ncd_io, ncd_pio_openfile, ncd_pio_closefile
       use ncdio_pio  , only : ncd_pio_openfile, ncd_inqfdims, ncd_pio_closefile, ncd_inqdid, ncd_inqdlen
@@ -1526,7 +1521,7 @@ contains
       call ncd_io( 'ext_cff_mss_ice_dfs', ext_cff_mss_snw_dfs, 'read', ncid, posNOTonfile=.true.)
       
       !!! direct and diffuse flux under different atmospheric conditions
-      if (atm_defined > 0)then
+      if (snicar_atm_type > 0)then
       ! direct-beam incident spectral flux: 
        call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
       ! diffuse incident spectral flux:
@@ -1774,7 +1769,7 @@ contains
      use elm_varpar       , only : nlevsno, numrad
      use clm_time_manager , only : get_nstep
      use shr_const_mod    , only : SHR_CONST_PI
-     use elm_varctl       , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing,atm_defined 
+     use elm_varctl       , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing, snicar_atm_type 
      !
      ! !ARGUMENTS:
      integer           , intent(in)  :: flg_snw_ice                                        ! flag: =1 when called from CLM, =2 when called from CSIM
@@ -2278,7 +2273,7 @@ contains
              elseif(numrad_snw==5) then
                 ! Direct:
                 if (flg_slr_in == 1) then
-                   if (atm_defined == 0) then
+                   if (snicar_atm_type == 0) then
                      flx_wgt(1) = 1._r8
                      flx_wgt(2) = 0.49352158521175_r8
                      flx_wgt(3) = 0.18099494230665_r8
@@ -2290,14 +2285,14 @@ contains
                         slr_zen = 89
                      endif
                      flx_wgt(1) = 1._r8
-                     flx_wgt(2) = flx_wgt_dir(atm_defined, slr_zen+1, 2)
-                     flx_wgt(3) = flx_wgt_dir(atm_defined, slr_zen+1, 3)
-                     flx_wgt(4) = flx_wgt_dir(atm_defined, slr_zen+1, 4)
-                     flx_wgt(5) = flx_wgt_dir(atm_defined, slr_zen+1, 5)   
+                     flx_wgt(2) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 2)
+                     flx_wgt(3) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 3)
+                     flx_wgt(4) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 4)
+                     flx_wgt(5) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 5)   
                   endif
                    ! Diffuse:
                 elseif (flg_slr_in == 2) then
-                     if  (atm_defined == 0) then
+                     if  (snicar_atm_type == 0) then
                      flx_wgt(1) = 1._r8
                      flx_wgt(2) = 0.58581507618433_r8
                      flx_wgt(3) = 0.20156903770812_r8
@@ -2305,10 +2300,10 @@ contains
                      flx_wgt(5) = 0.10343699264369_r8
                   else
                      flx_wgt(1) = 1._r8
-                     flx_wgt(2) = flx_wgt_dif(atm_defined, 2)
-                     flx_wgt(3) = flx_wgt_dif(atm_defined, 3)
-                     flx_wgt(4) = flx_wgt_dif(atm_defined, 4)
-                     flx_wgt(5) = flx_wgt_dif(atm_defined, 5)  
+                     flx_wgt(2) = flx_wgt_dif(snicar_atm_type, 2)
+                     flx_wgt(3) = flx_wgt_dif(snicar_atm_type, 3)
+                     flx_wgt(4) = flx_wgt_dif(snicar_atm_type, 4)
+                     flx_wgt(5) = flx_wgt_dif(snicar_atm_type, 5)  
                   endif
                 endif
              endif ! end if numrad_snw
