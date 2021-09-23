@@ -640,7 +640,7 @@ with config_use_snicar_ad in mpas-seaice namelist
 
 <entry id="snow_shape_defined" type="integer" category="physics"
        group="elm_inparm" valid_values="" value="1">
-snow shape: 1=sphere (original SNICAR scheme)
+snow shape: 1=sphere (original assumption in SNICAR)
             2=spheroid; 3=hexagonal plate; 4=koch snowflake
 </entry>
  

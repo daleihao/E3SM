@@ -1541,7 +1541,7 @@ contains
        call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
       ! diffuse incident spectral flux:
        call ncd_io( 'flx_wgt_dif', flx_wgt_dif,           'read', ncid, posNOTonfile=.true.)
-      end
+      endif
       
       !$acc update device( &
       !$acc ss_alb_snw_drc     ,&
@@ -1911,9 +1911,12 @@ contains
          gg_ice_F07_tmp(7)  , & !
          g_ice_F07  , & !
          g_ice  , & !
-         g_Cg_intp , & !
+         gg_F07_intp  , & !
+         g_Cg_intp, & !
          R_1_omega_tmp , & ! !!! BC internal mixing
+         C_BC_total , & ! !!! BC concentrtion
          C_dust_total !! dust concentration
+     integer :: slr_zen
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
      ! SNICAR_AD new variables, follow sea-ice shortwave conventions
@@ -2075,9 +2078,9 @@ contains
       real(r8) :: g_F07_p2(7)
       real(r8) :: g_F07_p1(7)
       real(r8) :: g_F07_p0(7)
-      real(r8) :: R_d0(3)
-      real(r8) :: R_d1(3)
-      real(r8) :: R_d2(3)
+      real(r8) :: BC_d0(3)
+      real(r8) :: BC_d1(3)
+      real(r8) :: BC_d2(3)
       real(r8) :: dust_clear_d0(3)
       real(r8) :: dust_clear_d1(3)
       real(r8) :: dust_clear_d2(3)
@@ -2118,8 +2121,6 @@ contains
       !!!!!!!!! snow shape
       ! define snow shape
       snw_shp_lcl(:) = snow_shape_defined
-      snow_fs(:) = 0
-      snow_as(:) = 0
       
       !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
       !g_wvl_center = g_wvl(2:8)/2 + g_wvl(1:7)/2 ; ! center point for wavelength band
@@ -2141,7 +2142,7 @@ contains
       
       !!! dust internal mixing
       data dust_clear_d0(:) /1.0413E+00,1.0168E+00,1.0189E+00/
-      data dust_clear_d1(:) /1.0016E+00,1.0070E+00 1.0840E+00/
+      data dust_clear_d1(:) /1.0016E+00,1.0070E+00,1.0840E+00/
       data dust_clear_d2(:) /2.4208E-01,1.5300E-03,1.1230E-04/
       
       data dust_cloudy_d0(:) /1.0388E+00,1.0167E+00,1.0189E+00/
@@ -2377,20 +2378,18 @@ contains
                    endif
 
   !!! Dalei Hao 
-                  ! shape-dependent asymeetrty factors (He et al., 2017)
+                  ! shape-dependent asymetry factors (He et al., 2017)
                   do i=snl_top,snl_btm,1
-                     if(snw_shp_lcl(i) == 1) ! sphere
-                  
-                     elseif(snw_shp_lcl(i) == 2) ! spheroid
+                     if(snw_shp_lcl(i) == 2) then ! spheroid
                      
                        diam_ice = 2._r8*snw_rds_lcl(i)
-                        if(snw_fs_lcl(i) == 0)
+                        if(snw_fs_lcl(i) == 0) then
                            fs_sphd = 0.929_r8
                         else
                            fs_sphd = snw_fs_lcl(i)               
-                        end
+                        endif
                         fs_hex = 0.788_r8 
-                        if(snw_ar_lcl(i) == 0)
+                        if(snw_ar_lcl(i) == 0) then
                            ar_tmp = 0.5_r8
                         else
                            ar_tmp = snw_ar_lcl(i)              
@@ -2398,15 +2397,15 @@ contains
                         g_ice_Cg_tmp = g_b0 * (fs_sphd/fs_hex)**g_b1 * diam_ice**g_b2 ! Eq.7, He et al. (2017)
                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * AR_tmp**2 ! Eqn. 3.1 in Fu (2007)                           
             
-                     elseif(snw_shp_lcl(i) == 3) ! hexagonal plate
+                     elseif(snw_shp_lcl(i) == 3) then ! hexagonal plate
                           diam_ice = 2._r8*snw_rds_lcl(i)
-                        if(snw_fs_lcl(i) == 0)
+                        if(snw_fs_lcl(i) == 0) then
                            fs_hex0 = 0.788_r8
                         else
                            fs_hex0 = snw_fs_lcl(i)               
-                        end
+                        endif
                         fs_hex = 0.788_r8 
-                        if(snw_ar_lcl(i) == 0)
+                        if(snw_ar_lcl(i) == 0) then
                            ar_tmp = 2.5_r8
                         else
                            ar_tmp = snw_ar_lcl(i)              
@@ -2414,15 +2413,15 @@ contains
                         g_ice_Cg_tmp = g_b0 * (fs_hex0/fs_hex)**g_b1 * diam_ice**g_b2 ! Eq.7, He et al. (2017)
                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * (log(AR_tmp))**2 ! Eqn. 3.3 in Fu (2007)
             
-                     elseif(snw_shp_lcl(i) == 4) ! koch snowflake
+                     elseif(snw_shp_lcl(i) == 4) then ! koch snowflake
                      diam_ice = 2._r8 * snw_rds_lcl(i) /0.544_r8
-                        if(snw_fs_lcl(i) == 0)
+                        if(snw_fs_lcl(i) == 0) then
                            fs_koch = 0.712_r8
                         else
                            fs_koch = snw_fs_lcl(i)               
-                        end
+                        endif
                         fs_hex = 0.788_r8 
-                        if(snw_ar_lcl(i) == 0)
+                        if(snw_ar_lcl(i) == 0) then
                            ar_tmp = 2.5_r8
                         else
                            ar_tmp = snw_ar_lcl(i)              
@@ -2435,7 +2434,7 @@ contains
                      
                      ! 6 wavelength bands for g_ice to be interpolated into 480-bands of SNICAR
                      ! shape-preserving piecewise interpolation into 480-bands
-                     if(snw_shp_lcl(i) > 1)
+                     if(snw_shp_lcl(i) > 1) then
                         !g_Cg_intp = pchip(g_wvl_center,g_ice_Cg_tmp,wvl) ;
                         !gg_F07_intp = pchip(g_wvl_center,gg_ice_F07_tmp,wvl) ;
                         !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
@@ -2444,21 +2443,21 @@ contains
                         !wvl_5bd = [0.5 0.85 1.1 1.35 3.25];
                         ! He /0.475 1.055 1.655 2.2 3 3.75 4.5
                      ! linear interpolation to get the Cg and G_f80 for band_idx.
-                     if(bnd_idx == 1)
+                     if(bnd_idx == 1) then
                         g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
                         gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+gg_ice_F07_tmp(1);
-                     elseif(bnd_idx == 2)
+                     elseif(bnd_idx == 2) then 
                         g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+g_ice_Cg_tmp(1);
                         gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+gg_ice_F07_tmp(1);
  
-                     elseif(bnd_idx == 3)
+                     elseif(bnd_idx == 3) then 
                         g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+g_ice_Cg_tmp(2);
                         gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+gg_ice_F07_tmp(2);
-                     elseif(bnd_idx == 4)
+                     elseif(bnd_idx == 4) then 
                         g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+g_ice_Cg_tmp(2);
                         gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+gg_ice_F07_tmp(2);
-                     elseif(bnd_idx == 5)
-                        g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
+                     elseif(bnd_idx == 5) then
+                        g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
                         gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
                      endif
       
@@ -2467,7 +2466,7 @@ contains
                         asm_prm_snw_lcl(i) = g_ice;
                      endif
                      
-                     if(asm_prm_snw_lcl(i) > 0.99_r8)
+                     if(asm_prm_snw_lcl(i) > 0.99_r8) then 
                       asm_prm_snw_lcl(i) = 0.99_r8
                      endif
                   enddo
