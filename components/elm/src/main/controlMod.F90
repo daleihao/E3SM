@@ -51,7 +51,7 @@ module controlMod
   use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
-  use SnowSnicarMod           , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing,atm_defined 
+  use elm_varctl              , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing,atm_defined 
  !
   ! !PUBLIC TYPES:
   implicit none

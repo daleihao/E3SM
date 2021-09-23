@@ -32,17 +32,7 @@ module SnowSnicarMod
   public :: SnowAge_grain    ! Snow effective grain size evolution
   public :: SnowAge_init     ! Initial read in of snow-aging file
   public :: SnowOptics_init  ! Initial read in of snow-optics file
-  
-  integer, public :: snow_shape_defined = 1
-  logical, public :: is_dust_internal_mixing = .false.
-  logical, public :: is_BC_internal_mixing = .false.
-  integer, public :: atm_defined = 0 !Atmospheric profile used to obtain surface-incident spectral flux distribution and subsequent broadband albedo: ! 0 = default
-                              ! 1 = mid-latitude winter
-                              ! 2 = mid-latitude summer
-                              ! 3 = sub-Arctic winter
-                              ! 4 = sub-Arctic summer
-                              ! 5 = Summit,Greenland (sub-Arctic summer, surface pressure of 796hPa)
-                              ! 6 = High Mountain (summer, surface pressure of 556 hPa)
+
 
   !$acc declare copyin(snow_shape_defined)
   !$acc declare copyin(is_dust_internal_mixing)
@@ -1784,6 +1774,7 @@ contains
      use elm_varpar       , only : nlevsno, numrad
      use clm_time_manager , only : get_nstep
      use shr_const_mod    , only : SHR_CONST_PI
+     use elm_varctl       , only: snow_shape_defined,is_dust_internal_mixing,is_BC_internal_mixing,atm_defined 
      !
      ! !ARGUMENTS:
      integer           , intent(in)  :: flg_snw_ice                                        ! flag: =1 when called from CLM, =2 when called from CSIM
