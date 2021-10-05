@@ -98,9 +98,9 @@ contains
          u10              => frictionvel_vars%u10_patch        , & ! Output: [real(r8) (:) ] 10-m wind (m/s) (for dust model)
          u10_elm          => frictionvel_vars%u10_elm_patch    , & ! Output: [real(r8) (:) ] 10-m wind (m/s)
          va               => frictionvel_vars%va_patch         , & ! Output: [real(r8) (:) ] atmospheric wind speed plus convective velocity (m/s)
-         fv               => frictionvel_vars%fv_patch           & ! Output: [real(r8) (:) ] friction velocity (m/s) (for dust model)
-         zeta_patch       => frictionvel_vars%zeta_patch         , & ! Output: [real(r8) (:) ] dimensionless height used in Monin-Obukhov theory (m/s) for scalar variance calculation
-         ustar_patch      => frictionvel_vars%ustar_patch         & ! Output: [real(r8) (:) ] friction velocity (m/s) for scalar variance calculation
+         fv               => frictionvel_vars%fv_patch         , & ! Output: [real(r8) (:) ] friction velocity (m/s) (for dust model)
+         zeta_patch       => frictionvel_vars%zeta_patch       , & ! Output: [real(r8) (:) ] dimensionless height used in Monin-Obukhov theory (m/s) for scalar variance calculation
+         ustar_patch      => frictionvel_vars%ustar_patch        & ! Output: [real(r8) (:) ] friction velocity (m/s) for scalar variance calculation
          )
 
       ! Adjustment factors for unstable (moz < 0) or stable (moz > 0) conditions.
