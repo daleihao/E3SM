@@ -1526,6 +1526,17 @@ contains
        call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
       ! diffuse incident spectral flux:
        call ncd_io( 'flx_wgt_dif', flx_wgt_dif,           'read', ncid, posNOTonfile=.true.)
+      
+      ! Test by Dalei Hao
+       !write (iulog,*) 'flx_wgt_dir', flx_wgt_dir(1,10,2), &
+       !       flx_wgt_dir(1,10,3), flx_wgt_dir(1,10,4), flx_wgt_dir(1,10,5),     &
+       !       flx_wgt_dir(1,20,2), &
+        !      flx_wgt_dir(1,20,3), flx_wgt_dir(1,20,4), flx_wgt_dir(1,20,5)
+              
+       !write (iulog,*) 'flx_wgt_dif', flx_wgt_dif(1,2), &
+       !       flx_wgt_dif(1,3), flx_wgt_dif(1,4), flx_wgt_dif(1,5),     &
+       !       flx_wgt_dif(2,2), &
+        !      flx_wgt_dif(2,3), flx_wgt_dif(2,4), flx_wgt_dif(2,5)
       endif
       
       !$acc update device( &
@@ -2107,7 +2118,8 @@ contains
       !!!!!!!!! snow shape
       ! define snow shape
       snw_shp_lcl(:) = snow_shape_defined
-      
+      snw_fs_lcl(:)  = 0._r8 
+      snw_ar_lcl(:)  = 0._r8 
       !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
       !g_wvl_center = g_wvl(2:8)/2 + g_wvl(1:7)/2 ; ! center point for wavelength band
       data g_b0(:) /9.76029E-01,9.67798E-01,1.00111E+00,1.00224E+00,9.64295E-01,9.97475E-01,9.97475E-01/
@@ -2288,7 +2300,12 @@ contains
                      flx_wgt(2) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 2)
                      flx_wgt(3) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 3)
                      flx_wgt(4) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 4)
-                     flx_wgt(5) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 5)   
+                     flx_wgt(5) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 5)  
+                     
+                    ! write(iulog,*) "SNICAR_AD STATS: coszen(c_idx) (0)= ", coszen(c_idx) ! add by Dalei check
+                   !  write(iulog,*) "SNICAR_AD STATS: slr_zen (0)= ", slr_zen ! add by Dalei check
+                    ! write(iulog,*) "SNICAR_AD STATS: flx_wgt (2)= ", flx_wgt(2) ! add by Dalei check
+                    ! write(iulog,*) "SNICAR_AD STATS: flx_wgt (4)= ", flx_wgt(4) ! add by Dalei check
                   endif
                    ! Diffuse:
                 elseif (flg_slr_in == 2) then
@@ -2303,7 +2320,10 @@ contains
                      flx_wgt(2) = flx_wgt_dif(snicar_atm_type, 2)
                      flx_wgt(3) = flx_wgt_dif(snicar_atm_type, 3)
                      flx_wgt(4) = flx_wgt_dif(snicar_atm_type, 4)
-                     flx_wgt(5) = flx_wgt_dif(snicar_atm_type, 5)  
+                     flx_wgt(5) = flx_wgt_dif(snicar_atm_type, 5)
+                     
+                     !write(iulog,*) "SNICAR_AD STATS: flx_wgt (0)= ", flx_wgt(2) ! add by Dalei check
+                     !write(iulog,*) "SNICAR_AD STATS: flx_wgt (0)= ", flx_wgt(4) ! add by Dalei check
                   endif
                 endif
              endif ! end if numrad_snw
@@ -2376,9 +2396,9 @@ contains
                         endif
                         fs_hex = 0.788_r8 
                         if(snw_ar_lcl(i) == 0) then
-                           ar_tmp = 0.5_r8
+                           AR_tmp = 0.5_r8
                         else
-                           ar_tmp = snw_ar_lcl(i)              
+                           AR_tmp = snw_ar_lcl(i)              
                         endif
                         g_ice_Cg_tmp = g_b0 * (fs_sphd/fs_hex)**g_b1 * diam_ice**g_b2 ! Eq.7, He et al. (2017)
                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * AR_tmp**2 ! Eqn. 3.1 in Fu (2007)                           
@@ -2392,9 +2412,9 @@ contains
                         endif
                         fs_hex = 0.788_r8 
                         if(snw_ar_lcl(i) == 0) then
-                           ar_tmp = 2.5_r8
+                           AR_tmp = 2.5_r8
                         else
-                           ar_tmp = snw_ar_lcl(i)              
+                           AR_tmp = snw_ar_lcl(i)              
                         endif
                         g_ice_Cg_tmp = g_b0 * (fs_hex0/fs_hex)**g_b1 * diam_ice**g_b2 ! Eq.7, He et al. (2017)
                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * (log(AR_tmp))**2 ! Eqn. 3.3 in Fu (2007)
@@ -2408,9 +2428,9 @@ contains
                         endif
                         fs_hex = 0.788_r8 
                         if(snw_ar_lcl(i) == 0) then
-                           ar_tmp = 2.5_r8
+                           AR_tmp = 2.5_r8
                         else
-                           ar_tmp = snw_ar_lcl(i)              
+                           AR_tmp = snw_ar_lcl(i)              
                         endif
                         
                         g_ice_Cg_tmp = g_b0 * (fs_koch/fs_hex)**g_b1 * diam_ice**g_b2 ! Eq.7, He et al. (2017)
@@ -2455,6 +2475,31 @@ contains
                      if(asm_prm_snw_lcl(i) > 0.99_r8) then 
                       asm_prm_snw_lcl(i) = 0.99_r8
                      endif
+                     
+                      !write(iulog,*) "SNICAR_AD STATS: snw_rds_lcl (0)= ", snw_rds_lcl(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: asm_prm_snw_lcl (0)= ", asm_prm_snw_lcl(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: ext_cff_mss_snw_lcl (0)= ", ext_cff_mss_snw_lcl(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: g_star (0)= ", g_star(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: omega_star (0)= ", omega_star(i) ! add by Dalei check
+                      !write(iulog,*) "SNICAR_AD STATS: tau_star (0)= ", tau_star(i) ! add by Dalei check
+                      !write(iulog,*) "g_Cg_intp ", g_Cg_intp ! add by Dalei check
+                      !write(iulog,*) "gg_F07_intp ", gg_F07_intp ! add by Dalei check
+                      !write(iulog,*) "g_ice_F07 ", g_ice_F07 ! add by Dalei check
+                      !write(iulog,*) "bnd_idx ", bnd_idx ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(1) ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(2) ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(3) ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(4) ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(5) ! add by Dalei check
+                      !write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(6) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(1) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(2) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(3) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(4) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(5) ! add by Dalei check
+                      !write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(6) ! add by Dalei check
+                      
                   enddo
                   !!!-end
                   
@@ -2576,20 +2621,30 @@ contains
                      ! (1) We use BC Re=0.045um [geometric mean diameter=0.06um (Dentener et al.2006, 
                      ! Yu and Luo,2009) & geometric std=1.5 (Flanner et al.2007;Aoki et al., 2011)]
                      ! (2) We tune BC density from 1.7 to 1.49 g/cm3 (Aoki et al., 2011) to match BC MAC=7.5 m2/g @550 nm.
-                     C_BC_total = mss_cnc_aer_lcl(i,1) * 1.7/1.49 * 1.0E+09; ! kg/kg to ng/g
-                     R_1_omega_tmp = BC_d0(bnd_idx) * (mss_cnc_aer_lcl(i,1) + BC_d2(bnd_idx))**BC_d1(bnd_idx) ! Eq. 8b in He et al.2017,JC
+                        C_BC_total = mss_cnc_aer_lcl(i,1) * 1.7/1.49 * 1.0E+09; ! kg/kg to ng/g
+                       ! write(iulog,*) "SNICAR_AD STATS:  (0)= ", C_BC_total ! add by Dalei checkC_BC_total
+                        
+                        if (C_BC_total > 0) then
+                           R_1_omega_tmp = BC_d0(bnd_idx) * (mss_cnc_aer_lcl(i,1) + BC_d2(bnd_idx))**BC_d1(bnd_idx) ! Eq. 8b in He et al.2017,JC
                      ! Adust R_1_omega_tmp due to BC Re from 0.1 to 0.045um based on 
                      ! Eq. 1 & Table S1 in He et al.2018 (GRL)
-                        if(bnd_idx == 1) then
-                           R_1_omega_tmp = (R_1_omega_tmp / (0.1/0.05)**-0.1866)**((0.1/0.05)^0.1918)  ! visible
-                           R_1_omega_tmp = (0.045/0.05)**-0.1866 * (R_1_omega_tmp ** ((0.045/0.05)**-0.1918)) ! visible
-                        else
-                           R_1_omega_tmp = (R_1_omega_tmp / (0.1/0.05)**-0.0046)** ((0.1/0.05)^0.5177)  ! NIR
-                           R_1_omega_tmp = (0.045/0.05)**-0.0046 * (R_1_omega_tmp ** ((0.045/0.05)**-0.5177)) ! NIR
-                        endif
+                           if(bnd_idx == 1) then
+                              R_1_omega_tmp = (R_1_omega_tmp / (0.1/0.05)**-0.1866)**((0.1/0.05)^0.1918)  ! visible
+                              R_1_omega_tmp = (0.045/0.05)**-0.1866 * (R_1_omega_tmp ** ((0.045/0.05)**-0.1918)) ! visible
+                           else
+                              R_1_omega_tmp = (R_1_omega_tmp / (0.1/0.05)**-0.0046)** ((0.1/0.05)^0.5177)  ! NIR
+                              R_1_omega_tmp = (0.045/0.05)**-0.0046 * (R_1_omega_tmp ** ((0.045/0.05)**-0.5177)) ! NIR
+                           endif
+                        
+                       !    write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
                    
                      ! new omega for entire BC-snow internal mixture
-                        ss_alb_snw_lcl(i) = 1.0 - R_1_omega_tmp
+                           ss_alb_snw_lcl(i) = 1 - (1.0 - ss_alb_snw_lcl(i))*R_1_omega_tmp
+                        
+                           
+                         !  write(iulog,*) "SNICAR_AD STATS: R_1_omega_tmp (0)= ", R_1_omega_tmp ! add by Dalei check
+                        !   write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
+                        endif
                      endif
                      
                      ss_alb_aer_lcl(1)     = 0._r8
@@ -2604,14 +2659,22 @@ contains
                         if (bnd_idx < 4) then
                            C_dust_total = mss_cnc_aer_lcl(i,5) + mss_cnc_aer_lcl(i,6) + mss_cnc_aer_lcl(i,7) + mss_cnc_aer_lcl(i,8)
                            C_dust_total = C_dust_total * 1.0E+06 ! kg/kg to ug/g
+                           if(C_dust_total > 0) then
                     ! Direct:
-                           if (flg_slr_in == 1) then
-                              R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES                     
-                           else
-                              R_1_omega_tmp = dust_cloudy_d0(bnd_idx) + dust_cloudy_d2(bnd_idx)*(C_dust_total**dust_cloudy_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES   
+                              if (flg_slr_in == 1) then
+                                 R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES                     
+                              else
+                                 R_1_omega_tmp = dust_cloudy_d0(bnd_idx) + dust_cloudy_d2(bnd_idx)*(C_dust_total**dust_cloudy_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES   
+                              endif
+                           
+                          !    write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
+                   
+                           ! new omega for entire BC-snow internal mixture
+                              ss_alb_snw_lcl(i) = 1 - (1.0 - ss_alb_snw_lcl(i)) *R_1_omega_tmp
+                          !    write(iulog,*) "SNICAR_AD STATS: C_dust_total (0)= ", C_dust_total ! add by Dalei check
+                          !    write(iulog,*) "SNICAR_AD STATS: R_1_omega_tmp (0)= ", R_1_omega_tmp ! add by Dalei check
+                          !    write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
                            endif
-                     ! new omega for entire BC-snow internal mixture
-                           ss_alb_snw_lcl(i) = 1.0 - R_1_omega_tmp
                         endif
                         do j = 5,8,1
                            ss_alb_aer_lcl(j)     = 0._r8
@@ -2913,6 +2976,29 @@ contains
                       write(iulog,*) "SNICAR_AD STATS: dust2(0)= ", mss_cnc_aer_lcl(0,4)
                       write(iulog,*) "SNICAR_AD STATS: dust3(0)= ", mss_cnc_aer_lcl(0,5)
                       write(iulog,*) "SNICAR_AD STATS: dust4(0)= ", mss_cnc_aer_lcl(0,6)
+                      write(iulog,*) "SNICAR_AD STATS: ss_alb_snw_lcl (0)= ", ss_alb_snw_lcl(i) ! add by Dalei check
+                      write(iulog,*) "SNICAR_AD STATS: asm_prm_snw_lcl (0)= ", asm_prm_snw_lcl(i) ! add by Dalei check
+                      write(iulog,*) "SNICAR_AD STATS: ext_cff_mss_snw_lcl (0)= ", ext_cff_mss_snw_lcl(i) ! add by Dalei check
+                      write(iulog,*) "SNICAR_AD STATS: g_star (0)= ", g_star(i) ! add by Dalei check
+                      write(iulog,*) "SNICAR_AD STATS: omega_star (0)= ", omega_star(i) ! add by Dalei check
+                      write(iulog,*) "SNICAR_AD STATS: tau_star (0)= ", tau_star(i) ! add by Dalei check
+                      write(iulog,*) "g_Cg_intp ", g_Cg_intp ! add by Dalei check
+                      write(iulog,*) "gg_F07_intp ", gg_F07_intp ! add by Dalei check
+                      write(iulog,*) "g_ice_F07 ", g_ice_F07 ! add by Dalei check
+                      write(iulog,*) "bnd_idx ", bnd_idx ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(1) ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(2) ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(3) ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(4) ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(5) ! add by Dalei check
+                      write(iulog,*) "gg_ice_F07_tmp ", gg_ice_F07_tmp(6) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(1) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(2) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(3) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(4) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(5) ! add by Dalei check
+                      write(iulog,*) "g_ice_Cg_tmp ", g_ice_Cg_tmp(6) ! add by Dalei check
+                      
                       call endrun(decomp_index=c_idx, elmlevel=namec, msg=errmsg(__FILE__, __LINE__))
                     endif
                   enddo
