@@ -228,7 +228,10 @@ contains
           fabd_sun_z    =>    surfalb_vars%fabd_sun_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf direct  PAR (per unit lai+sai) for each canopy layer
           fabd_sha_z    =>    surfalb_vars%fabd_sha_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf direct  PAR (per unit lai+sai) for each canopy layer
           fabi_sun_z    =>    surfalb_vars%fabi_sun_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai+sai) for each canopy layer
-          fabi_sha_z    =>    surfalb_vars%fabi_sha_z_patch         & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer
+          fabi_sha_z    =>    surfalb_vars%fabi_sha_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer  
+          albsnd_pur_hst    =>    surfalb_vars%albsnd_pur_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_pur_hst    =>    surfalb_vars%albsni_pur_hst_col       & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          
           )
 
     ! Cosine solar zenith angle for next time step
@@ -675,6 +678,10 @@ contains
                 ! pure snow albedo for all-aerosol radiative forcing
                 albgrd_pur(c,ib) = albsod(c,ib)*(1.-frac_sno(c)) + albsnd_pur(c,ib)*frac_sno(c)
                 albgri_pur(c,ib) = albsoi(c,ib)*(1.-frac_sno(c)) + albsni_pur(c,ib)*frac_sno(c)
+                
+                ! output pure snow albedo added by Dalei Hao
+                albsnd_pur_hst(c,ib) = albsnd_pur(c,ib)
+                albsni_pur_hst(c,ib) = albsni_pur(c,ib)
              end if
 
              ! also in this loop (but optionally in a different loop for vectorized code)

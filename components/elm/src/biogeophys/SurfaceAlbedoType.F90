@@ -74,7 +74,14 @@ module SurfaceAlbedoType
      real(r8), pointer :: albsoi_col           (:,:) => null() ! col soil albedo: diffuse (col,bnd) [frc]
      real(r8), pointer :: albsnd_hst_col       (:,:) => null() ! col snow albedo, direct , for history files (col,bnd) [frc]
      real(r8), pointer :: albsni_hst_col       (:,:) => null() ! col snow albedo, diffuse, for history files (col,bnd) [frc]
-
+     
+     !!! total broadband albedo added by Dalei Hao
+     real(r8), pointer :: albsn_hst_col        (:) => null() ! col snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsn_pur_hst_col    (:) => null() ! col pure snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: alb_hst_patch        (:) => null() ! col patch surface albedo, total, for history files   (col) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsnd_pur_hst_col   (:,:) => null() ! col pure snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsni_pur_hst_col   (:,:) => null() ! col pure snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     
      real(r8), pointer :: ftdd_patch           (:,:) => null() ! patch down direct flux below canopy per unit direct flx    (numrad)
      real(r8), pointer :: ftid_patch           (:,:) => null() ! patch down diffuse flux below canopy per unit direct flx   (numrad)
      real(r8), pointer :: ftii_patch           (:,:) => null() ! patch down diffuse flux below canopy per unit diffuse flx  (numrad)
@@ -284,6 +291,13 @@ contains
     allocate(this%vcmaxcintsun_patch (begp:endp))              ; this%vcmaxcintsun_patch (:)   =spval
     allocate(this%vcmaxcintsha_patch (begp:endp))              ; this%vcmaxcintsha_patch (:)   =spval
 
+    ! output snow albedo braodband added by Daleihao
+    allocate(this%albsn_hst_col     (begc:endc))       ; this%albsn_hst_col     (:) = spval
+    allocate(this%albsn_pur_hst_col     (begc:endc))       ; this%albsn_pur_hst_col     (:) = spval
+    allocate(this%alb_hst_patch     (begp:endp))       ; this%alb_hst_patch     (:) = spval
+    allocate(this%albsnd_pur_hst_col     (begc:endc,numrad))       ; this%albsnd_pur_hst_col     (:,:) = spval
+    allocate(this%albsnd_pur_hst_col     (begc:endc,numrad))       ; this%albsnd_pur_hst_col     (:,:) = spval
+
   end subroutine InitAllocate
 
   !-----------------------------------------------------------------------
@@ -332,7 +346,24 @@ contains
     call hist_addfld2d (fname='ALBI', units='proportion', type2d='numrad', &
          avgflag='A', long_name='surface albedo (indirect)', &
          ptr_patch=this%albi_patch, default='inactive', c2l_scale_type='urbanf')
+    
+    ! output broadband albedo added by Dalei Hao
+          this%albsn_hst_col(begc:endc) = spval
+    call hist_addfld1d (fname='ALBSN', units='1', &
+         avgflag='A', long_name='broadband snow albedo (total)', &
+         ptr_col=this%albsn_hst_col, default='inactive')
+         
+       this%albsn_pur_hst_col(begc:endc) = spval
+    call hist_addfld1d (fname='ALBSN_PUR', units='1', &
+         avgflag='A', long_name='broadband pure snow albedo (total)', &
+         ptr_col=this%albsn_pur_hst_col, default='inactive')
+         
+      this%alb_hst_patch(begc:endc) = spval
+    call hist_addfld1d (fname='ALB', units='1', &
+         avgflag='A', long_name='broadband surface albedo (total)', &
+         ptr_col=this%alb_hst_patch, default='inactive'
 
+    
   end subroutine InitHistory
 
   !-----------------------------------------------------------------------
@@ -380,6 +411,13 @@ contains
     this%ftid_patch     (begp:endp, :) = 0.0_r8
     this%ftii_patch     (begp:endp, :) = 1.0_r8
 
+    ! added by Dalei Hao
+    this%albsn_hst_col (begc:endc) = 0.6_r8
+    this%albsn_pur_hst_col (begc:endc) = 0.6_r8
+    this%alb_hst_patch     (begp:endp) = 0.2_r8
+    this%albsnd_pur_hst_col     (begc:endc, :) = 0.6_r8
+    this%albsnd_pur_hst_col     (begc:endc, :) = 0.6_r8
+    
   end subroutine InitCold
 
   !---------------------------------------------------------------------
@@ -467,6 +505,18 @@ contains
          dim1name='pft', dim2name='levcan', switchdim=.true., &
          long_name='tlai increment for canopy layer', units='', &
          interpinic_flag='interp', readvar=readvar, data=this%tlai_z_patch)
+         
+    !!! added by Dalei Hao
+     call restartvar(ncid=ncid, flag=flag, varname='albsn_hst_col', xtype=ncd_double,  &
+         dim1name='column', &
+         long_name='snow albedo total', units='1', &
+         interpinic_flag='interp', readvar=readvar, data=this%albsn_hst_col)
+         
+     call restartvar(ncid=ncid, flag=flag, varname='alb_hst_patch', xtype=ncd_double,  &
+         dim1name='pft', &
+         long_name='surface albedo total', units='1', &
+         interpinic_flag='interp', readvar=readvar, data=this%alb_hst_patch)
+    
     if (flag=='read' .and. .not. readvar) then
        if (masterproc) then
           write(iulog,*) "can't find tlai_z in restart (or initial) file..."
@@ -620,7 +670,23 @@ contains
           if (masterproc) write(iulog,*) "Initialize albgri_dst to albgri"
           this%albgri_dst_col(begc:endc,:) = this%albgri_col(begc:endc,:)
        end if
-
+       
+       !!! added by Dalei Hao
+       call restartvar(ncid=ncid, flag=flag, varname='albsn_pur_hst_col', xtype=ncd_double,  &
+         dim1name='column', &
+         long_name='pure snow albedo total', units='', &
+         interpinic_flag='interp', readvar=readvar, data=this%albsn_pur_hst_col)
+    
+       call restartvar(ncid=ncid, flag=flag, varname='albsnd_pur_hst_col', xtype=ncd_double,  &
+            dim1name='column', dim2name='numrad', switchdim=.true., &
+            long_name='pure snow albedo direct (0 to 1)', units='', &
+            interpinic_flag='interp', readvar=readvar, data=this%albsnd_pur_hst_col)
+         
+       call restartvar(ncid=ncid, flag=flag, varname='albsni_pur_hst_col', xtype=ncd_double,  &
+            dim1name='column', dim2name='numrad', switchdim=.true., &
+            long_name='pure snow albedo diffuse (0 to 1)', units='', &
+            interpinic_flag='interp', readvar=readvar, data=this%albsni_pur_hst_col)
+         
     end if  ! end of if-use_snicar_frc
 
     ! patch type physical state variable - fabd
