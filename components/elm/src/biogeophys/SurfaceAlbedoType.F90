@@ -83,10 +83,10 @@ module SurfaceAlbedoType
      real(r8), pointer :: albsn_nobc_hst_col   (:) => null() ! col snow albedo (no BC), total, for history files   (col) [frc] ! Added by Dalei Hao
      real(r8), pointer :: albsnd_pur_hst_col   (:,:) => null() ! col pure snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
      real(r8), pointer :: albsni_pur_hst_col   (:,:) => null() ! col pure snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
-     real(r8), pointer :: albsnd_pur_nodust_col   (:,:) => null() ! col no-dust snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
-     real(r8), pointer :: albsni_pur_nodust_col   (:,:) => null() ! col no-dust snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
-     real(r8), pointer :: albsnd_pur_nobc_col   (:,:) => null() ! col no-bc snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
-     real(r8), pointer :: albsni_pur_nobc_col   (:,:) => null() ! col no-bc snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsnd_nodust_hst_col   (:,:) => null() ! col no-dust snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsni_nodust_hst_col   (:,:) => null() ! col no-dust snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsnd_nobc_hst_col   (:,:) => null() ! col no-bc snow albedo, direct, for history files   (col,bnd) [frc] ! Added by Dalei Hao
+     real(r8), pointer :: albsni_nobc_hst_col   (:,:) => null() ! col no-bc snow albedo, diffuse, for history files   (col,bnd) [frc] ! Added by Dalei Hao
      
      real(r8), pointer :: ftdd_patch           (:,:) => null() ! patch down direct flux below canopy per unit direct flx    (numrad)
      real(r8), pointer :: ftid_patch           (:,:) => null() ! patch down diffuse flux below canopy per unit direct flx   (numrad)
@@ -304,11 +304,11 @@ contains
     allocate(this%albsn_nobc_hst_col     (begc:endc))       ; this%albsn_nobc_hst_col     (:) = spval
     allocate(this%alb_hst_patch     (begp:endp))       ; this%alb_hst_patch     (:) = spval
     allocate(this%albsnd_pur_hst_col     (begc:endc,numrad))       ; this%albsnd_pur_hst_col     (:,:) = spval
-    allocate(this%albsnd_pur_hst_col     (begc:endc,numrad))       ; this%albsnd_pur_hst_col     (:,:) = spval
+    allocate(this%albsni_pur_hst_col     (begc:endc,numrad))       ; this%albsni_pur_hst_col     (:,:) = spval
     allocate(this%albsnd_nodust_hst_col     (begc:endc,numrad))       ; this%albsnd_nodust_hst_col     (:,:) = spval
-    allocate(this%albsnd_nodust_hst_col     (begc:endc,numrad))       ; this%albsnd_nodust_hst_col     (:,:) = spval
+    allocate(this%albsni_nodust_hst_col     (begc:endc,numrad))       ; this%albsni_nodust_hst_col     (:,:) = spval
     allocate(this%albsnd_nobc_hst_col     (begc:endc,numrad))       ; this%albsnd_nobc_hst_col     (:,:) = spval
-    allocate(this%albsnd_nobc_hst_col     (begc:endc,numrad))       ; this%albsnd_nobc_hst_col     (:,:) = spval
+    allocate(this%albsni_nobc_hst_col     (begc:endc,numrad))       ; this%albsni_nobc_hst_col     (:,:) = spval
 
   end subroutine InitAllocate
 
@@ -383,7 +383,7 @@ contains
       this%alb_hst_patch(begc:endc) = spval
     call hist_addfld1d (fname='ALB', units='1', &
          avgflag='A', long_name='broadband surface albedo (total)', &
-         ptr_col=this%alb_hst_patch, default='inactive'
+         ptr_col=this%alb_hst_patch, default='inactive')
 
 
   end subroutine InitHistory
