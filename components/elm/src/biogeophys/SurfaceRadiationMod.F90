@@ -474,9 +474,16 @@ contains
           !!! total broadband albedo added by Dalei Hao
           albsn_hst     =>    surfalb_vars%albsn_hst_col          , &         ! col snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
           albsn_pur_hst =>    surfalb_vars%albsn_pur_hst_col      , &     ! col pure snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsn_nodust_hst =>    surfalb_vars%albsn_nodust_hst_col  , &     ! col no-dust snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsn_nobc_hst =>    surfalb_vars%albsn_nobc_hst_col      , &     ! col no-BC snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
           alb_hst       =>    surfalb_vars%alb_hst_patch          , & ! col patch surface albedo, total, for history files   (col) [frc] ! Added by Dalei Hao
-          albsnd_pur_hst =>    surfalb_vars%albsnd_pur_hst_col    , &     ! col pure snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
-          albsni_pur_hst =>    surfalb_vars%albsni_pur_hst_col      &     ! col pure snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsnd_pur_hst =>    surfalb_vars%albsnd_pur_hst_col    , &     ! col pure snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_pur_hst =>    surfalb_vars%albsni_pur_hst_col    , &     ! col pure snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          albsnd_nodust_hst =>    surfalb_vars%albsnd_nodust_hst_col    , &     ! col no-dust snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_nodust_hst =>    surfalb_vars%albsni_nodust_hst_col    , &     ! col no-dust snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          albsnd_nobc_hst =>    surfalb_vars%albsnd_nobc_hst_col    , &     ! col no-BC snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_nobc_hst =>    surfalb_vars%albsni_nobc_hst_col      &     ! col no-BC snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          
           )
 
           dtime = dtime_mod
@@ -784,6 +791,11 @@ contains
              if (use_snicar_frc) then
              !! total broadband pure snow albedo added by Dalei Hao
              albsn_pur_hst(c) =  (albsnd_pur_hst(c,1) * forc_solad(t,1) + albsni_pur_hst(c,1) * forc_solai(t,1) + albsnd_pur_hst(c,2) *forc_solad(t,2) + albsni_pur_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-dust snow albedo added by Dalei Hao
+             albsn_nodust_hst(c) =  (albsnd_nodust_hst(c,1) * forc_solad(t,1) + albsni_nodust_hst(c,1) * forc_solai(t,1) + albsnd_nodust_hst(c,2) *forc_solad(t,2) + albsni_nodust_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-BC snow albedo added by Dalei Hao
+             albsn_nobc_hst(c) =  (albsnd_nobc_hst(c,1) * forc_solad(t,1) + albsni_nobc_hst(c,1) * forc_solai(t,1) + albsnd_nobc_hst(c,2) *forc_solad(t,2) + albsni_nobc_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
              endif
              
           else
@@ -860,6 +872,11 @@ contains
           if (use_snicar_frc) then
              !! total broadband pure snow albedo added by Dalei Hao
              albsn_pur_hst(c) =  (albsnd_pur_hst(c,1) * forc_solad(t,1) + albsni_pur_hst(c,1) * forc_solai(t,1) + albsnd_pur_hst(c,2) *forc_solad(t,2) + albsni_pur_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-dust snow albedo added by Dalei Hao
+             albsn_nodust_hst(c) =  (albsnd_nodust_hst(c,1) * forc_solad(t,1) + albsni_nodust_hst(c,1) * forc_solai(t,1) + albsnd_nodust_hst(c,2) *forc_solad(t,2) + albsni_nodust_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-BC snow albedo added by Dalei Hao
+             albsn_nobc_hst(c) =  (albsnd_nobc_hst(c,1) * forc_solad(t,1) + albsni_nobc_hst(c,1) * forc_solai(t,1) + albsnd_nobc_hst(c,2) *forc_solad(t,2) + albsni_nobc_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
           endif
        end do
 

@@ -230,8 +230,11 @@ contains
           fabi_sun_z    =>    surfalb_vars%fabi_sun_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai+sai) for each canopy layer
           fabi_sha_z    =>    surfalb_vars%fabi_sha_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer  
           albsnd_pur_hst    =>    surfalb_vars%albsnd_pur_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
-          albsni_pur_hst    =>    surfalb_vars%albsni_pur_hst_col       & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
-          
+          albsni_pur_hst    =>    surfalb_vars%albsni_pur_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          albsnd_nodust_hst    =>    surfalb_vars%albsnd_nodust_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_nodust_hst    =>    surfalb_vars%albsni_nodust_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          albsnd_nobc_hst    =>    surfalb_vars%albsnd_nobc_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_nobc_hst    =>    surfalb_vars%albsni_nobc_hst_col       & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
           )
 
     ! Cosine solar zenith angle for next time step
@@ -682,6 +685,10 @@ contains
                 ! output pure snow albedo added by Dalei Hao
                 albsnd_pur_hst(c,ib) = albsnd_pur(c,ib)
                 albsni_pur_hst(c,ib) = albsni_pur(c,ib)
+                albsnd_nobc_hst(c,ib) = albsnd_bc(c,ib)
+                albsni_nobc_hst(c,ib) = albsni_bc(c,ib)
+                albsnd_nodust_hst(c,ib) = albsnd_dst(c,ib)
+                albsni_nodust_hst(c,ib) = albsni_dst(c,ib)
              end if
 
              ! also in this loop (but optionally in a different loop for vectorized code)
