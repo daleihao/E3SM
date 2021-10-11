@@ -380,7 +380,7 @@ contains
          avgflag='A', long_name='broadband no-BC snow albedo (total)', &
          ptr_col=this%albsn_nobc_hst_col, default='inactive')
          
-      this%alb_hst_patch(begc:endc) = spval
+      this%alb_hst_patch(begp:endp) = spval
     call hist_addfld1d (fname='ALB', units='1', &
          avgflag='A', long_name='broadband surface albedo (total)', &
          ptr_col=this%alb_hst_patch, default='inactive')

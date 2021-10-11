@@ -2659,7 +2659,12 @@ contains
                       tau_snw(i) = L_snw(i)*ext_cff_mss_snw_lcl(i)
 
                       do j=1,sno_nbr_aer
-                         if (is_dust_internal_mixing .or. is_BC_internal_mixing) then
+                         if (is_BC_internal_mixing .and. (j == 1)) then
+                           L_aer(i,j)  = 0._r8
+                          else
+                           L_aer(i,j)   = L_snw(i)*mss_cnc_aer_lcl(i,j)
+                          endif
+                         if (is_dust_internal_mixing .and. (j >= 5)) then
                            L_aer(i,j)  = 0._r8
                          else
                            L_aer(i,j)   = L_snw(i)*mss_cnc_aer_lcl(i,j)
