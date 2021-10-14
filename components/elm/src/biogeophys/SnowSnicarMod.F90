@@ -2226,8 +2226,8 @@ contains
            ! 40nm) assumed for freshly-emitted BC in MAM.  Future
            ! implementations may prognose the BC effective radius in
            ! snow.
-           rds_bcint_lcl(:)  =  100._r8
-           rds_bcext_lcl(:)  =  100._r8
+           rds_bcint_lcl(:)  =  100._r8  ! default 100
+           rds_bcext_lcl(:)  =  100._r8  ! default 100
            !mgf--
 #endif
 
@@ -2564,16 +2564,27 @@ contains
                     ! retrieve absorption enhancement factor for within-ice BC
                     enh_fct = bcenh(bnd_idx,idx_bcint_nclrds,idx_bcint_icerds)
 
+                    if (is_BC_internal_mixing) then
                     ! get BC optical properties (moved from above)
                     ! aerosol species 1 optical properties (within-ice BC)
-                    ss_alb_aer_lcl(1)        = ss_alb_bc1(bnd_idx,idx_bcint_nclrds)
-                    asm_prm_aer_lcl(1)       = asm_prm_bc1(bnd_idx,idx_bcint_nclrds)
-                    ext_cff_mss_aer_lcl(1)   = ext_cff_mss_bc1(bnd_idx,idx_bcint_nclrds)*enh_fct
+                     ss_alb_aer_lcl(1)        = ss_alb_bc1(bnd_idx,idx_bcint_nclrds)
+                     asm_prm_aer_lcl(1)       = asm_prm_bc1(bnd_idx,idx_bcint_nclrds)
+                     ext_cff_mss_aer_lcl(1)   = ext_cff_mss_bc1(bnd_idx,idx_bcint_nclrds)*enh_fct
 
                     ! aerosol species 2 optical properties (external BC)
-                    ss_alb_aer_lcl(2)        = ss_alb_bc2(bnd_idx,idx_bcext_nclrds)
-                    asm_prm_aer_lcl(2)       = asm_prm_bc2(bnd_idx,idx_bcext_nclrds)
-                    ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx,idx_bcext_nclrds)
+                     ss_alb_aer_lcl(2)        = ss_alb_bc2(bnd_idx,idx_bcext_nclrds)
+                     asm_prm_aer_lcl(2)       = asm_prm_bc2(bnd_idx,idx_bcext_nclrds)
+                     ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx,idx_bcext_nclrds)
+                     else
+                        ss_alb_aer_lcl(1)        = ss_alb_bc1(bnd_idx,idx_bcint_nclrds)
+                        asm_prm_aer_lcl(1)       = asm_prm_bc1(bnd_idx,idx_bcint_nclrds)
+                        ext_cff_mss_aer_lcl(1)   = ext_cff_mss_bc1(bnd_idx,idx_bcint_nclrds)
+
+                    ! aerosol species 2 optical properties (external BC)
+                        ss_alb_aer_lcl(2)        = ss_alb_bc2(bnd_idx,idx_bcext_nclrds)
+                        asm_prm_aer_lcl(2)       = asm_prm_bc2(bnd_idx,idx_bcext_nclrds)
+                        ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx,idx_bcext_nclrds)
+                    endif                   
 
 #else
                     ! bulk aerosol treatment (BC optical properties independent
@@ -2599,7 +2610,7 @@ contains
                      ! made adjustments on BC size & density as follows to get MAC=7.5m2/g.
                      ! (1) We use BC Re=0.045um [geometric mean diameter=0.06um (Dentener et al.2006, 
                      ! Yu and Luo,2009) & geometric std=1.5 (Flanner et al.2007;Aoki et al., 2011)]
-                     ! (2) We tune BC density from 1.7 to 1.49 g/cm3 (Aoki et al., 2011) to match BC MAC=7.5 m2/g @550 nm.
+                     ! (2) We tune BC density from 1.7 to 1.49 g/cm3 (Aoki et al., 2011) to match BC MAC=7.5 m2/g @550 nm. 100
                         C_BC_total = mss_cnc_aer_lcl(i,1) * 1.7_r8/1.49_r8 * 1.0E+09; ! kg/kg to ng/g
                         
                         if (C_BC_total > 0) then
@@ -2659,11 +2670,6 @@ contains
                       tau_snw(i) = L_snw(i)*ext_cff_mss_snw_lcl(i)
 
                       do j=1,sno_nbr_aer
-                         if (is_BC_internal_mixing .and. (j == 1)) then
-                           L_aer(i,j)  = 0._r8
-                          else
-                           L_aer(i,j)   = L_snw(i)*mss_cnc_aer_lcl(i,j)
-                          endif
                          if (is_dust_internal_mixing .and. (j >= 5)) then
                            L_aer(i,j)  = 0._r8
                          else

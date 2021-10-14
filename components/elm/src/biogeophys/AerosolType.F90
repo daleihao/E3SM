@@ -231,6 +231,39 @@ contains
          avgflag='A', long_name='mass of dust in top snow layer', &
          ptr_col=this%mss_dst_top_col, set_urb=spval)
 
+    ! add ouput of mass of aerosols
+         this%mss_cnc_bcphi_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_bcphi_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_bcphi_col', &
+         ptr_col=this%mss_cnc_bcphi_col, no_snow_behavior=no_snow_normal, default='inactive')
+       
+        this%mss_cnc_bcpho_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_bcpho_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_bcpho_col', &
+         ptr_col=this%mss_cnc_bcpho_col, no_snow_behavior=no_snow_normal, default='inactive')
+         
+         this%mss_cnc_dst1_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_dst1_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_dst1_col', &
+         ptr_col=this%mss_cnc_dst1_col, no_snow_behavior=no_snow_normal, default='inactive')
+         
+         this%mss_cnc_dst2_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_dst2_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_dst2_col', &
+         ptr_col=this%mss_cnc_dst2_col, no_snow_behavior=no_snow_normal, default='inactive')
+         
+         this%mss_cnc_dst3_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_dst3_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_dst3_col', &
+         ptr_col=this%mss_cnc_dst3_col, no_snow_behavior=no_snow_normal, default='inactive')
+         
+         this%mss_cnc_dst4_col(begc:endc,:) = spval
+    call hist_addfld2d (fname='mss_cnc_dst4_col', units='kg/kg', type2d='levsno', &
+         avgflag='A', long_name='mss_cnc_dst4_col', &
+         ptr_col=this%mss_cnc_dst4_col, no_snow_behavior=no_snow_normal, default='inactive')
+     
+         
+         
   end subroutine InitHistory
 
   !-----------------------------------------------------------------------

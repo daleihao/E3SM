@@ -809,7 +809,12 @@ contains
              fsr_sno_vi(p) = spval
              fsr_sno_ni(p) = spval
              albsn_hst(c)  = spval ! Dalei Hao
+             
+             if (use_snicar_frc) then
              albsn_pur_hst(c)  = spval ! Dalei Hao
+             albsn_nodust_hst(c)  = spval ! Dalei Hao
+             albsn_nobc_hst(c)  = spval ! Dalei Hao
+             endif
           endif
        end do
        do fp = 1,num_urbanp
