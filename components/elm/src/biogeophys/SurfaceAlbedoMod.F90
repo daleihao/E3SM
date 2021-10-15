@@ -737,8 +737,8 @@ contains
              albsnd_nodust_hst(c,ib) = albsnd_dst(c,ib)
              albsni_nodust_hst(c,ib) = albsni_dst(c,ib)
           else
-             albsnd_hst(c,ib) = spval
-             albsni_hst(c,ib) = spval
+             albsnd_hst(c,ib) = 0._r8
+             albsni_hst(c,ib) = 0._r8
              ! output pure snow albedo added by Dalei Hao
              albsnd_hst2(c,ib) = spval
              albsni_hst2(c,ib) = spval
