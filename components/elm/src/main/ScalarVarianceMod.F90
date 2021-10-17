@@ -12,6 +12,7 @@ module ScalarVarianceMod
   use elm_varctl           , only : iulog
   use decompMod            , only : bounds_type
   use subgridAveMod        , only : build_scale_l2g_gpu
+  use domainMod            , only : ldomain
   use GridcellType         , only : grc_pp
   use LandunitType         , only : lun_pp
   use ColumnDataType       , only : col_pp
@@ -110,7 +111,6 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     !end if
 
 
-
     call build_scale_l2g_gpu(bounds, l2g_scale_type, &
          scale_l2g)
 
@@ -169,11 +169,13 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     rtp2_het_grc(bounds%begg : bounds%endg) = spval
     rtpthlp_het_grc(bounds%begg : bounds%endg) = spval
     sumwt(bounds%begg : bounds%endg) = 0._r8
+    
     do p = bounds%begp,bounds%endp
        if (veg_pp%active(p) .and. veg_pp%wtgcell(p) /= 0._r8) then
           c = veg_pp%column(p)
           l = veg_pp%landunit(p)
           g = veg_pp%gridcell(p)
+          if (ldomain%frac(g) > 0.999999_r8)  then ! only calculate pure land grid
           if (eflx_sh_tot(p) /= spval .and. eflx_sh_tot(p) /= spval .and. q_ref2m(p) /= spval .and. t_ref2m(p) /= spval &
           .and. taux_patch(p) /= spval .and. tauy_patch(p) /= spval .and. forc_pbot_not_downscaled_grc(g) /= spval .and. forc_rho_not_downscaled_grc(g) /= spval) then
              if (sumwt(g) == 0._r8) then
@@ -205,6 +207,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
                 rtpthlp_het_grc(g) = rtpthlp_het_grc(g) + p_weight*rtpthlp_pft + p_weight*(t_pft-twa)*(q_pft-qwa);
 
                 sumwt(g) = sumwt(g) + veg_pp%wtgcell(p)
+          end if
           end if
        end if
     end do
@@ -286,7 +289,9 @@ subroutine calculate_scalar_covaiance_het(bounds, &
     rtpthlp_hom_grc(bounds%begg : bounds%endg) = spval
     
     do g = bounds%begg,bounds%endg
-
+             
+             
+        if (ldomain%frac(g) > 0.999999_r8)  then ! only calculate pure land grid
           if (eflx_sh_tot_grc(g) /= spval .and. eflx_lh_tot_grc(g) /= spval .and. taux_grc(g) /= spval  .and. tauy_grc(g) /= spval .and.  forc_rho_not_downscaled_grc(g) /= spval) then
             lh = eflx_lh_tot_grc(g);
             sh = eflx_sh_tot_grc(g);
@@ -324,7 +329,7 @@ subroutine calculate_scalar_covaiance_het(bounds, &
                 rtp2_hom_grc(g) = rt_tol**2;
             end if
             rtpthlp_hom_grc(g)=0.2_r8*a_const*(wpthlp/uf)*(wprtp/uf);
-
+        end if
        end if
     end do
    
