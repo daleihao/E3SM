@@ -199,32 +199,32 @@ contains
          ptr_lnd=this%eflx_sh_tot_grc)
        
      !!! scalar-variance
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8
+    this%thlp2_hom_grc(begg:endg) = 0._r8
     call hist_addfld1d (fname='thlp2_hom', units='',  &
          avgflag='A', long_name='temperature variance by HOM method', &
          ptr_lnd=this%thlp2_hom_grc)
          
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8  
+    this%rtp2_hom_grc(begg:endg) = 0._r8  
     call hist_addfld1d (fname='rtp2_hom', units='',  &
          avgflag='A', long_name='humidity variance by HOM method', &
          ptr_lnd=this%rtp2_hom_grc)
          
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8
+    this%rtpthlp_hom_grc(begg:endg) = 0._r8
     call hist_addfld1d (fname='rtpthlp_hom', units='',  &
          avgflag='A', long_name='temperature-humidity co-variance by HOM method', &
          ptr_lnd=this%rtpthlp_hom_grc)
          
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8
+    this%thlp2_het_grc(begg:endg) = 0._r8
     call hist_addfld1d (fname='thlp2_het', units='',  &
          avgflag='A', long_name='temperature variance by HET method', &
          ptr_lnd=this%thlp2_het_grc)
          
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8  
+    this%rtp2_het_grc(begg:endg) = 0._r8  
     call hist_addfld1d (fname='rtp2_het', units='',  &
          avgflag='A', long_name='humidity variance by HET method', &
          ptr_lnd=this%rtp2_het_grc)
          
-    this%eflx_sh_tot_grc(begg:endg) = 0._r8
+    this%rtpthlp_het_grc(begg:endg) = 0._r8
     call hist_addfld1d (fname='rtpthlp_het', units='',  &
          avgflag='A', long_name='temperature-humidity co-variance by HET method', &
          ptr_lnd=this%rtpthlp_het_grc)
