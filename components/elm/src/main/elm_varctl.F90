@@ -11,7 +11,7 @@ module elm_varctl
   !
   ! !PUBLIC MEMBER FUNCTIONS:
   implicit none
-  public :: elm_varctl_set    ! Set variables
+  public :: elm_varctl_set   ! Set variables
   public :: cnallocate_carbon_only_set
   public :: cnallocate_carbon_only
   public :: cnallocate_carbonnitrogen_only_set
@@ -498,6 +498,26 @@ module elm_varctl
    integer, public :: budget_ann   = 1
    integer, public :: budget_ltann = 1
    integer, public :: budget_ltend = 0
+   
+  !----------------------------------------------------------
+  ! SNICAR
+  !----------------------------------------------------------
+  integer, public :: snow_shape_defined = 1
+  logical, public :: is_dust_internal_mixing = .false.
+  logical, public :: is_BC_internal_mixing = .false.
+  integer, public :: snicar_atm_type = 0 !Atmospheric profile used to obtain surface-incident spectral flux distribution and subsequent broadband albedo: ! 0 = default
+                              ! 1 = mid-latitude winter
+                              ! 2 = mid-latitude summer
+                              ! 3 = sub-Arctic winter
+                              ! 4 = sub-Arctic summer
+                              ! 5 = Summit,Greenland (sub-Arctic summer, surface pressure of 796hPa)
+                              ! 6 = High Mountain (summer, surface pressure of 556 hPa)
+                              
+  !$acc declare copyin(snow_shape_defined)
+  !$acc declare copyin(is_dust_internal_mixing)
+  !$acc declare copyin(is_BC_internal_mixing)
+  !$acc declare copyin(snicar_atm_type)
+                              
 contains
 
   !---------------------------------------------------------------------------

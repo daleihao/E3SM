@@ -470,7 +470,20 @@ contains
           fsds_sno_vd     =>    surfrad_vars%fsds_sno_vd_patch    , & ! Output: [real(r8) (:)   ] incident visible, direct radiation on snow (for history files) (pft) [W/m2]
           fsds_sno_nd     =>    surfrad_vars%fsds_sno_nd_patch    , & ! Output: [real(r8) (:)   ] incident near-IR, direct radiation on snow (for history files) (pft) [W/m2]
           fsds_sno_vi     =>    surfrad_vars%fsds_sno_vi_patch    , & ! Output: [real(r8) (:)   ] incident visible, diffuse radiation on snow (for history files) (pft) [W/m2]
-          fsds_sno_ni     =>    surfrad_vars%fsds_sno_ni_patch      & ! Output: [real(r8) (:)   ] incident near-IR, diffuse radiation on snow (for history files) (pft) [W/m2]
+          fsds_sno_ni     =>    surfrad_vars%fsds_sno_ni_patch    , & ! Output: [real(r8) (:)   ] incident near-IR, diffuse radiation on snow (for history files) (pft) [W/m2]
+          !!! total broadband albedo added by Dalei Hao
+          albsn_hst     =>    surfalb_vars%albsn_hst_col          , &         ! col snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsn_pur_hst =>    surfalb_vars%albsn_pur_hst_col      , &     ! col pure snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsn_nodust_hst =>    surfalb_vars%albsn_nodust_hst_col  , &     ! col no-dust snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          albsn_nobc_hst =>    surfalb_vars%albsn_nobc_hst_col      , &     ! col no-BC snow albedo, total , for history files (col) [frc] ! Added by Dalei Hao
+          alb_hst       =>    surfalb_vars%alb_hst_patch          , & ! col patch surface albedo, total, for history files   (col) [frc] ! Added by Dalei Hao
+          albsnd_pur_hst =>    surfalb_vars%albsnd_pur_hst_col    , &     ! col pure snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_pur_hst =>    surfalb_vars%albsni_pur_hst_col    , &     ! col pure snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          albsnd_nodust_hst =>    surfalb_vars%albsnd_nodust_hst_col    , &     ! col no-dust snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_nodust_hst =>    surfalb_vars%albsni_nodust_hst_col    , &     ! col no-dust snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          albsnd_nobc_hst =>    surfalb_vars%albsnd_nobc_hst_col    , &     ! col no-BC snow albedo, direct , for history files (col) [frc] ! Added by Dalei Hao
+          albsni_nobc_hst =>    surfalb_vars%albsni_nobc_hst_col      &     ! col no-BC snow albedo, diffuse , for history files (col) [frc] ! Added by Dalei Hao
+          
           )
 
           dtime = dtime_mod
@@ -567,6 +580,7 @@ contains
                 ! Solar radiation absorbed by ground surface without any aerosols
                 absrad_pur = trd(p,ib)*(1._r8-albgrd_pur(c,ib)) + tri(p,ib)*(1._r8-albgri_pur(c,ib))
                 sabg_pur(p) = sabg_pur(p) + absrad_pur
+                        
              end if
 
           end do ! end of pft loop
@@ -727,6 +741,9 @@ contains
           rnir = albd(p,2)*forc_solad(t,2) + albi(p,2)*forc_solai(t,2)
           fsr(p) = rvis + rnir
 
+          !! total broadband albedo added by Dalei Hao
+          alb_hst(p) =  fsr(p) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))  
+
           fsds_vis_d(p) = forc_solad(t,1)
           fsds_nir_d(p) = forc_solad(t,2)
           fsds_vis_i(p) = forc_solai(t,1)
@@ -767,6 +784,20 @@ contains
              fsr_sno_nd(p) = fsds_nir_d(p)*albsnd_hst(c,2)
              fsr_sno_vi(p) = fsds_vis_i(p)*albsni_hst(c,1)
              fsr_sno_ni(p) = fsds_nir_i(p)*albsni_hst(c,2)
+            
+             !! total broadband snow albedo added by Dalei Hao
+             albsn_hst(c) =  (albsnd_hst(c,1) * forc_solad(t,1) + albsni_hst(c,1) * forc_solai(t,1) + albsnd_hst(c,2) *forc_solad(t,2) + albsni_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
+             if (use_snicar_frc) then
+             !! total broadband pure snow albedo added by Dalei Hao
+             albsn_pur_hst(c) =  (albsnd_pur_hst(c,1) * forc_solad(t,1) + albsni_pur_hst(c,1) * forc_solai(t,1) + albsnd_pur_hst(c,2) *forc_solad(t,2) + albsni_pur_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-dust snow albedo added by Dalei Hao
+             albsn_nodust_hst(c) =  (albsnd_nodust_hst(c,1) * forc_solad(t,1) + albsni_nodust_hst(c,1) * forc_solai(t,1) + albsnd_nodust_hst(c,2) *forc_solad(t,2) + albsni_nodust_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-BC snow albedo added by Dalei Hao
+             albsn_nobc_hst(c) =  (albsnd_nobc_hst(c,1) * forc_solad(t,1) + albsni_nobc_hst(c,1) * forc_solai(t,1) + albsnd_nobc_hst(c,2) *forc_solad(t,2) + albsni_nobc_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
+             endif
+             
           else
              fsds_sno_vd(p) = spval
              fsds_sno_nd(p) = spval
@@ -777,13 +808,21 @@ contains
              fsr_sno_nd(p) = spval
              fsr_sno_vi(p) = spval
              fsr_sno_ni(p) = spval
+             albsn_hst(c)  = spval ! Dalei Hao
+             
+             if (use_snicar_frc) then
+             albsn_pur_hst(c)  = spval ! Dalei Hao
+             albsn_nodust_hst(c)  = spval ! Dalei Hao
+             albsn_nobc_hst(c)  = spval ! Dalei Hao
+             endif
           endif
        end do
        do fp = 1,num_urbanp
           p = filter_urbanp(fp)
           t = veg_pp%topounit(p)
           g = veg_pp%gridcell(p)
-
+          c = veg_pp%column(p) ! added by Dalei Hao
+          
           local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime)*dtime
           local_secp1 = mod(local_secp1,isecspday)
 
@@ -829,6 +868,21 @@ contains
              fsr_nir_d_ln(p) = spval
           endif
           fsr(p) = fsr_vis_d(p) + fsr_nir_d(p) + fsr_vis_i(p) + fsr_nir_i(p)
+          
+           !! total broadband albedo added by Dalei Hao
+          alb_hst(p) =  fsr(p) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))  
+          !! total broadband snow albedo added by Dalei Hao
+          albsn_hst(c) =  (albsnd_hst(c,1) * forc_solad(t,1) + albsni_hst(c,1) * forc_solai(t,1) + albsnd_hst(c,2) *forc_solad(t,2) + albsni_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
+          if (use_snicar_frc) then
+             !! total broadband pure snow albedo added by Dalei Hao
+             albsn_pur_hst(c) =  (albsnd_pur_hst(c,1) * forc_solad(t,1) + albsni_pur_hst(c,1) * forc_solai(t,1) + albsnd_pur_hst(c,2) *forc_solad(t,2) + albsni_pur_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-dust snow albedo added by Dalei Hao
+             albsn_nodust_hst(c) =  (albsnd_nodust_hst(c,1) * forc_solad(t,1) + albsni_nodust_hst(c,1) * forc_solai(t,1) + albsnd_nodust_hst(c,2) *forc_solad(t,2) + albsni_nodust_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             !! total broadband no-BC snow albedo added by Dalei Hao
+             albsn_nobc_hst(c) =  (albsnd_nobc_hst(c,1) * forc_solad(t,1) + albsni_nobc_hst(c,1) * forc_solai(t,1) + albsnd_nobc_hst(c,2) *forc_solad(t,2) + albsni_nobc_hst(c,2) * forc_solai(t,2)) / (forc_solad(t,1) + forc_solai(t,1) + forc_solad(t,2) + forc_solai(t,2))
+             
+          endif
        end do
 
      end associate

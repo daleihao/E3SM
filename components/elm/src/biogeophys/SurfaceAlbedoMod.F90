@@ -94,6 +94,7 @@ contains
     ! !USES:
       !$acc routine seq
     use elm_varctl         , only : iulog, subgridflag, use_snicar_frc, use_fates, use_snicar_ad
+    use elm_varcon    , only: spval ! added by Dalei Hao
     use shr_orb_mod
 
     !
@@ -232,7 +233,15 @@ contains
           fabd_sun_z    =>    surfalb_vars%fabd_sun_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf direct  PAR (per unit lai+sai) for each canopy layer
           fabd_sha_z    =>    surfalb_vars%fabd_sha_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf direct  PAR (per unit lai+sai) for each canopy layer
           fabi_sun_z    =>    surfalb_vars%fabi_sun_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed sunlit leaf diffuse PAR (per unit lai+sai) for each canopy layer
-          fabi_sha_z    =>    surfalb_vars%fabi_sha_z_patch         & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer
+          fabi_sha_z    =>    surfalb_vars%fabi_sha_z_patch       , & ! Output:  [real(r8) (:,:) ]  absorbed shaded leaf diffuse PAR (per unit lai+sai) for each canopy layer  
+          albsnd_pur_hst    =>    surfalb_vars%albsnd_pur_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_pur_hst    =>    surfalb_vars%albsni_pur_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          albsnd_nodust_hst    =>    surfalb_vars%albsnd_nodust_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_nodust_hst    =>    surfalb_vars%albsni_nodust_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          albsnd_nobc_hst    =>    surfalb_vars%albsnd_nobc_hst_col     , & ! Output:  [real(r8) (:,:) ]  pure snow albedo direct    added by Dalei Hao
+          albsni_nobc_hst    =>    surfalb_vars%albsni_nobc_hst_col      , & ! Output:  [real(r8) (:,:) ]  pure snow albedo diffuse  added by Dalei Hao
+          albsnd_hst2    =>    surfalb_vars%albsnd_hst_col2         , & ! Output:  [real(r8) (:,:) ]  snow albedo, direct, for history files (col,bnd) [frc]
+          albsni_hst2    =>    surfalb_vars%albsni_hst_col2           & ! Output:  [real(r8) (:,:) ]  snow ground albedo, diffuse, for history files (col,bnd) [frc]
           )
 
     ! Cosine solar zenith angle for next time step
@@ -679,6 +688,7 @@ contains
                 ! pure snow albedo for all-aerosol radiative forcing
                 albgrd_pur(c,ib) = albsod(c,ib)*(1.-frac_sno(c)) + albsnd_pur(c,ib)*frac_sno(c)
                 albgri_pur(c,ib) = albsoi(c,ib)*(1.-frac_sno(c)) + albsni_pur(c,ib)*frac_sno(c)
+
              end if
 
              ! also in this loop (but optionally in a different loop for vectorized code)
@@ -713,7 +723,7 @@ contains
 
        ! For diagnostics, set snow albedo to spval over non-snow non-urban points
        ! so that it is not averaged in history buffer (OPTIONAL)
-       ! TODO - this is set to 0 not spval - seems wrong since it will be averaged in
+       ! TODO - this is set to 0 not spval - seems wrong since it will be averaged in % check
 
     do ib = 1, nband
        do fc = 1,num_nourbanc
@@ -721,9 +731,28 @@ contains
              if ((coszen_col(c) > 0._r8) .and. (h2osno(c) > 0._r8)) then
              albsnd_hst(c,ib) = albsnd(c,ib)
              albsni_hst(c,ib) = albsni(c,ib)
+             ! output pure snow albedo added by Dalei Hao
+             albsnd_hst2(c,ib) = albsnd(c,ib)
+             albsni_hst2(c,ib) = albsni(c,ib)
+             albsnd_pur_hst(c,ib) = albsnd_pur(c,ib)
+             albsni_pur_hst(c,ib) = albsni_pur(c,ib)
+             albsnd_nobc_hst(c,ib) = albsnd_bc(c,ib)
+             albsni_nobc_hst(c,ib) = albsni_bc(c,ib)
+             albsnd_nodust_hst(c,ib) = albsnd_dst(c,ib)
+             albsni_nodust_hst(c,ib) = albsni_dst(c,ib)
           else
              albsnd_hst(c,ib) = 0._r8
              albsni_hst(c,ib) = 0._r8
+             ! output pure snow albedo added by Dalei Hao
+             albsnd_hst2(c,ib) = spval
+             albsni_hst2(c,ib) = spval
+             albsnd_pur_hst(c,ib) = spval
+             albsni_pur_hst(c,ib) = spval
+             albsnd_nobc_hst(c,ib) = spval
+             albsni_nobc_hst(c,ib) = spval
+             albsnd_nodust_hst(c,ib) = spval
+             albsni_nodust_hst(c,ib) = spval
+             
           endif
        enddo
     enddo
@@ -966,6 +995,7 @@ contains
           ftii(p,ib) = 1._r8
           albd(p,ib) = albgrd(c,ib)
           albi(p,ib) = albgri(c,ib)
+          
        end do
     end do
 

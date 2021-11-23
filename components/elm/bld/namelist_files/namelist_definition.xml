@@ -511,7 +511,7 @@ Per tape series history write frequency.
 </entry>
 
 <entry id="metdata_biases" type="char*400" category="datasets"
-       group="elm_inparm" valid_values="">
+group="elm_inparm" valid_values="">
 </entry>
 
 <entry id="co2_file" type="char*400" category="datasets"
@@ -643,6 +643,27 @@ Toggle to turn on calculation of SNow and Ice Aerosol Radiation model (SNICAR) r
 Toggle to turn on SNICAR_AD snow shortwave algorithms
 The same snow shortwave algorithm can be turned on for sea-ice simulation
 with config_use_snicar_ad in mpas-seaice namelist
+</entry>
+
+<entry id="snow_shape_defined" type="integer" category="physics"
+       group="elm_inparm" valid_values="" value="1">
+snow shape: 1=sphere (original assumption in SNICAR)
+            2=spheroid; 3=hexagonal plate; 4=koch snowflake
+</entry>
+ 
+<entry id="is_dust_internal_mixing" type="logical" category="physics"
+       group="elm_inparm" valid_values="" value=".false.">
+is_dust_internal_mixing 
+</entry>
+
+<entry id="is_BC_internal_mixing" type="logical" category="physics"
+       group="elm_inparm" valid_values="" value=".false.">
+is_BC_internal_mixing
+</entry>
+
+<entry id="snicar_atm_type" type="integer" category="physics"
+       group="elm_inparm" valid_values="" value="0">
+atmospheric types for snicar
 </entry>
 
 <entry id="use_extrasnowlayers" type="logical" category="physics"
