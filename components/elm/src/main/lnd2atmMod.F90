@@ -31,8 +31,7 @@ module lnd2atmMod
   use ColumnDataType       , only : col_ws, col_wf, col_cf, col_es
   use VegetationDataType   , only : veg_es, veg_ef, veg_ws, veg_wf
   use SoilHydrologyType    , only : soilhydrology_type
-  use ScalarVarianceMod    
-
+  use ScalarVarianceMod
   
   !
   ! !PUBLIC TYPES:
@@ -322,7 +321,6 @@ contains
          rtpthlp_het_grc(bounds%begg:bounds%endg)      , &
          p2c_scale_type=unity, c2l_scale_type= urbanf, l2g_scale_type=unity)
     !!! end
-    
     
     if (use_cn .or. use_fates) then
        call c2g(bounds, &
