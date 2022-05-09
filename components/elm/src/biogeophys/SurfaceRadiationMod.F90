@@ -66,6 +66,8 @@ module SurfaceRadiationMod
      real(r8), pointer  :: fsds_vis_i_patch      (:) => null() ! patch incident diffuse vis solar radiation (W/m**2)
      real(r8), pointer  :: fsds_vis_d_ln_patch   (:) => null() ! patch incident direct beam vis solar radiation at local noon (W/m**2)
      real(r8), pointer  :: fsds_vis_i_ln_patch   (:) => null() ! patch incident diffuse beam vis solar radiation at local noon (W/m**2)
+	 
+	 real(r8), pointer  :: fsds_sno_patch        (:) => null() ! patch incident solar radiation on snow (W/m**2)
 
    contains
 
@@ -134,6 +136,8 @@ contains
     allocate(this%fsds_sno_nd_patch     (begp:endp))              ; this%fsds_sno_nd_patch     (:)   = spval
     allocate(this%fsds_sno_vi_patch     (begp:endp))              ; this%fsds_sno_vi_patch     (:)   = spval
     allocate(this%fsds_sno_ni_patch     (begp:endp))              ; this%fsds_sno_ni_patch     (:)   = spval
+	
+	allocate(this%fsds_sno_patch        (begp:endp))              ; this%fsds_sno_patch        (:)   = spval
 
   end subroutine InitAllocate
 
@@ -281,6 +285,11 @@ contains
     call hist_addfld1d (fname='SNOFSRNI', units='W/m^2',  &
          avgflag='A', long_name='diffuse nir reflected solar radiation from snow', &
          ptr_patch=this%fsr_sno_ni_patch, default='inactive')
+		 
+	this%fsds_sno_patch(begp:endp) = spval
+    call hist_addfld1d (fname='SNOFSDS', units='W/m^2',  &
+         avgflag='A', long_name='incident solar radiation on snow', &
+         ptr_patch=this%fsds_sno_patch, default='inactive')
 
   end subroutine InitHistory
 
@@ -470,7 +479,8 @@ contains
           fsds_sno_vd     =>    surfrad_vars%fsds_sno_vd_patch    , & ! Output: [real(r8) (:)   ] incident visible, direct radiation on snow (for history files) (pft) [W/m2]
           fsds_sno_nd     =>    surfrad_vars%fsds_sno_nd_patch    , & ! Output: [real(r8) (:)   ] incident near-IR, direct radiation on snow (for history files) (pft) [W/m2]
           fsds_sno_vi     =>    surfrad_vars%fsds_sno_vi_patch    , & ! Output: [real(r8) (:)   ] incident visible, diffuse radiation on snow (for history files) (pft) [W/m2]
-          fsds_sno_ni     =>    surfrad_vars%fsds_sno_ni_patch      & ! Output: [real(r8) (:)   ] incident near-IR, diffuse radiation on snow (for history files) (pft) [W/m2]
+          fsds_sno_ni     =>    surfrad_vars%fsds_sno_ni_patch    , & ! Output: [real(r8) (:)   ] incident near-IR, diffuse radiation on snow (for history files) (pft) [W/m2]
+		  fsds_sno        =>    surfrad_vars%fsds_sno_patch         & ! Output: [real(r8) (:)   ] incident solar radiation on snow (for history files) (pft) [W/m2]
           )
 
           dtime = dtime_mod
@@ -484,6 +494,7 @@ contains
           sabg(p)       = 0._r8
           sabv(p)       = 0._r8
           fsa(p)        = 0._r8
+		  fsds_sno(p)   = 0._r8
         if (lun_pp%itype(l)==istsoil .or. lun_pp%itype(l)==istcrop) then
            fsa_r(p) = 0._r8
         end if
@@ -551,6 +562,8 @@ contains
                 sabg_soil(p) = sabg(p)
              endif
 
+             fsds_sno(p) = fsds_sno(p) + trd(p,ib) + tri(p,ib);
+			 
              if (use_snicar_frc) then
                 ! Solar radiation absorbed by ground surface without BC
                 absrad_bc = trd(p,ib)*(1._r8-albgrd_bc(c,ib)) + tri(p,ib)*(1._r8-albgri_bc(c,ib))
