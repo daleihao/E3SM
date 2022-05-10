@@ -122,6 +122,9 @@ module SnowSnicarMod
   real(r8) :: asm_prm_snw_dfs    (idx_Mie_snw_mx,numrad_snw);
   real(r8) :: ext_cff_mss_snw_dfs(idx_Mie_snw_mx,numrad_snw);
 
+  !!! direct & diffuse
+  real(r8) :: flx_wgt_dir     (6,90,numrad_snw); ! 6 atmospheric types, 0-89 SZA
+  real(r8) :: flx_wgt_dif    (6, numrad_snw); ! 6 atmospheric types
   !$acc declare create(ss_alb_snw_drc     )
   !$acc declare create(asm_prm_snw_drc    )
   !$acc declare create(ext_cff_mss_snw_drc)
@@ -129,6 +132,9 @@ module SnowSnicarMod
   !$acc declare create(asm_prm_snw_dfs    )
   !$acc declare create(ext_cff_mss_snw_dfs)
 
+  !$acc declare create(flx_wgt_dir        )
+  !$acc declare create(flx_wgt_dif        )
+  
 #ifdef MODAL_AER
   !mgf++
   ! Size-dependent BC optical properties. Currently a fixed BC size is
@@ -1482,7 +1488,7 @@ contains
      subroutine SnowOptics_init( )
 
       use fileutils  , only : getfil
-      use elm_varctl , only : fsnowoptics
+      use elm_varctl , only : fsnowoptics, snicar_atm_type
       use spmdMod    , only : masterproc
       use ncdio_pio  , only : file_desc_t, ncd_io, ncd_pio_openfile, ncd_pio_closefile
       use ncdio_pio  , only : ncd_pio_openfile, ncd_inqfdims, ncd_pio_closefile, ncd_inqdid, ncd_inqdlen
@@ -1512,6 +1518,16 @@ contains
       call ncd_io( 'ss_alb_ice_dfs', ss_alb_snw_dfs,           'read', ncid, posNOTonfile=.true.)
       call ncd_io( 'asm_prm_ice_dfs', asm_prm_snw_dfs,         'read', ncid, posNOTonfile=.true.)
       call ncd_io( 'ext_cff_mss_ice_dfs', ext_cff_mss_snw_dfs, 'read', ncid, posNOTonfile=.true.)
+	  
+	  
+      !!! direct and diffuse flux under different atmospheric conditions
+      if (snicar_atm_type > 0)then
+      ! direct-beam incident spectral flux: 
+       call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
+      ! diffuse incident spectral flux:
+       call ncd_io( 'flx_wgt_dif', flx_wgt_dif,           'read', ncid, posNOTonfile=.true.)
+      endif
+
       !$acc update device( &
       !$acc ss_alb_snw_drc     ,&
       !$acc asm_prm_snw_drc    ,&
@@ -1753,6 +1769,7 @@ contains
      use elm_varpar       , only : nlevsno, numrad
      use clm_time_manager , only : get_nstep
      use shr_const_mod    , only : SHR_CONST_PI
+	 use elm_varctl       , only: snow_shape_defined,is_dust_internal_mixing, snicar_atm_type
      !
      ! !ARGUMENTS:
      integer           , intent(in)  :: flg_snw_ice                                        ! flag: =1 when called from CLM, =2 when called from CSIM
@@ -1856,6 +1873,36 @@ contains
      real(r8):: lon_coord                          ! gridcell longitude (debugging only)
      integer :: sfctype                            ! underlying surface type (debugging only)
      real(r8):: pi                                 ! 3.1415...
+
+   !!!!!!!!!!!!!!!!!!!!!!!!
+     ! New variales for non-spherical snow shape   ! He et al., 2017
+     integer :: snw_shp_lcl(-nlevsno+1:0)          ! Snow grain shape option:
+                                                   ! 1=sphere; 2=spheroid; 3=hexagonal plate; 4=koch snowflake
+     integer :: snw_fs_lcl(-nlevsno+1:0)           ! Shape factor: ratio of nonspherical grain effective radii to that of equal-volume sphere
+                                                   ! 0=use recommended default value (He et al. 2017);
+                                                   ! others(0<fs<1)= use user-specified value
+                                                   ! only activated when sno_shp > 1 (i.e. nonspherical)
+     integer :: snw_ar_lcl(-nlevsno+1:0)           ! % Aspect ratio: ratio of grain width to length
+                                                   ! 0=use recommended default value (He et al. 2017);
+                                                   ! others(0.1<fs<20)= use user-specified value
+                                                   ! only activated when sno_shp > 1 (i.e. nonspherical)
+     real(r8):: &
+         diam_ice  , & !
+         fs_sphd  , & !
+         fs_hex0  , & ! 
+         fs_hex  , & ! 
+         fs_koch  , & ! 
+         AR_tmp  , & ! 
+         g_ice_Cg_tmp(7)  , & !
+         gg_ice_F07_tmp(7)  , & !
+         g_ice_F07  , & !
+         g_ice  , & !
+         gg_F07_intp  , & !
+         g_Cg_intp, & !
+         C_dust_total !! dust concentration
+     integer :: slr_zen
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
      ! SNICAR_AD new variables, follow sea-ice shortwave conventions
      real(r8):: &
@@ -2002,6 +2049,28 @@ contains
          !mgf--
 #endif
 
+ ! Constants for aspherical ice particles %%%
+      ! g_snw asymmetry factor parameterization coefficients (6 bands) from
+      !  Table 3 & Eqs. 6-7 in He et al. (2017)
+      ! assume same values for 4-5 um band, which leads to very small biases (<3%)
+
+      real(r8) :: g_b2(7)
+      real(r8) :: g_b1(7)
+      real(r8) :: g_b0(7)
+      real(r8) :: g_F07_c2(7)
+      real(r8) :: g_F07_c1(7)
+      real(r8) :: g_F07_c0(7)
+      real(r8) :: g_F07_p2(7)
+      real(r8) :: g_F07_p1(7)
+      real(r8) :: g_F07_p0(7)
+      real(r8) :: dust_clear_d0(3)
+      real(r8) :: dust_clear_d1(3)
+      real(r8) :: dust_clear_d2(3)
+      real(r8) :: dust_cloudy_d0(3)
+      real(r8) :: dust_cloudy_d1(3)
+      real(r8) :: dust_cloudy_d2(3)
+
+
      ! Enforce expected array sizes
 
      associate(&
@@ -2031,6 +2100,38 @@ contains
               0.0951585_r8,  0.1246290_r8, &
               0.1495960_r8,  0.1691565_r8, &
               0.1826034_r8,  0.1894506_r8/)
+
+ !!!!!!!!!!!! snow albedo improvement by Dalei Hao 2021
+      !!!!!!!!! snow shape
+      ! define snow shape
+      snw_shp_lcl(:) = snow_shape_defined
+      snw_fs_lcl(:)  = 0._r8 
+      snw_ar_lcl(:)  = 0._r8 
+      !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
+      !g_wvl_center = g_wvl(2:8)/2 + g_wvl(1:7)/2 ; ! center point for wavelength band
+      data g_b0(:) /9.76029E-01,9.67798E-01,1.00111E+00,1.00224E+00,9.64295E-01,9.97475E-01,9.97475E-01/
+      data g_b1(:) /5.21042E-01,4.96181E-01,1.83711E-01,1.37082E-01,5.50598E-02,8.48743E-02,8.48743E-02/
+      data g_b2(:) /-2.66792E-04,1.14088E-03,2.37011E-04,-2.35905E-04,8.40449E-04,-4.71484E-04,-4.71484E-04/
+      ! Tables 1 & 2 and Eqs. 3.1-3.4 from Fu, 2007
+      data g_F07_c2(:) /1.349959E-1,1.115697E-1,9.853958E-2,5.557793E-2,-1.233493E-1,0.0,0.0/
+      data g_F07_c1(:) /-3.987320E-1,-3.723287E-1,-3.924784E-1,-3.259404E-1,4.429054E-2,-1.726586E-1,-1.726586E-1/
+      data g_F07_c0(:) /7.938904E-1,8.030084E-1,8.513932E-1,8.692241E-1,7.085850E-1,6.412701E-1,6.412701E-1/
+      data g_F07_p2(:) /3.165543E-3,2.014810E-3,1.780838E-3,6.987734E-4,-1.882932E-2,-2.277872E-2,-2.277872E-2/
+      data g_F07_p1(:) /1.140557E-1,1.143152E-1,1.143814E-1,1.071238E-1,1.353873E-1,1.914431E-1,1.914431E-1/
+      data g_F07_p0(:) /5.292852E-1,5.425909E-1,5.601598E-1,6.023407E-1,6.473899E-1,4.634944E-1,4.634944E-1/
+
+
+      !!! dust internal mixing
+      data dust_clear_d0(:) /1.0413E+00,1.0168E+00,1.0189E+00/
+      data dust_clear_d1(:) /1.0016E+00,1.0070E+00,1.0840E+00/
+      data dust_clear_d2(:) /2.4208E-01,1.5300E-03,1.1230E-04/
+
+      data dust_cloudy_d0(:) /1.0388E+00,1.0167E+00,1.0189E+00/
+      data dust_cloudy_d1(:) /1.0015E+00,1.0061E+00,1.0823E+00/
+      data dust_cloudy_d2(:) /2.5973E-01,1.6200E-03,1.1721E-04/
+!!!!!!!!!!!!!
+
+
 
 
       ! Loop over all non-urban columns
@@ -2169,18 +2270,39 @@ contains
              elseif(numrad_snw==5) then
                 ! Direct:
                 if (flg_slr_in == 1) then
-                   flx_wgt(1) = 1._r8
-                   flx_wgt(2) = 0.49352158521175_r8
-                   flx_wgt(3) = 0.18099494230665_r8
-                   flx_wgt(4) = 0.12094898498813_r8
-                   flx_wgt(5) = 0.20453448749347_r8
+                  if (snicar_atm_type == 0) then
+                     flx_wgt(1) = 1._r8
+                     flx_wgt(2) = 0.49352158521175_r8
+                     flx_wgt(3) = 0.18099494230665_r8
+                     flx_wgt(4) = 0.12094898498813_r8
+                     flx_wgt(5) = 0.20453448749347_r8
+                  else                 
+                     slr_zen = nint(acosd(coszen(c_idx)))
+                     if (slr_zen>89) then
+                        slr_zen = 89
+                     endif
+                     flx_wgt(1) = 1._r8
+                     flx_wgt(2) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 2)
+                     flx_wgt(3) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 3)
+                     flx_wgt(4) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 4)
+                     flx_wgt(5) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 5)  
+                  endif
+				  
                    ! Diffuse:
                 elseif (flg_slr_in == 2) then
-                   flx_wgt(1) = 1._r8
-                   flx_wgt(2) = 0.58581507618433_r8
-                   flx_wgt(3) = 0.20156903770812_r8
-                   flx_wgt(4) = 0.10917889346386_r8
-                   flx_wgt(5) = 0.10343699264369_r8
+                   if  (snicar_atm_type == 0) then
+                     flx_wgt(1) = 1._r8
+                     flx_wgt(2) = 0.58581507618433_r8
+                     flx_wgt(3) = 0.20156903770812_r8
+                     flx_wgt(4) = 0.10917889346386_r8
+                     flx_wgt(5) = 0.10343699264369_r8
+                  else
+                     flx_wgt(1) = 1._r8
+                     flx_wgt(2) = flx_wgt_dif(snicar_atm_type, 2)
+                     flx_wgt(3) = flx_wgt_dif(snicar_atm_type, 3)
+                     flx_wgt(4) = flx_wgt_dif(snicar_atm_type, 4)
+                     flx_wgt(5) = flx_wgt_dif(snicar_atm_type, 5)
+                  endif
                 endif
              endif ! end if numrad_snw
 
@@ -2238,6 +2360,103 @@ contains
                          ext_cff_mss_snw_lcl(i) = ext_cff_mss_snw_dfs(rds_idx,bnd_idx)
                       enddo
                    endif
+				   
+				    !!! Dalei Hao 
+                  ! shape-dependent asymetry factors (He et al., 2017)
+                  do i=snl_top,snl_btm,1
+                     if(snw_shp_lcl(i) == 2) then ! spheroid
+
+                       diam_ice = 2._r8*snw_rds_lcl(i)
+                        if(snw_fs_lcl(i) == 0) then
+                           fs_sphd = 0.929_r8
+                        else
+                           fs_sphd = snw_fs_lcl(i)               
+                        endif
+                        fs_hex = 0.788_r8 
+                        if(snw_ar_lcl(i) == 0) then
+                           AR_tmp = 0.5_r8
+                        else
+                           AR_tmp = snw_ar_lcl(i)              
+                        endif
+                        g_ice_Cg_tmp = g_b0 * ((fs_sphd/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
+                        gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * (AR_tmp**2) ! Eqn. 3.1 in Fu (2007)                           
+
+                     elseif(snw_shp_lcl(i) == 3) then ! hexagonal plate
+                          diam_ice = 2._r8*snw_rds_lcl(i)
+                        if(snw_fs_lcl(i) == 0) then
+                           fs_hex0 = 0.788_r8
+                        else
+                           fs_hex0 = snw_fs_lcl(i)               
+                        endif
+                        fs_hex = 0.788_r8 
+                        if(snw_ar_lcl(i) == 0) then
+                           AR_tmp = 2.5_r8
+                        else
+                           AR_tmp = snw_ar_lcl(i)              
+                        endif
+                        g_ice_Cg_tmp = g_b0 * ((fs_hex0/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
+                        gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2) ! Eqn. 3.3 in Fu (2007)
+
+                     elseif(snw_shp_lcl(i) == 4) then ! koch snowflake
+                     diam_ice = 2._r8 * snw_rds_lcl(i) /0.544_r8
+                        if(snw_fs_lcl(i) == 0) then
+                           fs_koch = 0.712_r8
+                        else
+                           fs_koch = snw_fs_lcl(i)               
+                        endif
+                        fs_hex = 0.788_r8 
+                        if(snw_ar_lcl(i) == 0) then
+                           AR_tmp = 2.5_r8
+                        else
+                           AR_tmp = snw_ar_lcl(i)              
+                        endif
+
+                        g_ice_Cg_tmp = g_b0 * ((fs_koch/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
+                        gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2) ! Eqn. 3.3 in Fu (2007)
+
+                     endif
+
+                     ! 6 wavelength bands for g_ice to be interpolated into 480-bands of SNICAR
+                     ! shape-preserving piecewise interpolation into 480-bands
+                     if(snw_shp_lcl(i) > 1) then
+                        !g_Cg_intp = pchip(g_wvl_center,g_ice_Cg_tmp,wvl) ;
+                        !gg_F07_intp = pchip(g_wvl_center,gg_ice_F07_tmp,wvl) ;
+                        !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
+                        !g_wvl_center = g_wvl(2:8)/2 + g_wvl(1:7)/2 ; ! center point for wavelength band
+                        ! elm wavelength/ /0.3,0.7,1.0,1.2,1.5,5/
+                        !wvl_5bd = [0.5 0.85 1.1 1.35 3.25];
+                        ! He /0.475 1.055 1.655 2.2 3 3.75 4.5
+                     ! linear interpolation to get the Cg and G_f80 for band_idx.
+                     if(bnd_idx == 1) then
+                        g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
+                        gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+gg_ice_F07_tmp(1);
+                     elseif(bnd_idx == 2) then 
+                        g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+g_ice_Cg_tmp(1);
+                        gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+gg_ice_F07_tmp(1);
+
+                     elseif(bnd_idx == 3) then 
+                        g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+g_ice_Cg_tmp(2);
+                        gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+gg_ice_F07_tmp(2);
+                     elseif(bnd_idx == 4) then 
+                        g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+g_ice_Cg_tmp(2);
+                        gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+gg_ice_F07_tmp(2);
+                     elseif(bnd_idx == 5) then
+                        g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
+                        gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
+                     endif
+
+                        g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8 ! Eq.2.2 in Fu (2007)
+                        g_ice = g_ice_F07 * g_Cg_intp ! Eq.6, He et al. (2017)
+                        asm_prm_snw_lcl(i) = g_ice;
+                     endif
+
+                     if(asm_prm_snw_lcl(i) > 0.99_r8) then 
+                      asm_prm_snw_lcl(i) = 0.99_r8
+                     endif                        
+
+                  enddo
+                  !!!-end
+
 
    !H. Wang
                    ! aerosol species 1 optical properties
@@ -2347,13 +2566,45 @@ contains
                     asm_prm_aer_lcl(2)       = asm_prm_bc2(bnd_idx)
                     ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx)
 #endif
+
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! dust internal mixing
+                     if (is_dust_internal_mixing) then
+                        if (bnd_idx < 4) then
+                           C_dust_total = mss_cnc_aer_lcl(i,5) + mss_cnc_aer_lcl(i,6) + mss_cnc_aer_lcl(i,7) + mss_cnc_aer_lcl(i,8)
+                           C_dust_total = C_dust_total * 1.0E+06 ! kg/kg to ug/g
+                           if(C_dust_total > 0) then
+                    ! Direct:
+                              if (flg_slr_in == 1) then
+                                 R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES                     
+                              else
+                                 R_1_omega_tmp = dust_cloudy_d0(bnd_idx) + dust_cloudy_d2(bnd_idx)*(C_dust_total**dust_cloudy_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES   
+                              endif
+
+
+                           ! new omega for entire BC-snow internal mixture
+                              ss_alb_snw_lcl(i) = 1.0_r8 - (1.0_r8 - ss_alb_snw_lcl(i)) *R_1_omega_tmp
+
+                           endif
+                        endif
+                        do j = 5,8,1
+                           ss_alb_aer_lcl(j)     = 0._r8
+                           asm_prm_aer_lcl(j)       = 0._r8
+                           ext_cff_mss_aer_lcl(j)   = 0._r8
+                           !mss_cnc_aer_lcl(i,j) = 0._r8
+                        enddo
+                    endif
+					
                     !mgf--
 
                       L_snw(i)   = h2osno_ice_lcl(i)+h2osno_liq_lcl(i)
                       tau_snw(i) = L_snw(i)*ext_cff_mss_snw_lcl(i)
 
                       do j=1,sno_nbr_aer
-                         L_aer(i,j)   = L_snw(i)*mss_cnc_aer_lcl(i,j)
+                         if (is_dust_internal_mixing .and. (j >= 5)) then
+                           L_aer(i,j)  = 0._r8
+                         else
+                           L_aer(i,j)   = L_snw(i)*mss_cnc_aer_lcl(i,j)
+                         endif
                          tau_aer(i,j) = L_aer(i,j)*ext_cff_mss_aer_lcl(j)
                       enddo
 
