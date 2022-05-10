@@ -1899,7 +1899,9 @@ contains
          g_ice  , & !
          gg_F07_intp  , & !
          g_Cg_intp, & !
+		 R_1_omega_tmp , & ! !!! BC internal mixing
          C_dust_total !! dust concentration
+
      integer :: slr_zen
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
