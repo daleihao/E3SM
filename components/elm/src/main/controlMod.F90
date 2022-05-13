@@ -53,7 +53,7 @@ module controlMod
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
   use elm_varctl              , only: use_top_solar_rad
-  use elm_varctl              , only: snow_shape_defined,is_dust_internal_mixing,snicar_atm_type
+  use elm_varctl              , only: snow_shape_defined,is_dust_internal_mixing,snicar_atm_type,MSE_BC
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -313,7 +313,7 @@ contains
 		 
 	! snow shape
     namelist /elm_inparm/ &
-         snow_shape_defined,is_dust_internal_mixing, snicar_atm_type 
+         snow_shape_defined,is_dust_internal_mixing, snicar_atm_type,MSE_BC 
     
     ! ----------------------------------------------------------------------
     ! Default values
@@ -812,9 +812,10 @@ contains
     call mpi_bcast (more_vertlayers,1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_top_solar_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! TOP solar radiation parameterization
-    call mpi_bcast (snow_shape_defined, 1, MPI_LOGICAL, 0, mpicom, ier) ! for snow shape
+    call mpi_bcast (snow_shape_defined, 1, MPI_INTEGER, 0, mpicom, ier) ! for snow shape
     call mpi_bcast (is_dust_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier) ! for snow-dust internal mixing
-    call mpi_bcast (snicar_atm_type, 1, MPI_LOGICAL, 0, mpicom, ier) ! for atmospheric condition
+    call mpi_bcast (snicar_atm_type, 1, MPI_INTEGER, 0, mpicom, ier) ! for atmospheric condition
+	call mpi_bcast (MSE_BC, 1, MPI_REAL8, 0, mpicom, ier) ! for MSE of BC
 	
     ! glacier_mec variables
     call mpi_bcast (create_glacier_mec_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
@@ -954,6 +955,7 @@ contains
 	write(iulog,*) '    snow_shape_defined = ', snow_shape_defined ! for snow shape
     write(iulog,*) '    is_dust_internal_mixing = ', is_dust_internal_mixing ! for snow-dust internal mixing
     write(iulog,*) '    snicar_atm_type = ', snicar_atm_type ! for atmospheric condition
+	write(iulog,*) '    MSE_BC = ', MSE_BC ! for MSE of BC
     write(iulog,*) '    use_vancouver = ', use_vancouver
     write(iulog,*) '    use_mexicocity = ', use_mexicocity
     write(iulog,*) '    use_noio = ', use_noio

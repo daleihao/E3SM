@@ -18,7 +18,7 @@ module SnowHydrologyMod
   use decompMod       , only : bounds_type
   use abortutils      , only : endrun
   use elm_varpar      , only : nlevsno
-  use elm_varctl      , only : iulog, use_extrasnowlayers
+  use elm_varctl      , only : iulog, use_extrasnowlayers, MSE_BC
   use elm_varcon      , only : namec, h2osno_max
   use atm2lndType     , only : atm2lnd_type
   use AerosolType     , only : aerosol_type
@@ -61,7 +61,7 @@ module SnowHydrologyMod
   !  7= dust species 3
   !  8= dust species 4
   !
-  real(r8), public, parameter :: scvng_fct_mlt_bcphi = 0.02_r8 ! scavenging factor for hydrophillic BC inclusion in meltwater [frc]
+  real(r8), public, parameter :: scvng_fct_mlt_bcphi = MSE_BC ! scavenging factor for hydrophillic BC inclusion in meltwater [frc]
   real(r8), public, parameter :: scvng_fct_mlt_bcpho = 0.03_r8 ! scavenging factor for hydrophobic BC inclusion in meltwater  [frc]
   real(r8), public, parameter :: scvng_fct_mlt_ocphi = 0.20_r8 ! scavenging factor for hydrophillic OC inclusion in meltwater [frc]
   real(r8), public, parameter :: scvng_fct_mlt_ocpho = 0.03_r8 ! scavenging factor for hydrophobic OC inclusion in meltwater  [frc]

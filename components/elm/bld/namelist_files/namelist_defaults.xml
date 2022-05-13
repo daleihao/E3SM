@@ -579,6 +579,7 @@ this mask will have smb calculated over the entire global land surface
 <snow_shape_defined>1</snow_shape_defined>
 <is_dust_internal_mixing>.false.</is_dust_internal_mixing>
 <snicar_atm_type>0</snicar_atm_type>
+<MSE_BC>0.2</MSE_BC>
 
 <!-- Nitrogen deposition streams namelist defaults -->
 <stream_year_first_ndep use_cn=".true."   sim_year="2000" >2000</stream_year_first_ndep>

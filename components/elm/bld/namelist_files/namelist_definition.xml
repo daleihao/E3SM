@@ -671,6 +671,11 @@ is_dust_internal_mixing
 atmospheric types for snicar
 </entry>
 
+<entry id="MSE_BC" type="real" category="physics"
+       group="elm_inparm" valid_values="" value="0.20">
+melt-water scavenging efficiency (MSE) for Hydrophilic black carbon
+</entry>
+
 <entry id="use_extrasnowlayers" type="logical" category="physics"
        group="elm_inparm" valid_values="" value=".false.">
 Toggle to use 16 snow layers instead of 5.  This option enables more realistic

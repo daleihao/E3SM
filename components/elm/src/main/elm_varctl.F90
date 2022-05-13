@@ -521,6 +521,8 @@ module elm_varctl
   !$acc declare copyin(is_dust_internal_mixing)
   !$acc declare copyin(is_BC_internal_mixing)
   !$acc declare copyin(snicar_atm_type)
+  real(r8), public :: MSE_BC = 0.20_r8
+  
 contains
 
   !---------------------------------------------------------------------------
