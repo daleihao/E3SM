@@ -124,7 +124,7 @@ module SnowSnicarMod
 
   !!! direct & diffuse
   real(r8) :: flx_wgt_dir    (6, 90,numrad_snw); ! six atmospheric types, 0-89 SZA
-  real(r8) :: flx_wgt_dif    (6, numrad_snw);   ! six atmospheric types
+  real(r8) :: flx_wgt_dif    (6, numrad_snw);    ! six atmospheric types
   !$acc declare create(ss_alb_snw_drc     )
   !$acc declare create(asm_prm_snw_drc    )
   !$acc declare create(ext_cff_mss_snw_drc)
