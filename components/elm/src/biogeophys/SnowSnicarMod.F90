@@ -1539,7 +1539,6 @@ contains
       call ncd_io( 'asm_prm_ice_dfs', asm_prm_snw_dfs,         'read', ncid, posNOTonfile=.true.)
       call ncd_io( 'ext_cff_mss_ice_dfs', ext_cff_mss_snw_dfs, 'read', ncid, posNOTonfile=.true.)
 	  
-	  
       !!! Direct and diffuse flux under different atmospheric conditions
       if (atm_type_index > 0) then
       ! Direct-beam incident spectral flux: 
@@ -2451,7 +2450,7 @@ contains
 			 
                      endif
 
-                     ! Linear interpolation for calculating the Cg and G_f80 for band_idx.
+                     ! Linear interpolation for calculating the varialbes for band_idx.
                      if(snw_shp_lcl(i) > 1) then
                        if(bnd_idx == 1) then
                          g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
@@ -2470,7 +2469,7 @@ contains
                          gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
                        endif
                        g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8 ! Eq.2.2 in Fu (2007)
-                       g_ice = g_ice_F07 * g_Cg_intp ! Eq.6, He et al. (2017)
+                       g_ice = g_ice_F07 * g_Cg_intp
                        asm_prm_snw_lcl(i) = g_ice;
                      endif
 
@@ -2595,7 +2594,7 @@ contains
                     if (use_dust_snow_internal_mixing) then
                         if (bnd_idx < 4) then
                            C_dust_total = mss_cnc_aer_lcl(i,5) + mss_cnc_aer_lcl(i,6) + mss_cnc_aer_lcl(i,7) + mss_cnc_aer_lcl(i,8)
-                           C_dust_total = C_dust_total * 1.0E+06 
+                           C_dust_total = C_dust_total * 1.0E+06_r8 
                            if(C_dust_total > 0) then
                               if (flg_slr_in == 1) then
                                  R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx))                   
