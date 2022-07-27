@@ -1988,7 +1988,7 @@ Number of ELM time steps per ELM and MOSART coupling period
 </entry>
 
 <!-- ========================================================================================  -->
-<!-- Namelist options for SNICAR-AD                                                  -->
+<!-- Namelist options for SNICAR-AD                                                            -->
 <!-- ========================================================================================  -->
 <entry id="snow_shape" type="char*256" category="elm_physics"
        group="elm_inparm" valid_values="sphere,spheroid,hexagonal_plate,koch_snowflake">
