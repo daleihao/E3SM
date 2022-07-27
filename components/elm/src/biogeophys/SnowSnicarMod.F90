@@ -1919,9 +1919,9 @@ contains
          g_Cg_intp          , & !
 	 R_1_omega_tmp      , & ! BC internal mixing
          C_dust_total       , & ! dust concentration
-	 atm_type_index         !
+	 atm_type_index         ! index for atmospheric type
 
-     integer :: slr_zen
+     integer :: slr_zen         ! integer value of solar zenith angle
 
 
      ! SNICAR_AD new variables, follow sea-ice shortwave conventions
@@ -2399,10 +2399,9 @@ contains
                       enddo
                    endif
 				   
-                  ! calculate the asymetry factors under different snow grain shape
+                  ! Calculate the asymetry factors under different snow grain shapes
                    do i=snl_top,snl_btm,1
                       if(snw_shp_lcl(i) == 2) then ! spheroid
-
                          diam_ice = 2._r8*snw_rds_lcl(i)
                          if(snw_fs_lcl(i) == 0) then
                             fs_sphd = 0.929_r8
@@ -2415,8 +2414,9 @@ contains
                          else
                             AR_tmp = snw_ar_lcl(i)              
                          endif
-                         g_ice_Cg_tmp = g_b0 * ((fs_sphd/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
-                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * (AR_tmp**2) ! Eqn. 3.1 in Fu (2007)                           
+                         g_ice_Cg_tmp = g_b0 * ((fs_sphd/fs_hex)**g_b1) * (diam_ice**g_b2)
+                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * (AR_tmp**2)
+			 
                       elseif(snw_shp_lcl(i) == 3) then ! hexagonal plate
                          diam_ice = 2._r8*snw_rds_lcl(i)
                          if(snw_fs_lcl(i) == 0) then
@@ -2430,8 +2430,8 @@ contains
                          else
                            AR_tmp = snw_ar_lcl(i)              
                          endif
-                         g_ice_Cg_tmp = g_b0 * ((fs_hex0/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
-                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2) ! Eqn. 3.3 in Fu (2007)
+                         g_ice_Cg_tmp = g_b0 * ((fs_hex0/fs_hex)**g_b1) * (diam_ice**g_b2)
+                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2)
 
                       elseif(snw_shp_lcl(i) == 4) then ! Koch snowflake
                          diam_ice = 2._r8 * snw_rds_lcl(i) /0.544_r8
@@ -2446,47 +2446,36 @@ contains
                          else
                             AR_tmp = snw_ar_lcl(i)              
                          endif
-
-                         g_ice_Cg_tmp = g_b0 * ((fs_koch/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
-                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2) ! Eqn. 3.3 in Fu (2007)
+                         g_ice_Cg_tmp = g_b0 * ((fs_koch/fs_hex)**g_b1) * (diam_ice**g_b2)
+                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2)
+			 
                      endif
 
-                     ! 6 wavelength bands for g_ice to be interpolated into 480-bands of SNICAR
-                     ! shape-preserving piecewise interpolation into 480-bands
+                     ! Linear interpolation for calculating the Cg and G_f80 for band_idx.
                      if(snw_shp_lcl(i) > 1) then
-                        !g_Cg_intp = pchip(g_wvl_center,g_ice_Cg_tmp,wvl) ;
-                        !gg_F07_intp = pchip(g_wvl_center,gg_ice_F07_tmp,wvl) ;
-                        !data g_wvl(:) /0.25,0.70,1.41,1.90,2.50,3.50,4.00,5.00/ ! wavelength (um) division point
-                        !g_wvl_center = g_wvl(2:8)/2 + g_wvl(1:7)/2 ; ! center point for wavelength band
-                        ! elm wavelength/ /0.3,0.7,1.0,1.2,1.5,5/
-                        !wvl_5bd = [0.5 0.85 1.1 1.35 3.25];
-                        ! He /0.475 1.055 1.655 2.2 3 3.75 4.5
-                     ! linear interpolation to get the Cg and G_f80 for band_idx.
-                     if(bnd_idx == 1) then
-                        g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
-                        gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+gg_ice_F07_tmp(1);
-                     elseif(bnd_idx == 2) then 
-                        g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+g_ice_Cg_tmp(1);
-                        gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+gg_ice_F07_tmp(1);
-
-                     elseif(bnd_idx == 3) then 
-                        g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+g_ice_Cg_tmp(2);
-                        gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+gg_ice_F07_tmp(2);
-                     elseif(bnd_idx == 4) then 
-                        g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+g_ice_Cg_tmp(2);
-                        gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+gg_ice_F07_tmp(2);
-                     elseif(bnd_idx == 5) then
-                        g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
-                        gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
-                     endif
-
-                        g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8 ! Eq.2.2 in Fu (2007)
-                        g_ice = g_ice_F07 * g_Cg_intp ! Eq.6, He et al. (2017)
-                        asm_prm_snw_lcl(i) = g_ice;
+                       if(bnd_idx == 1) then
+                         g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
+                         gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+gg_ice_F07_tmp(1);
+                       elseif(bnd_idx == 2) then 
+                         g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+g_ice_Cg_tmp(1);
+                         gg_F07_intp = (gg_ice_F07_tmp(2)-gg_ice_F07_tmp(1))/(1.055_r8-0.475_r8)*(0.85_r8-0.475_r8)+gg_ice_F07_tmp(1);
+                       elseif(bnd_idx == 3) then 
+                         g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+g_ice_Cg_tmp(2);
+                         gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.1_r8-1.055_r8)+gg_ice_F07_tmp(2);
+                       elseif(bnd_idx == 4) then 
+                         g_Cg_intp = (g_ice_Cg_tmp(3)-g_ice_Cg_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+g_ice_Cg_tmp(2);
+                         gg_F07_intp = (gg_ice_F07_tmp(3)-gg_ice_F07_tmp(2))/(1.655_r8-1.055_r8)*(1.35_r8-1.055_r8)+gg_ice_F07_tmp(2);
+                       elseif(bnd_idx == 5) then
+                         g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
+                         gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
+                       endif
+                       g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8 ! Eq.2.2 in Fu (2007)
+                       g_ice = g_ice_F07 * g_Cg_intp ! Eq.6, He et al. (2017)
+                       asm_prm_snw_lcl(i) = g_ice;
                      endif
 
                      if(asm_prm_snw_lcl(i) > 0.99_r8) then 
-                      asm_prm_snw_lcl(i) = 0.99_r8
+                       asm_prm_snw_lcl(i) = 0.99_r8
                      endif                        
 
                   enddo
@@ -2602,23 +2591,22 @@ contains
                     ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx)
 #endif
 
-                    ! dust internal mixing
+                    ! Dust internal mixing
                     if (use_dust_snow_internal_mixing) then
                         if (bnd_idx < 4) then
                            C_dust_total = mss_cnc_aer_lcl(i,5) + mss_cnc_aer_lcl(i,6) + mss_cnc_aer_lcl(i,7) + mss_cnc_aer_lcl(i,8)
                            C_dust_total = C_dust_total * 1.0E+06 
                            if(C_dust_total > 0) then
                               if (flg_slr_in == 1) then
-                                 R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES                     
+                                 R_1_omega_tmp = dust_clear_d0(bnd_idx) + dust_clear_d2(bnd_idx)*(C_dust_total**dust_clear_d1(bnd_idx))                   
                               else
-                                 R_1_omega_tmp = dust_cloudy_d0(bnd_idx) + dust_cloudy_d2(bnd_idx)*(C_dust_total**dust_cloudy_d1(bnd_idx)) ! Eq. 1 in He et al.2019,JAMES   
-                              endif
-							  
+                                 R_1_omega_tmp = dust_cloudy_d0(bnd_idx) + dust_cloudy_d2(bnd_idx)*(C_dust_total**dust_cloudy_d1(bnd_idx))   
+                              endif					  
                               ss_alb_snw_lcl(i) = 1.0_r8 - (1.0_r8 - ss_alb_snw_lcl(i)) *R_1_omega_tmp
                            endif
                         endif
                         do j = 5,8,1
-                           ss_alb_aer_lcl(j)     = 0._r8
+                           ss_alb_aer_lcl(j)        = 0._r8
                            asm_prm_aer_lcl(j)       = 0._r8
                            ext_cff_mss_aer_lcl(j)   = 0._r8
                         enddo
