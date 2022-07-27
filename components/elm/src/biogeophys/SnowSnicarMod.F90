@@ -1787,7 +1787,7 @@ contains
      use elm_varpar       , only : nlevsno, numrad
      use clm_time_manager , only : get_nstep
      use shr_const_mod    , only : SHR_CONST_PI
-	 use elm_varctl       , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
+     use elm_varctl       , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
      !
      ! !ARGUMENTS:
      integer           , intent(in)  :: flg_snw_ice                                        ! flag: =1 when called from CLM, =2 when called from CSIM
@@ -1915,9 +1915,9 @@ contains
          g_ice  , & !
          gg_F07_intp  , & !
          g_Cg_intp, & !
-		 R_1_omega_tmp , & ! !!! BC internal mixing
+	 R_1_omega_tmp , & ! !!! BC internal mixing
          C_dust_total, & !! dust concentration
-		 atm_type_index
+	 atm_type_index
 
      integer :: slr_zen
 
@@ -2139,36 +2139,36 @@ contains
               0.1495960_r8,  0.1691565_r8, &
               0.1826034_r8,  0.1894506_r8/)
 
-      ! Define snow grain shape
-	  if (snow_shape == 'sphere') then
-        snw_shp_lcl(:) = 1
-	  elseif (snow_shape == 'spheroid') then
-	    snw_shp_lcl(:) = 2
-	  elseif (snow_shape == 'hexagonal_plate') then
-	    snw_shp_lcl(:) = 3
-      elseif (snow_shape == 'koch_snowflake') then
-	    snw_shp_lcl(:) = 4
-	  endif
+       ! Define snow grain shape
+       if (snow_shape == 'sphere') then
+         snw_shp_lcl(:) = 1
+       elseif (snow_shape == 'spheroid') then
+         snw_shp_lcl(:) = 2
+       elseif (snow_shape == 'hexagonal_plate') then
+	 snw_shp_lcl(:) = 3
+       elseif (snow_shape == 'koch_snowflake') then
+         snw_shp_lcl(:) = 4
+       endif
 	  	  
-      snw_fs_lcl(:)  = 0._r8 
-      snw_ar_lcl(:)  = 0._r8 
+       snw_fs_lcl(:)  = 0._r8 
+       snw_ar_lcl(:)  = 0._r8 
 	  
-	  ! Define atmospheric type
-	  if (snicar_atm_type == 'default') then
-        atm_type_index = 0
-	  elseif (snicar_atm_type == 'mid-latitude_winter') then
-	    atm_type_index = 1
-	  elseif (snicar_atm_type == 'mid-latitude_summer') then
-	    atm_type_index = 2
-      elseif (snicar_atm_type == 'sub-Arctic_winter') then
-	    atm_type_index = 3
-	  elseif (snicar_atm_type == 'sub-Arctic_summer') then
-	    atm_type_index = 4
-	  elseif (snicar_atm_type == 'summit_Greenland') then
-	    atm_type_index = 5
-	  elseif (snicar_atm_type == 'high_mountain') then
-	    atm_type_index = 6
-	  endif
+       ! Define atmospheric type
+       if (snicar_atm_type == 'default') then
+         atm_type_index = 0
+       elseif (snicar_atm_type == 'mid-latitude_winter') then
+         atm_type_index = 1
+       elseif (snicar_atm_type == 'mid-latitude_summer') then
+         atm_type_index = 2
+       elseif (snicar_atm_type == 'sub-Arctic_winter') then
+         atm_type_index = 3
+       elseif (snicar_atm_type == 'sub-Arctic_summer') then
+         atm_type_index = 4
+       elseif (snicar_atm_type == 'summit_Greenland') then
+         atm_type_index = 5
+       elseif (snicar_atm_type == 'high_mountain') then
+         atm_type_index = 6
+       endif
 	  
       ! Loop over all non-urban columns
       ! (when called from CSIM, there is only one column)
