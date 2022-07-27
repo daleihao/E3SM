@@ -837,7 +837,6 @@ contains
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_top_solar_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! TOP solar radiation parameterization
     
-	
     ! glacier_mec variables
     call mpi_bcast (create_glacier_mec_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (maxpatch_glcmec, 1, MPI_INTEGER, 0, mpicom, ier)
