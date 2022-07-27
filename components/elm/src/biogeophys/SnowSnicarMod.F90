@@ -2146,7 +2146,7 @@ contains
 	    snw_shp_lcl(:) = 2
 	  elseif (snow_shape == 'hexagonal_plate') then
 	    snw_shp_lcl(:) = 3
-      elseif (snow_shape == 'Koch_snowflake') then
+      elseif (snow_shape == 'koch_snowflake') then
 	    snw_shp_lcl(:) = 4
 	  endif
 	  	  

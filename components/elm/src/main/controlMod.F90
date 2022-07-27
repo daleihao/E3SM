@@ -934,9 +934,9 @@ contains
     call mpi_bcast (lnd_rof_coupling_nstep, 1, MPI_INTEGER, 0, mpicom, ier)
 
     !SNICAR-AD
-    call mpi_bcast (snow_shape, 1, MPI_CHARACTER, 0, mpicom, ier)
+	call mpi_bcast (snow_shape, 1, MPI_CHARACTER, 0, mpicom, ier)
 	call mpi_bcast (snicar_atm_type, 1, MPI_CHARACTER, 0, mpicom, ier)
-    call mpi_bcast (is_dust_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier)
+	call mpi_bcast (is_dust_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier)
 	
   end subroutine control_spmd
 
@@ -981,9 +981,9 @@ contains
     write(iulog,*) '    irrigate = ', irrigate
     write(iulog,*) '    two-way irrigation = ', tw_irr
     write(iulog,*) '    use_snicar_frc = ', use_snicar_frc
-    write(iulog,*) '    use_snicar_ad = ', use_snicar_ad
+	write(iulog,*) '    use_snicar_ad = ', use_snicar_ad
 	write(iulog,*) '    snow_shape = ', snow_shape
-    write(iulog,*) '    snicar_atm_type = ', snicar_atm_type
+	write(iulog,*) '    snicar_atm_type = ', snicar_atm_type
 	write(iulog,*) '    use_dust_snow_internal_mixing = ', use_dust_snow_internal_mixing
     write(iulog,*) '    use_vancouver = ', use_vancouver
     write(iulog,*) '    use_mexicocity = ', use_mexicocity
