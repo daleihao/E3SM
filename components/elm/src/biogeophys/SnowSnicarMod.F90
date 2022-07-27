@@ -1518,6 +1518,8 @@ contains
         atm_type_index = 5
       elseif (snicar_atm_type == 'high_mountain') then
         atm_type_index = 6
+      else
+	atm_type_index = 0
       endif
 	  
       !
@@ -1539,7 +1541,7 @@ contains
 	  
 	  
       !!! Direct and diffuse flux under different atmospheric conditions
-      if (atm_type_index > 0)then
+      if (atm_type_index > 0) then
       ! Direct-beam incident spectral flux: 
         call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
       ! Diffuse incident spectral flux:
@@ -2067,11 +2069,7 @@ contains
          !mgf--
 #endif
 
-      ! Constants for aspherical ice particles %%%
-      ! g_snw asymmetry factor parameterization coefficients (6 bands) from
-      !  Table 3 & Eqs. 6-7 in He et al. (2017)
-      ! assume same values for 4-5 um band, which leads to very small biases (<3%)
-
+      ! Constants for non-spherical ice particles and dust-snow internal mixing
       real(r8) :: g_b2(7)
       real(r8) :: g_b1(7)
       real(r8) :: g_b0(7)
@@ -2148,6 +2146,8 @@ contains
 	 snw_shp_lcl(:) = 3
        elseif (snow_shape == 'koch_snowflake') then
          snw_shp_lcl(:) = 4
+       else
+	 snw_shp_lcl(:) = 0
        endif
 	  	  
        snw_fs_lcl(:)  = 0._r8 
@@ -2168,6 +2168,8 @@ contains
          atm_type_index = 5
        elseif (snicar_atm_type == 'high_mountain') then
          atm_type_index = 6
+       else
+	 atm_type_index = 0
        endif
 	  
       ! Loop over all non-urban columns
