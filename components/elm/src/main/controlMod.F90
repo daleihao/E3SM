@@ -936,7 +936,7 @@ contains
     !SNICAR-AD
     call mpi_bcast (snow_shape, 1, MPI_CHARACTER, 0, mpicom, ier)
     call mpi_bcast (snicar_atm_type, 1, MPI_CHARACTER, 0, mpicom, ier)
-    call mpi_bcast (is_dust_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier)
+    call mpi_bcast (use_dust_snow_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier)
 	
   end subroutine control_spmd
 
