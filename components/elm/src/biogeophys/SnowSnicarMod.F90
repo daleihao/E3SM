@@ -1904,19 +1904,19 @@ contains
                                                    ! others(0.1<fs<20)= use user-specified value
                                                    ! only activated when sno_shp > 1 (i.e. nonspherical)
      real(r8):: &
-         diam_ice           , & ! temporary
-         fs_sphd            , & ! temporary
-         fs_hex0            , & ! temporary
-         fs_hex             , & ! temporary
-         fs_koch            , & ! temporary
-         AR_tmp             , & ! temporary
-         g_ice_Cg_tmp(7)    , & ! temporary
-         gg_ice_F07_tmp(7)  , & ! temporary
-         g_ice_F07          , & ! temporary
-         g_ice              , & ! temporary
-         gg_F07_intp        , & ! temporary
-         g_Cg_intp          , & ! temporary
-	 R_1_omega_tmp      , & ! BC internal mixing
+         diam_ice           , & ! effective snow grain diameter
+         fs_sphd            , & ! shape factor for spheroid
+         fs_hex0            , & ! shape factor for hexagonal plate
+         fs_hex             , & ! shape factor for hexagonal plate (reference)
+         fs_koch            , & ! shape factor for koch snowflake
+         AR_tmp             , & ! aspect ratio for spheroid
+         g_ice_Cg_tmp(7)    , & ! temporary for calculation of asymetry factor
+         gg_ice_F07_tmp(7)  , & ! temporary for calculation of asymetry factor
+         g_ice_F07          , & ! temporary for calculation of asymetry factor
+         g_ice              , & ! asymmetry factor
+         gg_F07_intp        , & ! temporary for calculation of asymetry factor (interpolated)
+         g_Cg_intp          , & ! temporary for calculation of asymetry factor  (interpolated)
+	 R_1_omega_tmp      , & ! temporary for dust-snow mixing calculation 
          C_dust_total       , & ! dust concentration
 	 atm_type_index         ! index for atmospheric type
 
@@ -2414,8 +2414,7 @@ contains
                             AR_tmp = snw_ar_lcl(i)              
                          endif
                          g_ice_Cg_tmp = g_b0 * ((fs_sphd/fs_hex)**g_b1) * (diam_ice**g_b2)
-                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * (AR_tmp**2)
-			 
+                         gg_ice_F07_tmp = g_F07_c0 + g_F07_c1 * AR_tmp + g_F07_c2 * (AR_tmp**2)			 
                       elseif(snw_shp_lcl(i) == 3) then ! hexagonal plate
                          diam_ice = 2._r8*snw_rds_lcl(i)
                          if(snw_fs_lcl(i) == 0) then
@@ -2431,7 +2430,6 @@ contains
                          endif
                          g_ice_Cg_tmp = g_b0 * ((fs_hex0/fs_hex)**g_b1) * (diam_ice**g_b2)
                          gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2)
-
                       elseif(snw_shp_lcl(i) == 4) then ! Koch snowflake
                          diam_ice = 2._r8 * snw_rds_lcl(i) /0.544_r8
                          if(snw_fs_lcl(i) == 0) then
@@ -2446,11 +2444,10 @@ contains
                             AR_tmp = snw_ar_lcl(i)              
                          endif
                          g_ice_Cg_tmp = g_b0 * ((fs_koch/fs_hex)**g_b1) * (diam_ice**g_b2)
-                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2)
-			 
+                         gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2)	 
                      endif
 
-                     ! Linear interpolation for calculating the variables for band_idx.
+                     ! Linear interpolation for calculating the asymetry factor at band_idx.
                      if(snw_shp_lcl(i) > 1) then
                        if(bnd_idx == 1) then
                          g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
@@ -2590,7 +2587,7 @@ contains
                     ext_cff_mss_aer_lcl(2)   = ext_cff_mss_bc2(bnd_idx)
 #endif
 
-                    ! Dust internal mixing
+                    ! Calculate single-scattering albedo for internal mixing of dust-snow
                     if (use_dust_snow_internal_mixing) then
                         if (bnd_idx < 4) then
                            C_dust_total = mss_cnc_aer_lcl(i,5) + mss_cnc_aer_lcl(i,6) + mss_cnc_aer_lcl(i,7) + mss_cnc_aer_lcl(i,8)
