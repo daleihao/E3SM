@@ -1504,21 +1504,21 @@ contains
      !mgf--
 
       ! Define atmospheric type
-	  if (snicar_atm_type == 'default') then
+      if (snicar_atm_type == 'default') then
         atm_type_index = 0
-	  elseif (snicar_atm_type == 'mid-latitude_winter') then
-	    atm_type_index = 1
-	  elseif (snicar_atm_type == 'mid-latitude_summer') then
-	    atm_type_index = 2
+      elseif (snicar_atm_type == 'mid-latitude_winter') then
+        atm_type_index = 1
+      elseif (snicar_atm_type == 'mid-latitude_summer') then
+        atm_type_index = 2
       elseif (snicar_atm_type == 'sub-Arctic_winter') then
-	    atm_type_index = 3
-	  elseif (snicar_atm_type == 'sub-Arctic_summer') then
-	    atm_type_index = 4
-	  elseif (snicar_atm_type == 'summit_Greenland') then
-	    atm_type_index = 5
-	  elseif (snicar_atm_type == 'high_mountain') then
-	    atm_type_index = 6
-	  endif
+        atm_type_index = 3
+      elseif (snicar_atm_type == 'sub-Arctic_summer') then
+        atm_type_index = 4
+      elseif (snicar_atm_type == 'summit_Greenland') then
+        atm_type_index = 5
+      elseif (snicar_atm_type == 'high_mountain') then
+        atm_type_index = 6
+      endif
 	  
       !
       ! Open optics file:
@@ -1538,12 +1538,12 @@ contains
       call ncd_io( 'ext_cff_mss_ice_dfs', ext_cff_mss_snw_dfs, 'read', ncid, posNOTonfile=.true.)
 	  
 	  
-      !!! direct and diffuse flux under different atmospheric conditions
+      !!! Direct and diffuse flux under different atmospheric conditions
       if (atm_type_index > 0)then
-      ! direct-beam incident spectral flux: 
-       call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
-      ! diffuse incident spectral flux:
-       call ncd_io( 'flx_wgt_dif', flx_wgt_dif,           'read', ncid, posNOTonfile=.true.)
+      ! Direct-beam incident spectral flux: 
+        call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
+      ! Diffuse incident spectral flux:
+        call ncd_io( 'flx_wgt_dif', flx_wgt_dif,           'read', ncid, posNOTonfile=.true.)
       endif
 
       !$acc update device( &
