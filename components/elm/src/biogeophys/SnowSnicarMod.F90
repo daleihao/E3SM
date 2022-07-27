@@ -1497,11 +1497,29 @@ contains
       character(len=256) :: locfn                       ! local filename
       character(len= 32) :: subname = 'SnowOptics_init' ! subroutine name
       integer            :: ier                         ! error status
-
+      integer            :: atm_type_index              ! index for atmospheric type
+	  
      !mgf++
      logical :: readvar      ! determine if variable was read from NetCDF file
      !mgf--
 
+      ! Define atmospheric type
+	  if (snicar_atm_type == 'default') then
+        atm_type_index = 0
+	  elseif (snicar_atm_type == 'mid-latitude_winter') then
+	    atm_type_index = 1
+	  elseif (snicar_atm_type == 'mid-latitude_summer') then
+	    atm_type_index = 2
+      elseif (snicar_atm_type == 'sub-Arctic_winter') then
+	    atm_type_index = 3
+	  elseif (snicar_atm_type == 'sub-Arctic_summer') then
+	    atm_type_index = 4
+	  elseif (snicar_atm_type == 'summit_Greenland') then
+	    atm_type_index = 5
+	  elseif (snicar_atm_type == 'high_mountain') then
+	    atm_type_index = 6
+	  endif
+	  
       !
       ! Open optics file:
       if(masterproc) write(iulog,*) 'Attempting to read snow optical properties .....'
@@ -1521,7 +1539,7 @@ contains
 	  
 	  
       !!! direct and diffuse flux under different atmospheric conditions
-      if (snicar_atm_type > 0)then
+      if (atm_type_index > 0)then
       ! direct-beam incident spectral flux: 
        call ncd_io( 'flx_wgt_dir', flx_wgt_dir,           'read', ncid, posNOTonfile=.true.)
       ! diffuse incident spectral flux:
@@ -1898,7 +1916,8 @@ contains
          gg_F07_intp  , & !
          g_Cg_intp, & !
 		 R_1_omega_tmp , & ! !!! BC internal mixing
-         C_dust_total !! dust concentration
+         C_dust_total, & !! dust concentration
+		 atm_type_index
 
      integer :: slr_zen
 
@@ -2048,7 +2067,7 @@ contains
          !mgf--
 #endif
 
- ! Constants for aspherical ice particles %%%
+      ! Constants for aspherical ice particles %%%
       ! g_snw asymmetry factor parameterization coefficients (6 bands) from
       !  Table 3 & Eqs. 6-7 in He et al. (2017)
       ! assume same values for 4-5 um band, which leads to very small biases (<3%)
@@ -2069,6 +2088,26 @@ contains
       real(r8) :: dust_cloudy_d1(3)
       real(r8) :: dust_cloudy_d2(3)
 
+      !!! factors for considering snow grain shape
+      data g_b0(:) /9.76029E-01_r8,9.67798E-01_r8,1.00111E+00_r8,1.00224E+00_r8,9.64295E-01_r8,9.97475E-01_r8,9.97475E-01_r8/
+      data g_b1(:) /5.21042E-01_r8,4.96181E-01_r8,1.83711E-01_r8,1.37082E-01_r8,5.50598E-02_r8,8.48743E-02_r8,8.48743E-02_r8/
+      data g_b2(:) /-2.66792E-04_r8,1.14088E-03_r8,2.37011E-04_r8,-2.35905E-04_r8,8.40449E-04_r8,-4.71484E-04_r8,-4.71484E-04_r8/
+
+      data g_F07_c2(:) /1.349959E-1_r8,1.115697E-1_r8,9.853958E-2_r8,5.557793E-2_r8,-1.233493E-1_r8,0.0_r8,0.0_r8/
+      data g_F07_c1(:) /-3.987320E-1_r8,-3.723287E-1_r8,-3.924784E-1_r8,-3.259404E-1_r8,4.429054E-2_r8,-1.726586E-1_r8,-1.726586E-1_r8/
+      data g_F07_c0(:) /7.938904E-1_r8,8.030084E-1_r8,8.513932E-1_r8,8.692241E-1_r8,7.085850E-1_r8,6.412701E-1_r8,6.412701E-1_r8/
+      data g_F07_p2(:) /3.165543E-3_r8,2.014810E-3_r8,1.780838E-3_r8,6.987734E-4_r8,-1.882932E-2_r8,-2.277872E-2_r8,-2.277872E-2_r8/
+      data g_F07_p1(:) /1.140557E-1_r8,1.143152E-1_r8,1.143814E-1_r8,1.071238E-1_r8,1.353873E-1_r8,1.914431E-1_r8,1.914431E-1_r8/
+      data g_F07_p0(:) /5.292852E-1_r8,5.425909E-1_r8,5.601598E-1_r8,6.023407E-1_r8,6.473899E-1_r8,4.634944E-1_r8,4.634944E-1_r8/
+
+      !!! factors for considring dust-snow internal mixing
+      data dust_clear_d0(:) /1.0413E+00_r8,1.0168E+00_r8,1.0189E+00_r8/
+      data dust_clear_d1(:) /1.0016E+00_r8,1.0070E+00_r8,1.0840E+00_r8/
+      data dust_clear_d2(:) /2.4208E-01_r8,1.5300E-03_r8,1.1230E-04_r8/
+
+      data dust_cloudy_d0(:) /1.0388E+00_r8,1.0167E+00_r8,1.0189E+00_r8/
+      data dust_cloudy_d1(:) /1.0015E+00_r8,1.0061E+00_r8,1.0823E+00_r8/
+      data dust_cloudy_d2(:) /2.5973E-01_r8,1.6200E-03_r8,1.1721E-04_r8/
 
      ! Enforce expected array sizes
 
@@ -2100,33 +2139,37 @@ contains
               0.1495960_r8,  0.1691565_r8, &
               0.1826034_r8,  0.1894506_r8/)
 
-      ! define snow shape
-      snw_shp_lcl(:) = snow_shape_defined
+      ! Define snow grain shape
+	  if (snow_shape == 'sphere') then
+        snw_shp_lcl(:) = 1
+	  elseif (snow_shape == 'spheroid') then
+	    snw_shp_lcl(:) = 2
+	  elseif (snow_shape == 'hexagonal_plate') then
+	    snw_shp_lcl(:) = 3
+      elseif (snow_shape == 'Koch_snowflake') then
+	    snw_shp_lcl(:) = 4
+	  endif
+	  	  
       snw_fs_lcl(:)  = 0._r8 
       snw_ar_lcl(:)  = 0._r8 
-
-      data g_b0(:) /9.76029E-01_r8,9.67798E-01_r8,1.00111E+00_r8,1.00224E+00_r8,9.64295E-01_r8,9.97475E-01_r8,9.97475E-01_r8/
-      data g_b1(:) /5.21042E-01_r8,4.96181E-01_r8,1.83711E-01_r8,1.37082E-01_r8,5.50598E-02_r8,8.48743E-02_r8,8.48743E-02_r8/
-      data g_b2(:) /-2.66792E-04_r8,1.14088E-03_r8,2.37011E-04_r8,-2.35905E-04_r8,8.40449E-04_r8,-4.71484E-04_r8,-4.71484E-04_r8/
-
-      data g_F07_c2(:) /1.349959E-1_r8,1.115697E-1_r8,9.853958E-2_r8,5.557793E-2_r8,-1.233493E-1_r8,0.0_r8,0.0_r8/
-      data g_F07_c1(:) /-3.987320E-1_r8,-3.723287E-1_r8,-3.924784E-1_r8,-3.259404E-1_r8,4.429054E-2_r8,-1.726586E-1_r8,-1.726586E-1_r8/
-      data g_F07_c0(:) /7.938904E-1_r8,8.030084E-1_r8,8.513932E-1_r8,8.692241E-1_r8,7.085850E-1_r8,6.412701E-1_r8,6.412701E-1_r8/
-      data g_F07_p2(:) /3.165543E-3_r8,2.014810E-3_r8,1.780838E-3_r8,6.987734E-4_r8,-1.882932E-2_r8,-2.277872E-2_r8,-2.277872E-2_r8/
-      data g_F07_p1(:) /1.140557E-1_r8,1.143152E-1_r8,1.143814E-1_r8,1.071238E-1_r8,1.353873E-1_r8,1.914431E-1_r8,1.914431E-1_r8/
-      data g_F07_p0(:) /5.292852E-1_r8,5.425909E-1_r8,5.601598E-1_r8,6.023407E-1_r8,6.473899E-1_r8,4.634944E-1_r8,4.634944E-1_r8/
-
-      !!! dust internal mixing
-      data dust_clear_d0(:) /1.0413E+00_r8,1.0168E+00_r8,1.0189E+00_r8/
-      data dust_clear_d1(:) /1.0016E+00_r8,1.0070E+00_r8,1.0840E+00_r8/
-      data dust_clear_d2(:) /2.4208E-01_r8,1.5300E-03_r8,1.1230E-04_r8/
-
-      data dust_cloudy_d0(:) /1.0388E+00_r8,1.0167E+00_r8,1.0189E+00_r8/
-      data dust_cloudy_d1(:) /1.0015E+00_r8,1.0061E+00_r8,1.0823E+00_r8/
-      data dust_cloudy_d2(:) /2.5973E-01_r8,1.6200E-03_r8,1.1721E-04_r8/
-
-
-
+	  
+	  ! Define atmospheric type
+	  if (snicar_atm_type == 'default') then
+        atm_type_index = 0
+	  elseif (snicar_atm_type == 'mid-latitude_winter') then
+	    atm_type_index = 1
+	  elseif (snicar_atm_type == 'mid-latitude_summer') then
+	    atm_type_index = 2
+      elseif (snicar_atm_type == 'sub-Arctic_winter') then
+	    atm_type_index = 3
+	  elseif (snicar_atm_type == 'sub-Arctic_summer') then
+	    atm_type_index = 4
+	  elseif (snicar_atm_type == 'summit_Greenland') then
+	    atm_type_index = 5
+	  elseif (snicar_atm_type == 'high_mountain') then
+	    atm_type_index = 6
+	  endif
+	  
       ! Loop over all non-urban columns
       ! (when called from CSIM, there is only one column)
        do fc = 1,num_nourbanc
@@ -2263,7 +2306,7 @@ contains
              elseif(numrad_snw==5) then
                 ! Direct:
                 if (flg_slr_in == 1) then
-                  if (snicar_atm_type == 'default') then
+                  if (atm_type_index == 0) then
                      flx_wgt(1) = 1._r8
                      flx_wgt(2) = 0.49352158521175_r8
                      flx_wgt(3) = 0.18099494230665_r8
@@ -2275,10 +2318,10 @@ contains
                         slr_zen = 89
                      endif
                      flx_wgt(1) = 1._r8
-                     flx_wgt(2) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 2)
-                     flx_wgt(3) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 3)
-                     flx_wgt(4) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 4)
-                     flx_wgt(5) = flx_wgt_dir(snicar_atm_type, slr_zen+1, 5)  
+                     flx_wgt(2) = flx_wgt_dir(atm_type_index, slr_zen+1, 2)
+                     flx_wgt(3) = flx_wgt_dir(atm_type_index, slr_zen+1, 3)
+                     flx_wgt(4) = flx_wgt_dir(atm_type_index, slr_zen+1, 4)
+                     flx_wgt(5) = flx_wgt_dir(atm_type_index, slr_zen+1, 5)  
                   endif
 				  
                    ! Diffuse:
@@ -2291,10 +2334,10 @@ contains
                      flx_wgt(5) = 0.10343699264369_r8
                   else
                      flx_wgt(1) = 1._r8
-                     flx_wgt(2) = flx_wgt_dif(snicar_atm_type, 2)
-                     flx_wgt(3) = flx_wgt_dif(snicar_atm_type, 3)
-                     flx_wgt(4) = flx_wgt_dif(snicar_atm_type, 4)
-                     flx_wgt(5) = flx_wgt_dif(snicar_atm_type, 5)
+                     flx_wgt(2) = flx_wgt_dif(atm_type_index, 2)
+                     flx_wgt(3) = flx_wgt_dif(atm_type_index, 3)
+                     flx_wgt(4) = flx_wgt_dif(atm_type_index, 4)
+                     flx_wgt(5) = flx_wgt_dif(atm_type_index, 5)
                   endif
                 endif
              endif ! end if numrad_snw
@@ -2388,7 +2431,7 @@ contains
                          g_ice_Cg_tmp = g_b0 * ((fs_hex0/fs_hex)**g_b1) * (diam_ice**g_b2) ! Eq.7, He et al. (2017)
                          gg_ice_F07_tmp = g_F07_p0 + g_F07_p1 * log(AR_tmp) + g_F07_p2 * ((log(AR_tmp))**2) ! Eqn. 3.3 in Fu (2007)
 
-                      elseif(snw_shp_lcl(i) == 4) then ! koch snowflake
+                      elseif(snw_shp_lcl(i) == 4) then ! Koch snowflake
                          diam_ice = 2._r8 * snw_rds_lcl(i) /0.544_r8
                          if(snw_fs_lcl(i) == 0) then
                             fs_koch = 0.712_r8
