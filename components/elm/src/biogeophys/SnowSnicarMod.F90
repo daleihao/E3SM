@@ -2326,7 +2326,7 @@ contains
 				  
                    ! Diffuse:
                 elseif (flg_slr_in == 2) then
-                   if  (snicar_atm_type == 'default') then
+                   if  (atm_type_index == 0) then
                      flx_wgt(1) = 1._r8
                      flx_wgt(2) = 0.58581507618433_r8
                      flx_wgt(3) = 0.20156903770812_r8
