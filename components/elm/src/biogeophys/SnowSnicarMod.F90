@@ -1904,18 +1904,18 @@ contains
                                                    ! others(0.1<fs<20)= use user-specified value
                                                    ! only activated when sno_shp > 1 (i.e. nonspherical)
      real(r8):: &
-         diam_ice           , & !
-         fs_sphd            , & !
-         fs_hex0            , & ! 
-         fs_hex             , & ! 
-         fs_koch            , & ! 
-         AR_tmp             , & ! 
-         g_ice_Cg_tmp(7)    , & !
-         gg_ice_F07_tmp(7)  , & !
-         g_ice_F07          , & !
-         g_ice              , & !
-         gg_F07_intp        , & !
-         g_Cg_intp          , & !
+         diam_ice           , & ! temporary
+         fs_sphd            , & ! temporary
+         fs_hex0            , & ! temporary
+         fs_hex             , & ! temporary
+         fs_koch            , & ! temporary
+         AR_tmp             , & ! temporary
+         g_ice_Cg_tmp(7)    , & ! temporary
+         gg_ice_F07_tmp(7)  , & ! temporary
+         g_ice_F07          , & ! temporary
+         g_ice              , & ! temporary
+         gg_F07_intp        , & ! temporary
+         g_Cg_intp          , & ! temporary
 	 R_1_omega_tmp      , & ! BC internal mixing
          C_dust_total       , & ! dust concentration
 	 atm_type_index         ! index for atmospheric type
@@ -2450,7 +2450,7 @@ contains
 			 
                      endif
 
-                     ! Linear interpolation for calculating the varialbes for band_idx.
+                     ! Linear interpolation for calculating the variables for band_idx.
                      if(snw_shp_lcl(i) > 1) then
                        if(bnd_idx == 1) then
                          g_Cg_intp = (g_ice_Cg_tmp(2)-g_ice_Cg_tmp(1))/(1.055_r8-0.475_r8)*(0.5_r8-0.475_r8)+g_ice_Cg_tmp(1);
@@ -2468,9 +2468,9 @@ contains
                          g_Cg_intp = (g_ice_Cg_tmp(6)-g_ice_Cg_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+g_ice_Cg_tmp(5);
                          gg_F07_intp = (gg_ice_F07_tmp(6)-gg_ice_F07_tmp(5))/(3.75_r8-3.0_r8)*(3.25_r8-3.0_r8)+gg_ice_F07_tmp(5);
                        endif
-                       g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8 ! Eq.2.2 in Fu (2007)
+                       g_ice_F07 = gg_F07_intp + (1._r8 - gg_F07_intp) / ss_alb_snw_lcl(i) / 2._r8
                        g_ice = g_ice_F07 * g_Cg_intp
-                       asm_prm_snw_lcl(i) = g_ice;
+                       asm_prm_snw_lcl(i) = g_ice
                      endif
 
                      if(asm_prm_snw_lcl(i) > 0.99_r8) then 
