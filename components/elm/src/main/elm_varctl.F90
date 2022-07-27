@@ -512,18 +512,12 @@ module elm_varctl
    
    
    !----------------------------------------------------------
-   ! SNICAR
+   ! SNICAR-AD
    !----------------------------------------------------------
-   integer, public :: snow_shape = 1
-   integer, public :: snicar_atm_type = 0 
+   character(len=256), public :: snow_shape = 'Sphere'
+   character(len=256), public :: snicar_atm_type = 'mid-latitude_winter'
    logical, public :: use_dust_snow_internal_mixing = .false.
-   !Atmospheric profile used to obtain surface-incident spectral flux distribution and subsequent broadband albedo: ! 0 = default
-                              ! 1 = mid-latitude winter
-                              ! 2 = mid-latitude summer
-                              ! 3 = sub-Arctic winter
-                              ! 4 = sub-Arctic summer
-                              ! 5 = Summit,Greenland (sub-Arctic summer, surface pressure of 796hPa)
-                              ! 6 = High Mountain (summer, surface pressure of 556 hPa)
+
 
 contains
 
