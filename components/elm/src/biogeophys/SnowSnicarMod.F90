@@ -1895,11 +1895,11 @@ contains
 
      integer :: snw_shp_lcl(-nlevsno+1:0)          ! Snow grain shape option:
                                                    ! 1=sphere; 2=spheroid; 3=hexagonal plate; 4=koch snowflake
-     integer :: snw_fs_lcl(-nlevsno+1:0)           ! Shape factor: ratio of nonspherical grain effective radii to that of equal-volume sphere
+     real(r8):: snw_fs_lcl(-nlevsno+1:0)           ! Shape factor: ratio of nonspherical grain effective radii to that of equal-volume sphere
                                                    ! 0=use recommended default value
                                                    ! others(0<fs<1)= use user-specified value
                                                    ! only activated when sno_shp > 1 (i.e. nonspherical)
-     integer :: snw_ar_lcl(-nlevsno+1:0)           ! % Aspect ratio: ratio of grain width to length
+     real(r8):: snw_ar_lcl(-nlevsno+1:0)           ! % Aspect ratio: ratio of grain width to length
                                                    ! 0=use recommended default value
                                                    ! others(0.1<fs<20)= use user-specified value
                                                    ! only activated when sno_shp > 1 (i.e. nonspherical)
