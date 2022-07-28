@@ -1917,9 +1917,9 @@ contains
          gg_F07_intp        , & ! temporary for calculation of asymetry factor (interpolated)
          g_Cg_intp          , & ! temporary for calculation of asymetry factor  (interpolated)
 	 R_1_omega_tmp      , & ! temporary for dust-snow mixing calculation 
-         C_dust_total       , & ! dust concentration
-	 atm_type_index         ! index for atmospheric type
-
+         C_dust_total           ! dust concentration
+      
+     integer :: atm_type_index  ! index for atmospheric type
      integer :: slr_zen         ! integer value of solar zenith angle
 
 
