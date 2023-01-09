@@ -2217,7 +2217,7 @@ end subroutine ncd_io_{DIMS}d_{TYPE}_glob
           start(i)=latidx
           count(i)=1
        !else if ( trim(dimname)=='ni'.or. trim(dimname)=='lon'.or. trim(dimname)=='lsmlon' .or. trim(dimname)=='gridcell' .or. trim(dimname)=='topounit') then
-       else if ( trim(dimname)=='ni'.or. trim(dimname)=='lon'.or. trim(dimname)=='lsmlon' .or. trim(dimname)=='gridcell') then   
+        else if ( trim(dimname)=='ni'.or. trim(dimname)=='lon'.or. trim(dimname)=='lsmlon' .or. trim(dimname)=='gridcell') then   
           start(i)=lonidx
           count(i)=1
        else if ( trim(dimname)=='column') then
@@ -2333,26 +2333,28 @@ end subroutine ncd_io_{DIMS}d_{TYPE}_glob
           allocate (topo1dlat(dimlen))
           allocate (topounits(dimlen))
 
-          status = pio_inq_varid(ncid, 'topo1d_lon', varid)
-          status = pio_get_var(ncid, varid, topo1dlon)
+          !status = pio_inq_varid(ncid, 'topo1d_lon', varid)
+          !status = pio_get_var(ncid, varid, topo1dlon)
 
-          status = pio_inq_varid(ncid, 'topo1d_lat', varid)
-          status = pio_get_var(ncid, varid, topo1dlat)
+          !status = pio_inq_varid(ncid, 'topo1d_lat', varid)
+          !status = pio_get_var(ncid, varid, topo1dlat)
 
           topounits(:) = huge(1)
           data_offset  = huge(1)
           ii     = 1
           ndata = 0
-          do cc = 1, dimlen
-             if (topo1dlon(cc) == closelon.and.topo1dlat(cc) == closelat) then
-                topounits(ii)=cc
-                ndata  =ii
-                ii=ii+1
-             end if
-          end do
+          !do cc = 1, dimlen
+          !   if (topo1dlon(cc) == closelon.and.topo1dlat(cc) == closelat) then
+          !      topounits(ii)=cc
+          !      ndata  =ii
+          !      ii=ii+1
+          !   end if
+          !end do
           if (ndata == 0) then
-             write(iulog,*)'couldnt find any topounits for this latitude',closelat,' and longitude ',closelon
-             call shr_sys_abort('ERROR:: no topounits for this position'//errMsg(__FILE__, __LINE__))
+             !write(iulog,*)'couldnt find any topounits for this latitude',closelat,' and longitude ',closelon,'dimlen:', dimlen 
+             !call shr_sys_abort('ERROR:: no topounits for this position'//errMsg(__FILE__, __LINE__))
+			 data_offset = 1
+			 ndata = dimlen
           else
              data_offset=topounits(1)
           end if
