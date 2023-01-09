@@ -321,7 +321,7 @@ contains
          thlp2_het_grc(bounds%begg:bounds%endg)      , &
          rtp2_het_grc(bounds%begg:bounds%endg)      , &
          rtpthlp_het_grc(bounds%begg:bounds%endg)      , &
-         p2c_scale_type=unity, c2l_scale_type= urbanf, l2g_scale_type=unity)
+         p2c_scale_type=unity, c2l_scale_type= unity, l2g_scale_type=unity)
     !!! end
 
    

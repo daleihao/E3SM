@@ -562,7 +562,7 @@ CONTAINS
        lmisr_sim = .true.
        lmodis_sim = .true.
        cosp_ncolumns = 10
-       cosp_nradsteps = 3
+       cosp_nradsteps = 1 !3
     end if
     
     !! reset COSP namelist variables based on input from cam namelist variables
