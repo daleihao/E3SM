@@ -56,6 +56,7 @@ module controlMod
   use elm_varctl              , only: use_top_solar_rad
   use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
   use EcosystemBalanceCheckMod, only: bgc_balance_check_tolerance => balance_check_tolerance
+  use elm_varctl              , only: pc_adj, capr_adj, Tsnow_adj, accum_factor_adj, n_melt_adj, tfrz_adj, fover_adj, fdrai_adj
 
   !
   ! !PUBLIC TYPES:
@@ -339,6 +340,9 @@ contains
 
     namelist /elm_inparm/ &
          use_fan, fan_mode, fan_to_bgc_veg, nh4_ads_coef
+
+    namelist /elm_inparm/ &
+        pc_adj, capr_adj, Tsnow_adj, accum_factor_adj, n_melt_adj, tfrz_adj, fover_adj, fdrai_adj
 
     ! ----------------------------------------------------------------------
     ! Default values
@@ -995,11 +999,21 @@ contains
     call mpi_bcast (snow_shape, len(snow_shape), MPI_CHARACTER, 0, mpicom, ier)
     call mpi_bcast (snicar_atm_type, len(snicar_atm_type), MPI_CHARACTER, 0, mpicom, ier)
     call mpi_bcast (use_dust_snow_internal_mixing, 1, MPI_LOGICAL, 0, mpicom, ier)
-	
+
     call mpi_bcast (mpi_sync_nstep_freq, 1, MPI_INTEGER, 0, mpicom, ier)
     
     ! use modified infiltration scheme in surface water storage
     call mpi_bcast (use_modified_infil, 1, MPI_LOGICAL, 0, mpicom, ier)
+
+    !ROS study
+    call mpi_bcast (pc_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (capr_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (Tsnow_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (accum_factor_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (n_melt_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (tfrz_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (fover_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (fdrai_adj, 1, MPI_REAL8, 0, mpicom, ier)
 
   end subroutine control_spmd
 

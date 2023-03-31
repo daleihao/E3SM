@@ -640,6 +640,16 @@ this mask will have smb calculated over the entire global land surface
 <snicar_atm_type>default</snicar_atm_type>
 <use_dust_snow_internal_mixing>.false.</use_dust_snow_internal_mixing>
 
+<!-- Parameter setting for ROS study -->
+<pc_adj>0.4</pc_adj>
+<capr_adj>0.34</capr_adj>
+<Tsnow_adj>1.0</Tsnow_adj>
+<accum_factor_adj>0.1</accum_factor_adj>
+<n_melt_adj>200.0</n_melt_adj>
+<tfrz_adj>273.15</tfrz_adj>
+<fover_adj>0.5</fover_adj>
+<fdrai_adj>2.5</fdrai_adj>
+
 <!-- Nitrogen deposition streams namelist defaults -->
 <stream_year_first_ndep use_cn=".true."   sim_year="2000" >2000</stream_year_first_ndep>
 <stream_year_last_ndep  use_cn=".true."   sim_year="2000" >2000</stream_year_last_ndep>

@@ -117,6 +117,7 @@ contains
      use column_varcon      , only : icol_roof, icol_sunwall, icol_shadewall
      use landunit_varcon    , only : istcrop, istice, istwet, istsoil, istice_mec, istdlak
      use elm_varctl         , only : subgridflag
+     use elm_varctl         , only : accum_factor_adj
      use elm_varpar         , only : nlevsoi,nlevsno
      use elm_varsur         , only : wt_lunit, f_grd, f_surf
      use atm2lndType        , only : atm2lnd_type
@@ -220,6 +221,7 @@ contains
           frac_sno_eff         => col_ws%frac_sno_eff         , & ! Output: [real(r8) (:)   ]  eff. fraction of ground covered by snow (0 to 1)
           frac_sno             => col_ws%frac_sno             , & ! Output: [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
           frac_h2osfc          => col_ws%frac_h2osfc          , & ! Output: [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1)
+          frac_h2osfc_eff      => col_ws%frac_h2osfc_eff      , & ! Output: [real(r8) (:)   ]  eff. fraction of ground covered by surface water (0 to 1)
           frac_iceold          => col_ws%frac_iceold          , & ! Output: [real(r8) (:,:) ]  fraction of ice relative to the tot water
           h2osoi_ice           => col_ws%h2osoi_ice           , & ! Output: [real(r8) (:,:) ]  ice lens (kg/m2)                      
           h2osoi_liq           => col_ws%h2osoi_liq           , & ! Output: [real(r8) (:,:) ]  liquid water (kg/m2)                  
@@ -543,7 +545,7 @@ contains
              snowmelt(c) = qflx_snow_melt(c) * dtime
 
              ! set shape factor for accumulation of snow
-             accum_factor=0.1
+             accum_factor=accum_factor_adj
 
              if (h2osno(c) > 0.0) then
 
@@ -810,7 +812,8 @@ contains
           frac_sno     => col_ws%frac_sno     , & ! Output: [real(r8) (:)   ] fraction of ground covered by snow (0 to 1)       
           frac_sno_eff => col_ws%frac_sno_eff , & ! Output: [real(r8) (:)   ] eff. fraction of ground covered by snow (0 to 1)  
           frac_h2osfc  => col_ws%frac_h2osfc  , & ! Output: [real(r8) (:)   ] col fractional area with surface water greater than zero 
-          frac_h2osfc_act => col_ws%frac_h2osfc_act & ! Output: [real(r8) (:)   ] col fractional area with surface water greater than zero
+          frac_h2osfc_act => col_ws%frac_h2osfc_act, & ! Output: [real(r8) (:)   ] col fractional area with surface water greater than zero
+          frac_h2osfc_eff  => col_ws%frac_h2osfc_eff    & ! Output: [real(r8) (:)   ] eff. col fractional area with surface water greater than zero
           )
 
        ! arbitrary lower limit on h2osfc for safer numerics...
@@ -852,6 +855,8 @@ contains
              
              frac_h2osfc_act(c) = frac_h2osfc(c)
 
+             frac_h2osfc_eff(c) = frac_h2osfc(c)
+
              if (.not. present(no_update)) then
 
                 ! adjust fh2o, fsno when sum is greater than zero
@@ -873,7 +878,8 @@ contains
 
              frac_h2osfc(c) = 0._r8
              frac_h2osfc_act(c) = 0._r8
-             
+             frac_h2osfc_eff(c) = 0._r8
+
           endif
 
        end do

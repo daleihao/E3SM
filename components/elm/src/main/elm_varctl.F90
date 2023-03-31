@@ -397,6 +397,17 @@ module elm_varctl
  
 
   !----------------------------------------------------------
+  ! ROS study
+  !----------------------------------------------------------
+  real(r8), public :: pc_adj = 0.4_r8
+  real(r8), public :: capr_adj = 0.34_r8
+  real(r8), public :: Tsnow_adj = 1.0_r8
+  real(r8), public :: accum_factor_adj = 0.1_r8
+  real(r8), public :: n_melt_adj = 200._r8
+  real(r8), public :: tfrz_adj = 273.15_r8
+  real(r8), public :: fover_adj = 0.5_r8
+  real(r8), public :: fdrai_adj = 2.5_r8
+  !----------------------------------------------------------
   ! VSFM switches
   !----------------------------------------------------------
   logical          , public :: use_vsfm                    = .false.

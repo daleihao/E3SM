@@ -10,6 +10,7 @@ module SoilHydrologyMod
   use elm_varctl        , only : iulog, use_vichydro
   use elm_varctl        , only : use_lnd_rof_two_way, lnd_rof_coupling_nstep
   use elm_varctl        , only : use_modified_infil
+  use elm_varctl        , only : fover_adj
   use elm_varcon        , only : e_ice, denh2o, denice, rpi
   use EnergyFluxType    , only : energyflux_type
   use SoilHydrologyType , only : soilhydrology_type
@@ -149,10 +150,12 @@ contains
       do fc = 1, num_hydrologyc
          c = filter_hydrologyc(fc)
          g = col_pp%gridcell(c)
-         fff(c) = fover(g)
+         !fff(c) = fover(g)
+         fff(c) = fover_adj
          if (zengdecker_2009_with_var_soil_thick) then
             nlevbed = nlev2bed(c)
-            fff(c) = 0.5_r8 * col_pp%zi(c,nlevsoi) / min(col_pp%zi(c,nlevbed), col_pp%zi(c,nlevsoi))
+            ! fff(c) = 0.5_r8 * col_pp%zi(c,nlevsoi) / min(col_pp%zi(c,nlevbed), col_pp%zi(c,nlevsoi))
+            fff(c) = fover_adj * col_pp%zi(c,nlevsoi) / min(col_pp%zi(c,nlevbed), col_pp%zi(c,nlevsoi))
          end if
          if (use_vichydro) then
             top_moist(c) = 0._r8
@@ -272,6 +275,7 @@ contains
      use atm2lndType      , only : atm2lnd_type ! land river two way coupling
      use lnd2atmType      , only : lnd2atm_type
      use subgridAveMod    , only : c2g
+     use elm_varctl       , only : pc_adj
      !
      ! !ARGUMENTS:
      type(bounds_type)        , intent(in)    :: bounds
@@ -334,6 +338,7 @@ contains
 
           frac_h2osfc          =>    col_ws%frac_h2osfc          , & ! Input:  [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1)
           frac_h2osfc_act      =>    col_ws%frac_h2osfc_act      , & ! Input:  [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1) without adjustment from snow fraction
+          frac_h2osfc_eff      =>    col_ws%frac_h2osfc_eff      , & ! Input:  [real(r8) (:)   ]  eff. fraction of ground covered by surface water (0 to 1)
           frac_sno             =>    col_ws%frac_sno_eff         , & ! Input:  [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
           h2osoi_ice           =>    col_ws%h2osoi_ice           , & ! Input:  [real(r8) (:,:) ]  ice lens (kg/m2)
           h2osoi_liq           =>    col_ws%h2osoi_liq           , & ! Input:  [real(r8) (:,:) ]  liquid water (kg/m2)
@@ -499,17 +504,17 @@ contains
                   if (frac_h2osfc_act(c) <= pc .and. frac_h2osfc(c) <= pc) then 
                      frac_infclust=0.0_r8
                   else
-                      if (frac_h2osfc(c) <= pc) then
+                     if (frac_h2osfc(c) <= pc) then
                         frac_infclust=(frac_h2osfc_act(c)-pc)**mu
-                      else
+                     else
                         frac_infclust=(frac_h2osfc(c)-pc)**mu
-                      endif
+                     endif
                   endif
                 else
-                  if (frac_h2osfc(c) <= pc) then
-                    frac_infclust=0.0_r8
+                  if (frac_h2osfc_eff(c) <= pc_adj) then
+                     frac_infclust=0.0_r8
                   else
-                    frac_infclust=(frac_h2osfc(c)-pc)**mu
+                     frac_infclust=(frac_h2osfc_eff(c)-pc_adj)**mu
                   endif
                 endif
              endif

@@ -3404,7 +3404,7 @@ contains
     rmin = minval(Grid)
     rmax = maxval(Grid)
     if (rmax.ne.rmin) then
-       shr_map_checkRad = ((rmax - rmin) < 1.01_SHR_KIND_R8*c2*pi)
+       shr_map_checkRad = ((rmax - rmin) < 1.01_SHR_KIND_R8) ! for small region
     else
        shr_map_checkRad = .true.
     end if
