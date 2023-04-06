@@ -37,7 +37,7 @@ contains
     !-----------------------------------------------------------------------
 
     ! ramp near freezing
-    frac_rain = (temperature - SHR_CONST_TKFRZ) * 0.5_r8
+    frac_rain = (temperature - (SHR_CONST_TKFRZ - 0.5_r8)) ! -0.5 -> 0.5
 
     ! bound in [0,1]
     frac_rain = min(1.0_r8,max(0.0_r8,frac_rain))

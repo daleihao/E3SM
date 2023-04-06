@@ -146,7 +146,7 @@ contains
 
       do fc = 1, num_hydrologyc
          c = filter_hydrologyc(fc)
-         fff(c) = 0.5_r8
+         fff(c) = 0.1_r8 ! default as 0.5, revised as 0.1
          if (zengdecker_2009_with_var_soil_thick) then
             nlevbed = nlev2bed(c)
             fff(c) = 0.5_r8 * col_pp%zi(c,nlevsoi) / min(col_pp%zi(c,nlevbed), col_pp%zi(c,nlevsoi))
