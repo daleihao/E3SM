@@ -40,7 +40,7 @@ module elm_varcon
   ! Initialize physical constants
   !------------------------------------------------------------------
 
-  real(r8), parameter :: n_melt=0.7                         ! fsca shape parameter
+  real(r8), parameter :: n_melt= 8!0.7                         ! fsca shape parameter
   real(r8), parameter :: e_ice=6.0                          ! soil ice impedance factor
   real(r8), parameter :: pc = 0.4                           ! threshold probability
   real(r8), parameter :: mu = 0.13889                       ! connectivity exponent 
