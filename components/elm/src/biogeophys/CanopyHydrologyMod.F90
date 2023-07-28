@@ -543,7 +543,8 @@ contains
              snowmelt(c) = qflx_snow_melt(c) * dtime
 
              ! set shape factor for accumulation of snow
-             accum_factor=0.1
+             !accum_factor=0.1
+			 accum_factor=0.3
 
              if (h2osno(c) > 0.0) then
 
