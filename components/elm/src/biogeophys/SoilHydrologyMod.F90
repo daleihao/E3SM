@@ -269,6 +269,7 @@ contains
      use atm2lndType      , only : atm2lnd_type ! land river two way coupling
      use lnd2atmType      , only : lnd2atm_type
      use subgridAveMod    , only : c2g
+     use elm_varctl       , only : pc_adj
      !
      ! !ARGUMENTS:
      type(bounds_type)        , intent(in)    :: bounds
@@ -473,10 +474,10 @@ contains
              !5. surface runoff from h2osfc
              if (h2osfcflag==1) then
                 ! calculate runoff from h2osfc  -------------------------------------
-                if (frac_h2osfc(c) <= pc) then
+                if (frac_h2osfc(c) <= pc_adj) then
                    frac_infclust=0.0_r8
                 else
-                   frac_infclust=(frac_h2osfc_eff(c)-pc)**mu
+                   frac_infclust=(frac_h2osfc_eff(c)-pc_adj)**mu
                 endif
              endif
 

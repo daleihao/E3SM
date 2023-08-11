@@ -2013,5 +2013,13 @@ explain the SZA dependence of direct irradiance.
 Toggle to turn on the internal mixing of dust-snow. 
 </entry>
 
+<!-- ========================================================================================  -->
+<!-- Namelist options for ROS study                                                            -->
+<!-- ========================================================================================  -->
+<entry id="pc_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Threshold for quantifing the fraction of the inundated portion of the grid cell that is interconnected.
+</entry>
+
 
 </namelist_definition>
