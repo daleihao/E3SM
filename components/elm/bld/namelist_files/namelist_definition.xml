@@ -2021,5 +2021,9 @@ Toggle to turn on the internal mixing of dust-snow.
 Threshold for quantifing the fraction of the inundated portion of the grid cell that is interconnected.
 </entry>
 
+<entry id="capr_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Tuning factor to turn first layer T into surface T.
+</entry>
 
 </namelist_definition>

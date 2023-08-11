@@ -592,6 +592,7 @@ this mask will have smb calculated over the entire global land surface
 
 <!-- Parameter setting for ROS study -->
 <pc_adj>0.4</pc_adj>
+<capr_adj>0.34</capr_adj>
 
 <!-- Nitrogen deposition streams namelist defaults -->
 <stream_year_first_ndep use_cn=".true."   sim_year="2000" >2000</stream_year_first_ndep>

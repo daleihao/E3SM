@@ -1911,6 +1911,7 @@ contains
     use elm_varcon     , only : capr, cnfac
     use column_varcon  , only : icol_roof, icol_sunwall, icol_shadewall
     use elm_varpar     , only : nlevsno, nlevgrnd, nlevurb
+    use elm_varctl     , only : capr_adj
     !
     ! !ARGUMENTS:
     implicit none
@@ -1971,7 +1972,7 @@ contains
                  .and. col_pp%itype(c) /= icol_roof) then
                if (j >= col_pp%snl(c)+1) then
                   if (j == col_pp%snl(c)+1) then
-                     fact(c,j) = dtime/cv(c,j) * dz(c,j) / (0.5_r8*(z(c,j)-zi(c,j-1)+capr*(z(c,j+1)-zi(c,j-1))))
+                     fact(c,j) = dtime/cv(c,j) * dz(c,j) / (0.5_r8*(z(c,j)-zi(c,j-1)+capr_adj*(z(c,j+1)-zi(c,j-1))))
                      fn(c,j) = tk(c,j)*(t_soisno(c,j+1)-t_soisno(c,j))/(z(c,j+1)-z(c,j))
                   else if (j <= nlevgrnd-1) then
                      fact(c,j) = dtime/cv(c,j)
