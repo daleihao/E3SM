@@ -145,6 +145,7 @@ module ColumnDataType
     real(r8), pointer :: frac_sno_eff       (:)   => null() ! fraction of ground covered by snow (0 to 1)
     real(r8), pointer :: frac_iceold        (:,:) => null() ! fraction of ice relative to the tot water (-nlevsno+1:nlevgrnd)
     real(r8), pointer :: frac_h2osfc        (:)   => null() ! fractional area with surface water greater than zero
+    real(r8), pointer :: frac_h2osfc_eff    (:)   => null() ! eff. fractional area with surface water greater than zero
     real(r8), pointer :: wf                 (:)   => null() ! soil water as frac. of whc for top 0.05 m (0-1)
     real(r8), pointer :: wf2                (:)   => null() ! soil water as frac. of whc for top 0.17 m (0-1)
     real(r8), pointer :: finundated         (:)   => null() ! fraction of column inundated, for bgc caclulation (0-1)
@@ -1365,6 +1366,7 @@ contains
     allocate(this%frac_sno_eff       (begc:endc))                     ; this%frac_sno_eff       (:)   = nan
     allocate(this%frac_iceold        (begc:endc,-nlevsno+1:nlevgrnd)) ; this%frac_iceold        (:,:) = nan
     allocate(this%frac_h2osfc        (begc:endc))                     ; this%frac_h2osfc        (:)   = nan
+    allocate(this%frac_h2osfc_eff    (begc:endc))                     ; this%frac_h2osfc_eff    (:)   = nan
     allocate(this%wf                 (begc:endc))                     ; this%wf                 (:)   = nan
     allocate(this%wf2                (begc:endc))                     ; this%wf2                (:)   = nan
     allocate(this%finundated         (begc:endc))                     ; this%finundated         (:)   = nan
@@ -1518,6 +1520,11 @@ contains
          avgflag='A', long_name='fraction of ground covered by surface water', &
          ptr_col=this%frac_h2osfc)
 
+    this%frac_h2osfc_eff(begc:endc) = spval
+    call hist_addfld1d (fname='FH2OSFC_EFF',  units='1',  &
+         avgflag='A', long_name='effective fraction of ground covered by surface water', &
+         ptr_col=this%frac_h2osfc_eff)
+
     if (use_cn) then
        this%wf(begc:endc) = spval
         call hist_addfld1d (fname='WF', units='proportion', &
@@ -1562,6 +1569,7 @@ contains
        this%h2osfc(c)                 = 0._r8
        this%h2ocan(c)                 = 0._r8
        this%frac_h2osfc(c)            = 0._r8
+       this%frac_h2osfc_eff(c)        = 0._r8
        this%h2orof(c)                 = 0._r8
        this%frac_h2orof(c)            = 0._r8
 
@@ -1841,6 +1849,14 @@ contains
          interpinic_flag='interp', readvar=readvar, data=this%frac_h2osfc)
     if (flag == 'read' .and. .not. readvar) then
        this%frac_h2osfc(bounds%begc:bounds%endc) = 0.0_r8
+    end if
+
+    call restartvar(ncid=ncid, flag=flag, varname='FH2OSFC_EFF', xtype=ncd_double,  &
+        dim1name='column',&
+        long_name='effective fraction of ground covered by h2osfc (0 to 1)', units='', &
+        interpinic_flag='interp', readvar=readvar, data=this%frac_h2osfc_eff)
+    if (flag == 'read' .and. .not. readvar) then
+        this%frac_h2osfc_eff(bounds%begc:bounds%endc) = 0.0_r8
     end if
 
     if (use_cn) then

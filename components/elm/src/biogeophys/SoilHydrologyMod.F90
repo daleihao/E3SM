@@ -329,6 +329,7 @@ contains
           t_soisno             =>    col_es%t_soisno             , & ! Input:  [real(r8) (:,:) ]  soil temperature (Kelvin)
 
           frac_h2osfc          =>    col_ws%frac_h2osfc          , & ! Input:  [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1)
+          frac_h2osfc_eff      =>    col_ws%frac_h2osfc_eff      , & ! Input:  [real(r8) (:)   ]  eff. fraction of ground covered by surface water (0 to 1)
           frac_sno             =>    col_ws%frac_sno_eff         , & ! Input:  [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
           h2osoi_ice           =>    col_ws%h2osoi_ice           , & ! Input:  [real(r8) (:,:) ]  ice lens (kg/m2)
           h2osoi_liq           =>    col_ws%h2osoi_liq           , & ! Input:  [real(r8) (:,:) ]  liquid water (kg/m2)
@@ -475,7 +476,7 @@ contains
                 if (frac_h2osfc(c) <= pc) then
                    frac_infclust=0.0_r8
                 else
-                   frac_infclust=(frac_h2osfc(c)-pc)**mu
+                   frac_infclust=(frac_h2osfc_eff(c)-pc)**mu
                 endif
              endif
 

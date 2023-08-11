@@ -220,6 +220,7 @@ contains
           frac_sno_eff         => col_ws%frac_sno_eff         , & ! Output: [real(r8) (:)   ]  eff. fraction of ground covered by snow (0 to 1)
           frac_sno             => col_ws%frac_sno             , & ! Output: [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
           frac_h2osfc          => col_ws%frac_h2osfc          , & ! Output: [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1)
+          frac_h2osfc_eff      => col_ws%frac_h2osfc_eff      , & ! Output: [real(r8) (:)   ]  eff. fraction of ground covered by surface water (0 to 1)
           frac_iceold          => col_ws%frac_iceold          , & ! Output: [real(r8) (:,:) ]  fraction of ice relative to the tot water
           h2osoi_ice           => col_ws%h2osoi_ice           , & ! Output: [real(r8) (:,:) ]  ice lens (kg/m2)                      
           h2osoi_liq           => col_ws%h2osoi_liq           , & ! Output: [real(r8) (:,:) ]  liquid water (kg/m2)                  
@@ -809,7 +810,8 @@ contains
           h2osfc       => col_ws%h2osfc       , & ! Output: [real(r8) (:)   ] surface water (mm)                                
           frac_sno     => col_ws%frac_sno     , & ! Output: [real(r8) (:)   ] fraction of ground covered by snow (0 to 1)       
           frac_sno_eff => col_ws%frac_sno_eff , & ! Output: [real(r8) (:)   ] eff. fraction of ground covered by snow (0 to 1)  
-          frac_h2osfc  => col_ws%frac_h2osfc    & ! Output: [real(r8) (:)   ] col fractional area with surface water greater than zero 
+          frac_h2osfc  => col_ws%frac_h2osfc  , & ! Output: [real(r8) (:)   ] col fractional area with surface water greater than zero
+          frac_h2osfc_eff  => col_ws%frac_h2osfc_eff    & ! Output: [real(r8) (:)   ] eff. col fractional area with surface water greater than zero
           )
 
        ! arbitrary lower limit on h2osfc for safer numerics...
@@ -849,6 +851,8 @@ contains
                 h2osfc(c)=0._r8
              endif
 
+             frac_h2osfc_eff(c) = frac_h2osfc(c)
+
              if (.not. present(no_update)) then
 
                 ! adjust fh2o, fsno when sum is greater than zero
@@ -869,6 +873,7 @@ contains
           else !if landunit not istsoil/istcrop, set frac_h2osfc to zero
 
              frac_h2osfc(c) = 0._r8
+             frac_h2osfc_eff(c) = 0._r8
 
           endif
 
