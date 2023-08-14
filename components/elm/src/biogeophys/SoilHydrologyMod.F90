@@ -474,7 +474,7 @@ contains
              !5. surface runoff from h2osfc
              if (h2osfcflag==1) then
                 ! calculate runoff from h2osfc  -------------------------------------
-                if (frac_h2osfc(c) <= pc_adj) then
+                if (frac_h2osfc_eff(c) <= pc_adj) then
                    frac_infclust=0.0_r8
                 else
                    frac_infclust=(frac_h2osfc_eff(c)-pc_adj)**mu
