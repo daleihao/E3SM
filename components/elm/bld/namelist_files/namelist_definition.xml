@@ -2026,4 +2026,23 @@ Threshold for quantifing the fraction of the inundated portion of the grid cell 
 Tuning factor to turn first layer T into surface T.
 </entry>
 
+<entry id="Tsnow_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Tuning factor for snow-rain seperation (central temperature (0-2 degree)).
+</entry>
+
+<entry id="accum_factor_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Tuning factor for the relationship between new snow and snow cover fraction.
+</entry>
+
+<entry id="n_melt_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Tuning factor for the relationship between SWE and snow cover fraction.
+</entry>
+
+<entry id="tfrz_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Snow freezing temperature
+</entry>
 </namelist_definition>

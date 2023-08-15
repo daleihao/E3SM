@@ -54,7 +54,7 @@ module controlMod
   use elm_varctl              , only: const_climate_hist
   use elm_varctl              , only: use_top_solar_rad
   use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
-  use elm_varctl              , only: pc_adj, capr_adj
+  use elm_varctl              , only: pc_adj, capr_adj, Tsnow_adj, accum_factor_adj, n_melt_adj, tfrz_adj
 
   !
   ! !PUBLIC TYPES:
@@ -321,7 +321,7 @@ contains
          snow_shape, snicar_atm_type, use_dust_snow_internal_mixing 
     
     namelist /elm_inparm/ &
-        pc_adj, capr_adj
+        pc_adj, capr_adj, Tsnow_adj, accum_factor_adj, n_melt_adj, tfrz_adj
 
     ! ----------------------------------------------------------------------
     ! Default values
@@ -945,6 +945,11 @@ contains
     !ROS study
     call mpi_bcast (pc_adj, 1, MPI_REAL8, 0, mpicom, ier)
     call mpi_bcast (capr_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (Tsnow_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (accum_factor_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (n_melt_adj, 1, MPI_REAL8, 0, mpicom, ier)
+    call mpi_bcast (tfrz_adj, 1, MPI_REAL8, 0, mpicom, ier)
+
 
   end subroutine control_spmd
 

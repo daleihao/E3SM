@@ -18,6 +18,7 @@ module initVerticalMod
   use elm_varctl     , only : fsurdat, iulog, use_var_soil_thick
   use elm_varctl     , only : use_vancouver, use_mexicocity, use_vertsoilc, use_extralakelayers, use_extrasnowlayers
   use elm_varctl     , only : use_erosion
+  use elm_varctl     , only : n_melt_adj
   use elm_varcon     , only : zlak, dzlak, zsoi, dzsoi, zisoi, dzsoi_decomp, spval, grlnd 
   use column_varcon  , only : icol_roof, icol_sunwall, icol_shadewall, icol_road_perv, icol_road_imperv
   use landunit_varcon, only : istdlak, istice_mec
@@ -677,7 +678,8 @@ contains
             ! of n_melt that assumes little topographic variability within the column
             col_pp%n_melt(c) = 10._r8
          else
-            col_pp%n_melt(c) = 200.0/max(10.0_r8, col_pp%topo_std(c))
+            !col_pp%n_melt(c) = 200.0/max(10.0_r8, col_pp%topo_std(c))
+            col_pp%n_melt(c) = n_melt_adj
          end if
 
          ! microtopographic parameter, units are meters (try smooth function of slope)

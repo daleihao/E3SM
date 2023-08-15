@@ -835,6 +835,7 @@ contains
     use landunit_varcon , only : istice, istice_mec, istwet
     use column_varcon   , only : icol_roof, icol_sunwall, icol_shadewall, icol_road_perv, icol_road_imperv
     use elm_varctl      , only : iulog
+    use elm_varctl       , only : tfrz_adj
     !
     ! !ARGUMENTS:
     type(bounds_type)      , intent(in)    :: bounds
@@ -918,7 +919,7 @@ contains
                   satw = (h2osoi_liq(c,j)/denh2o + h2osoi_ice(c,j)/denice)/(dz(c,j)*watsat(c,j))
                   satw = min(1._r8, satw)
                   if (satw > .1e-6_r8) then
-                     if (t_soisno(c,j) >= tfrz) then       ! Unfrozen soil
+                     if (t_soisno(c,j) >= tfrz_adj) then       ! Unfrozen soil
                         dke = max(0._r8, log10(satw) + 1.0_r8)
                      else                               ! Frozen soil
                         dke = satw
@@ -933,13 +934,13 @@ contains
                   if (j > nlevbed) thk(c,j) = thk_bedrock
                else if (lun_pp%itype(l) == istice .OR. lun_pp%itype(l) == istice_mec) then
                   thk(c,j) = tkwat
-                  if (t_soisno(c,j) < tfrz) thk(c,j) = tkice
+                  if (t_soisno(c,j) < tfrz_adj) thk(c,j) = tkice
                else if (lun_pp%itype(l) == istwet) then
                   if (j > nlevbed) then
                      thk(c,j) = thk_bedrock
                   else
                      thk(c,j) = tkwat
-                     if (t_soisno(c,j) < tfrz) thk(c,j) = tkice
+                     if (t_soisno(c,j) < tfrz_adj) thk(c,j) = tkice
                   endif
                endif
             endif
@@ -1057,6 +1058,7 @@ contains
     use elm_varcon       , only : tfrz, hfus, grav, denice, cnfac, cpice, cpliq
     use elm_varpar       , only : nlevsno, nlevgrnd
     use elm_varctl       , only : iulog
+    use elm_varctl       , only : tfrz_adj
     !
     ! !ARGUMENTS:
     type(bounds_type)      , intent(in)    :: bounds
@@ -1127,9 +1129,9 @@ contains
          c = filter_nolakec(fc)
 
          ! If liquid exists below melt point, freeze some to ice.
-         if ( frac_h2osfc(c) > 0._r8 .AND. t_h2osfc(c) <= tfrz) then
-            tinc = tfrz - t_h2osfc(c)
-            t_h2osfc(c) = tfrz
+         if ( frac_h2osfc(c) > 0._r8 .AND. t_h2osfc(c) <= tfrz_adj) then
+            tinc = tfrz_adj - t_h2osfc(c)
+            t_h2osfc(c) = tfrz_adj
 
             ! energy absorbed beyond freezing temperature
             hm(c) = frac_h2osfc(c)*(dhsdT(c)*tinc - tinc*c_h2osfc(c)/dtime)
@@ -1281,6 +1283,7 @@ contains
     use elm_varcon       , only : tfrz, hfus, grav
     use column_varcon    , only : icol_roof, icol_sunwall, icol_shadewall, icol_road_perv
     use landunit_varcon  , only : istsoil, istcrop, istice_mec
+    use elm_varctl       , only : tfrz_adj
     !
     ! !ARGUMENTS:
     type(bounds_type)      , intent(in)    :: bounds
@@ -1384,20 +1387,20 @@ contains
 
                ! Melting identification
                ! If ice exists above melt point, melt some to liquid.
-               if (h2osoi_ice(c,j) > 0._r8 .AND. t_soisno(c,j) > tfrz) then
+               if (h2osoi_ice(c,j) > 0._r8 .AND. t_soisno(c,j) > tfrz_adj) then
                   imelt(c,j) = 1
                   !                tinc(c,j) = t_soisno(c,j) - tfrz
-                  tinc(c,j) = tfrz - t_soisno(c,j)
-                  t_soisno(c,j) = tfrz
+                  tinc(c,j) = tfrz_adj - t_soisno(c,j)
+                  t_soisno(c,j) = tfrz_adj
                endif
 
                ! Freezing identification
                ! If liquid exists below melt point, freeze some to ice.
-               if (h2osoi_liq(c,j) > 0._r8 .AND. t_soisno(c,j) < tfrz) then
+               if (h2osoi_liq(c,j) > 0._r8 .AND. t_soisno(c,j) < tfrz_adj) then
                   imelt(c,j) = 2
                   !                tinc(c,j) = t_soisno(c,j) - tfrz
-                  tinc(c,j) = tfrz - t_soisno(c,j)
-                  t_soisno(c,j) = tfrz
+                  tinc(c,j) = tfrz_adj - t_soisno(c,j)
+                  t_soisno(c,j) = tfrz_adj
                endif
             endif   ! end of snow layer if-block
          end do   ! end of column-loop
@@ -1415,37 +1418,37 @@ contains
 
 
 
-               if (h2osoi_ice(c,j) > 0. .AND. t_soisno(c,j) > tfrz) then
+               if (h2osoi_ice(c,j) > 0. .AND. t_soisno(c,j) > tfrz_adj) then
                   imelt(c,j) = 1
                   !             tinc(c,j) = t_soisno(c,j) - tfrz
-                  tinc(c,j) = tfrz - t_soisno(c,j)
-                  t_soisno(c,j) = tfrz
+                  tinc(c,j) = tfrz_adj - t_soisno(c,j)
+                  t_soisno(c,j) = tfrz_adj
                endif
 
                ! from Zhao (1997) and Koren (1999)
                supercool(c,j) = 0.0_r8
                if (lun_pp%itype(l) == istsoil .or. lun_pp%itype(l) == istcrop .or. col_pp%itype(c) == icol_road_perv) then
-                  if(t_soisno(c,j) < tfrz) then
+                  if(t_soisno(c,j) < tfrz_adj) then
                      smp = hfus*(tfrz-t_soisno(c,j))/(grav*t_soisno(c,j)) * 1000._r8  !(mm)
                      supercool(c,j) = watsat(c,j)*(smp/sucsat(c,j))**(-1._r8/bsw(c,j))
                      supercool(c,j) = supercool(c,j)*dz(c,j)*1000._r8       ! (mm)
                   endif
                endif
 
-               if (h2osoi_liq(c,j) > supercool(c,j) .AND. t_soisno(c,j) < tfrz) then
+               if (h2osoi_liq(c,j) > supercool(c,j) .AND. t_soisno(c,j) < tfrz_adj) then
                   imelt(c,j) = 2
                   !             tinc(c,j) = t_soisno(c,j) - tfrz
-                  tinc(c,j) = tfrz - t_soisno(c,j)
-                  t_soisno(c,j) = tfrz
+                  tinc(c,j) = tfrz_adj - t_soisno(c,j)
+                  t_soisno(c,j) = tfrz_adj
                endif
 
                ! If snow exists, but its thickness is less than the critical value (0.01 m)
                if (snl(c)+1 == 1 .AND. h2osno(c) > 0._r8 .AND. j == 1) then
-                  if (t_soisno(c,j) > tfrz) then
+                  if (t_soisno(c,j) > tfrz_adj) then
                      imelt(c,j) = 1
                      !                tincc,j) = t_soisno(c,j) - tfrz
-                     tinc(c,j) = tfrz - t_soisno(c,j)
-                     t_soisno(c,j) = tfrz
+                     tinc(c,j) = tfrz_adj - t_soisno(c,j)
+                     t_soisno(c,j) = tfrz_adj
                   endif
                endif
 
@@ -1575,7 +1578,7 @@ contains
                         endif
 
                         if (j <= 0) then    ! snow
-                           if (h2osoi_liq(c,j)*h2osoi_ice(c,j)>0._r8) t_soisno(c,j) = tfrz
+                           if (h2osoi_liq(c,j)*h2osoi_ice(c,j)>0._r8) t_soisno(c,j) = tfrz_adj
                         end if
                      endif  ! end of heatr > 0 if-block
 

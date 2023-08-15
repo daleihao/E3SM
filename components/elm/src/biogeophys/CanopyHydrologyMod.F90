@@ -117,6 +117,7 @@ contains
      use column_varcon      , only : icol_roof, icol_sunwall, icol_shadewall
      use landunit_varcon    , only : istcrop, istice, istwet, istsoil, istice_mec, istdlak
      use elm_varctl         , only : subgridflag
+     use elm_varctl         , only : accum_factor_adj
      use elm_varpar         , only : nlevsoi,nlevsno
      use elm_varsur         , only : wt_lunit, f_grd, f_surf
      use atm2lndType        , only : atm2lnd_type
@@ -544,7 +545,7 @@ contains
              snowmelt(c) = qflx_snow_melt(c) * dtime
 
              ! set shape factor for accumulation of snow
-             accum_factor=0.1
+             accum_factor=accum_factor_adj
 
              if (h2osno(c) > 0.0) then
 
