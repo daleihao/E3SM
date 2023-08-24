@@ -678,8 +678,8 @@ contains
             ! of n_melt that assumes little topographic variability within the column
             col_pp%n_melt(c) = 10._r8
          else
-            !col_pp%n_melt(c) = 200.0/max(10.0_r8, col_pp%topo_std(c))
-            col_pp%n_melt(c) = n_melt_adj
+            col_pp%n_melt(c) = n_melt_adj/max(10.0_r8, col_pp%topo_std(c))
+            !col_pp%n_melt(c) = n_melt_adj
          end if
 
          ! microtopographic parameter, units are meters (try smooth function of slope)

@@ -369,7 +369,7 @@ module elm_varctl
   real(r8), public :: capr_adj = 0.34_r8
   real(r8), public :: Tsnow_adj = 1.0_r8
   real(r8), public :: accum_factor_adj = 0.1_r8
-  real(r8), public :: n_melt_adj = 10._r8
+  real(r8), public :: n_melt_adj = 200._r8
   real(r8), public :: tfrz_adj = 273.15_r8
   !----------------------------------------------------------
   ! VSFM switches
