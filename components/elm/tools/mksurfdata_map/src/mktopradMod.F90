@@ -192,41 +192,41 @@ subroutine mktopradAtt( ncid, dynlanduse, xtype )
      if (outnc_1d) then
         call ncd_defvar(ncid=ncid, varname='SINSL_COSAS', xtype=xtype, &
              dim1name='gridcell',&
-             long_name='sin(slope) * cos(aspect)', units='degrees')
+             long_name='sin(slope) * cos(aspect)', units='unitless')
      else
         call ncd_defvar(ncid=ncid, varname='SINSL_COSAS', xtype=xtype, &
              dim1name='lsmlon', dim2name='lsmlat', &
-             long_name='sin(slope) * cos(aspect)', units='degrees')
+             long_name='sin(slope) * cos(aspect)', units='unitless')
      end if
 
      if (outnc_1d) then
         call ncd_defvar(ncid=ncid, varname='SINSL_SINAS', xtype=xtype, &
              dim1name='gridcell',&
-             long_name='sin(slope) * sin(aspect)', units='degrees')
+             long_name='sin(slope) * sin(aspect)', units='unitless')
      else
         call ncd_defvar(ncid=ncid, varname='SINSL_SINAS', xtype=xtype, &
              dim1name='lsmlon', dim2name='lsmlat', &
-             long_name='sin(slope) * sin(aspect)', units='degrees')
+             long_name='sin(slope) * sin(aspect)', units='unitless')
      end if
 
     if (outnc_1d) then
         call ncd_defvar(ncid=ncid, varname='SKY_VIEW', xtype=xtype, &
             dim1name='gridcell',&
-            long_name='sky view factor', units='degrees')
+            long_name='sky view factor', units='unitless')
     else
         call ncd_defvar(ncid=ncid, varname='SKY_VIEW', xtype=xtype, &
             dim1name='lsmlon', dim2name='lsmlat', &
-            long_name='sky view factor', units='degrees')
+            long_name='sky view factor', units='unitless')
     end if
 
     if (outnc_1d) then
         call ncd_defvar(ncid=ncid, varname='TERRAIN_CONFIG', xtype=xtype, &
             dim1name='gridcell',&
-            long_name='terrain configuration factor', units='degrees')
+            long_name='terrain configuration factor', units='unitless')
     else
         call ncd_defvar(ncid=ncid, varname='TERRAIN_CONFIG', xtype=xtype, &
             dim1name='lsmlon', dim2name='lsmlat', &
-            long_name='terrain configuration factor', units='degrees')
+            long_name='terrain configuration factor', units='unitless')
     end if
 
   end if
