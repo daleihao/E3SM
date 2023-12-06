@@ -5,7 +5,7 @@ module mktopradMod
 ! !MODULE: mktopradMod
 !
 ! !DESCRIPTION:
-! Make topography data (gravel, slope percentile and parameters)
+! Make topography data for TOP solar radiation parameterization
 !
 ! !REVISION HISTORY:
 ! Author: Dalei Hao
@@ -40,13 +40,13 @@ contains
 !-----------------------------------------------------------------------
 !BOP
 !
-! !IROUTINE: mktop
+! !IROUTINE: mktoprad
 !
 ! !INTERFACE:
 subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
 !
 ! !DESCRIPTION:
-! Make topography data
+! Make topography data for TOP solar radiation parameterization
 !
 ! !USES:
   use mkdomainMod  , only : domain_type, domain_clean, domain_read, domain_checksame
@@ -69,7 +69,7 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
 ! subroutine mksrfdat in module mksrfdatMod
 !
 ! !REVISION HISTORY:
-! Author: Keith Oleson
+! Author: Dalei Hao
 !
 !
 ! !LOCAL VARIABLES:
@@ -104,7 +104,7 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
   ns_i = tdomain%ns
   allocate(top_i(ns_i), stat=ier)
   if (ier /= 0) then
-     write(6,*)'mktop allocation error'; call abort()
+     write(6,*)'mktoprad allocation error'; call abort()
   end if
 
   write (6,*) 'Open topography file: ', trim(datfname)
@@ -113,8 +113,7 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
   call check_ret(nf_get_var_double (ncidi, varid, top_i), subname)
   call check_ret(nf_close(ncidi), subname)
 
-  ! Read topo dataset with unit mask everywhere
-
+  ! Read topo dataset
   call gridmap_mapread(tgridmap, mapfname)
 
   ! Error checks for domain and map consistencies
@@ -191,24 +190,44 @@ subroutine mktopradAtt( ncid, dynlanduse, xtype )
      ! Define variables
 
      if (outnc_1d) then
-        call ncd_defvar(ncid=ncid, varname='SLOPE', xtype=xtype, &
+        call ncd_defvar(ncid=ncid, varname='SINSL_COSAS', xtype=xtype, &
              dim1name='gridcell',&
-             long_name='mean topographic slope', units='degrees')
+             long_name='sin(slope) * cos(aspect)', units='degrees')
      else
-        call ncd_defvar(ncid=ncid, varname='SLOPE', xtype=xtype, &
+        call ncd_defvar(ncid=ncid, varname='SINSL_COSAS', xtype=xtype, &
              dim1name='lsmlon', dim2name='lsmlat', &
-             long_name='mean topographic slope', units='degrees')
+             long_name='sin(slope) * cos(aspect)', units='degrees')
      end if
 
      if (outnc_1d) then
-        call ncd_defvar(ncid=ncid, varname='SLOPE', xtype=xtype, &
+        call ncd_defvar(ncid=ncid, varname='SINSL_SINAS', xtype=xtype, &
              dim1name='gridcell',&
-             long_name='mean topographic slope', units='degrees')
+             long_name='sin(slope) * sin(aspect)', units='degrees')
      else
-        call ncd_defvar(ncid=ncid, varname='SLOPE', xtype=xtype, &
+        call ncd_defvar(ncid=ncid, varname='SINSL_SINAS', xtype=xtype, &
              dim1name='lsmlon', dim2name='lsmlat', &
-             long_name='mean topographic slope', units='degrees')
+             long_name='sin(slope) * sin(aspect)', units='degrees')
      end if
+
+    if (outnc_1d) then
+        call ncd_defvar(ncid=ncid, varname='SKY_VIEW', xtype=xtype, &
+            dim1name='gridcell',&
+            long_name='sky view factor', units='degrees')
+    else
+        call ncd_defvar(ncid=ncid, varname='SKY_VIEW', xtype=xtype, &
+            dim1name='lsmlon', dim2name='lsmlat', &
+            long_name='sky view factor', units='degrees')
+    end if
+
+    if (outnc_1d) then
+        call ncd_defvar(ncid=ncid, varname='TERRAIN_CONFIG', xtype=xtype, &
+            dim1name='gridcell',&
+            long_name='terrain configuration factor', units='degrees')
+    else
+        call ncd_defvar(ncid=ncid, varname='TERRAIN_CONFIG', xtype=xtype, &
+            dim1name='lsmlon', dim2name='lsmlat', &
+            long_name='terrain configuration factor', units='degrees')
+    end if
 
   end if
 
