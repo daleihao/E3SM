@@ -44,6 +44,7 @@ program mksurfdat
     use mkCH4inversionMod  , only : mkCH4inversion
     use mksoilphosphorusMod, only : mksoilphosphorus
     use mkSedMod           , only : mkgrvl, mkslp10, mkEROparams
+    use mktopradMod        , only : mktoprad
 !
 ! !ARGUMENTS:
     implicit none
@@ -150,6 +151,10 @@ program mksurfdat
     real(r8), allocatable  :: ero_c3(:)          ! ELM-Erosion c3 parameter (unitless) 
     real(r8), allocatable  :: tillage(:)         ! conserved tillage fraction (fraction)
     real(r8), allocatable  :: litho(:)           ! lithology erodiblity index (unitless)
+    real(r8), allocatable  :: sinsl_sinas(:)     ! sin(slope)*sin(aspect) / cos(slope)
+    real(r8), allocatable  :: sinsl_cosas(:)     ! sin(slope)*cos(aspect) / cos(slope)
+    real(r8), allocatable  :: sky_view(:)        ! mean of (sky view factor / cos(slope))
+    real(r8), allocatable  :: terrain_config(:)  ! mean of (terrain configuration factor / cos(slope))
 
 
     type(domain_type) :: ldomain
@@ -184,6 +189,7 @@ program mksurfdat
          mksrf_fgrvl,              &
          mksrf_fslp10,             &
          mksrf_fero,               &
+         mksrf_ftoprad,             &
          nglcec,                   &
          numpft,                   &
          soil_color,               &
@@ -220,6 +226,7 @@ program mksurfdat
          map_fgrvl,                &
          map_fslp10,               &
          map_fero,                 &
+         map_ftoprad,               &
          outnc_large_files,        &
          outnc_double,             &
          outnc_dims,               &
@@ -261,6 +268,7 @@ program mksurfdat
     !    mksrf_fgrvl ---- Soil gravel content dataset
     !    mksrf_fslp10 --- Slope percentile dataset
     !    mksrf_fero ----- ELM-Erosion parameters dataset 
+    !    mksrf_ftoprad --- TOP parameters dataset for solar radiation parameterization
     ! ======================================
     ! Must specify mapping file for the different datafiles above
     ! ======================================
@@ -289,6 +297,7 @@ program mksurfdat
     !    map_fgrvl ------- Mapping for mksrf_fgrvl
     !    map_fslp10 ------ Mapping for mksrf_fslp10
     !    map_fero -------- Mapping for mksrf_fero
+    !    map_ftoprad_______ Mapping for mksrf_ftoprad
     ! ======================================
     ! Optionally specify setting for:
     ! ======================================
@@ -456,7 +465,11 @@ program mksurfdat
                ero_c2(ns_o)                       , &
                ero_c3(ns_o)                       , &
                tillage(ns_o)                      , &
-               litho(ns_o)                        )
+               litho(ns_o)                        , &
+               sinsl_sinas(ns_o)                  , &
+               sinsl_cosas(ns_o)                  , &
+               sky_view(ns_o)                     , &
+               terrain_config(ns_o)               )
 
     landfrac_pft(:)       = spval 
     pctlnd_pft(:)         = spval
@@ -501,6 +514,10 @@ program mksurfdat
     ero_c3(:)             = spval 
     tillage(:)            = spval
     litho(:)              = spval
+    sinsl_sinas(:)        = spval
+    sinsl_cosas(:)        = spval
+    sky_view(:)           = spval
+    terrain_config(:)     = spval
 
     ! ----------------------------------------------------------------------
     ! Open diagnostic output log file
@@ -569,6 +586,7 @@ program mksurfdat
     write(ndiag,*)' mapping for soil gravel      ',trim(map_fgrvl)
     write(ndiag,*)' mapping for slope percentile ',trim(map_fslp10)
     write(ndiag,*)' mapping for erosion params   ',trim(map_fero)
+    write(ndiag,*)' mapping for TOP params       ',trim(map_ftoprad)
 
     if (mksrf_fdynuse /= ' ') then
        write(6,*)'mksrf_fdynuse = ',trim(mksrf_fdynuse)
@@ -751,6 +769,12 @@ program mksurfdat
          ero_c1_o=ero_c1, ero_c2_o=ero_c2, ero_c3_o=ero_c3, tillage_o=tillage, &
          litho_o=litho)
 
+    call mktoprad(ldomain, mapfname=map_ftoprad, datfname=mksrf_ftoprad, varname = 'SINSL_SINAS', ndiag=ndiag, top_o=sinsl_sinas)
+    call mktoprad(ldomain, mapfname=map_ftoprad, datfname=mksrf_ftoprad, varname = 'SINSL_COSAS', ndiag=ndiag, top_o=sinsl_cosas)
+    call mktoprad(ldomain, mapfname=map_ftoprad, datfname=mksrf_ftoprad, varname = 'SKY_VIEW', ndiag=ndiag, top_o=sky_view)
+    call mktoprad(ldomain, mapfname=map_ftoprad, datfname=mksrf_ftoprad, varname = 'TERRAIN_CONFIG', ndiag=ndiag, top_o=terrain_config)
+
+
     do n = 1,ns_o
 
        ! Assume wetland and/or lake when dataset landmask implies ocean 
@@ -778,6 +802,10 @@ program mksurfdat
           ero_c3(n)        = 0._r8
           tillage(n)       = 0._r8
           litho(n)         = 0._r8
+          sinsl_sinas(n)   = 0._r8
+          sinsl_cosas(n)   = 0._r8
+          sky_view(n)      = 1._r8
+          terrain_config(n)= 0._r8
        else
           pftdata_mask(n) = 1
        end if
@@ -1078,6 +1106,18 @@ program mksurfdat
     call check_ret(nf_inq_varid(ncid, 'Litho', varid), subname)
     call check_ret(nf_put_var_double(ncid, varid, litho), subname)
 
+    call check_ret(nf_inq_varid(ncid, 'SINSL_SINAS', varid), subname)
+    call check_ret(nf_put_var_double(ncid, varid, sinsl_sinas), subname)
+
+    call check_ret(nf_inq_varid(ncid, 'SINSL_COSAS', varid), subname)
+    call check_ret(nf_put_var_double(ncid, varid, sinsl_cosas), subname)
+
+    call check_ret(nf_inq_varid(ncid, 'SKY_VIEW', varid), subname)
+    call check_ret(nf_put_var_double(ncid, varid, sky_view), subname)
+
+    call check_ret(nf_inq_varid(ncid, 'TERRAIN_CONFIG', varid), subname)
+    call check_ret(nf_put_var_double(ncid, varid, terrain_config), subname)
+
     ! Deallocate arrays NOT needed for dynamic-pft section of code
 
     deallocate ( organic )
@@ -1097,6 +1137,7 @@ program mksurfdat
     deallocate ( apatiteP, labileP, occludedP, secondaryP )
     deallocate ( grvl, slp10 )
     deallocate ( ero_c1, ero_c2, ero_c3, tillage, litho )
+    deallocate ( sinsl_sinas, sinsl_cosas, sky_view, terrain_config )
 
     ! Synchronize the disk copy of a netCDF dataset with in-memory buffers
 
