@@ -62,7 +62,8 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
   character(len=*)  , intent(in) :: datfname  ! input data file name
   integer           , intent(in) :: ndiag     ! unit number for diag out
   character(len=*)  , intent(in) :: varname   ! topo variable name
-  real(r8)          , intent(out):: top_o(:) ! output topography data
+  real(r8)          , intent(out):: top_o(:)  ! output topography data
+  real(r8)          , intent(out):: nodata    ! default value
 !
 !
 ! !CALLED FROM:
