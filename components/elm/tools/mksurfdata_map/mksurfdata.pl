@@ -562,7 +562,7 @@ EOF
  mksrf_fgrvl       = '$datfil{'grvl'}'
  mksrf_fslp10      = '$datfil{'slp10'}'
  mksrf_fero        = '$datfil{'ero'}'
- mksrf_toprad      = '$datfil{'toporad'}'
+ mksrf_toprad      = '$datfil{'toprad'}'
 EOF
             my $urbdesc = "urb3den";
             my $rcp_option= "";

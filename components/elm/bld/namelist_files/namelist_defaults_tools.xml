@@ -175,7 +175,7 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 <hgrid type="grvl"             >5x5min</hgrid>
 <hgrid type="slp10"            >0.5x0.5</hgrid>
 <hgrid type="ero"              >0.5x0.5</hgrid>
-<hgrid type="toprad"           >0.5x0.5</hgrid>
+<hgrid type="toprad"           >0.1x0.1</hgrid>
 
 
 <!-- namelist filenames for different types of mksurfdata_map input files -->
@@ -310,8 +310,8 @@ attributes from the config_cache.xml file (with keys converted to upper-case).
 <mksrf_fero hgrid="0.5x0.5" lmask="AVHRR"
 >lnd/clm2/rawdata/mksrf_soilero_0.5x0.5.c220523.nc</mksrf_fero>
 
-<mksrf_ftoprad hgrid="0.5x0.5" lmask="nomask"
->lnd/clm2/rawdata/mksrf_topostats_1km-merge-10min_HYDRO1K-merge-nomask_simyr2000.c130402.nc</mksrf_ftoprad>
+<mksrf_ftoprad hgrid="0.1x0.1" lmask="nomask"
+>lnd/clm2/rawdata/mksrf_toprad_0.1x0.1.c231218.nc</mksrf_ftoprad>
 <!-- mksrf_fvegtyp -->
 
 <!-- test years -->
