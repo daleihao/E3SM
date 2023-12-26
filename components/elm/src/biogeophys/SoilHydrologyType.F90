@@ -9,6 +9,7 @@ Module SoilHydrologyType
   use elm_varpar            , only : more_vertlayers, nlevsoifl, toplev_equalspace
   use elm_varcon            , only : zsoi, dzsoi, zisoi, spval
   use elm_varctl            , only : iulog, use_lnd_rof_two_way
+  use elm_varctl            , only : fdrai_adj
   use SharedParamsMod     , only : ParamsShareInst
   use LandunitType          , only : lun_pp                
   use ColumnType            , only : col_pp      
@@ -573,7 +574,8 @@ contains
             g = col_pp%gridcell(c)
             this%hkdepth_col(c) = 1._r8/fdrain(g)
          else
-            this%hkdepth_col(c) = 1._r8/2.5_r8
+            ! this%hkdepth_col(c) = 1._r8/2.5_r8
+            this%hkdepth_col(c) = 1._r8/fdrai_adj
          endif
 
       end do

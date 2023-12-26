@@ -597,6 +597,8 @@ this mask will have smb calculated over the entire global land surface
 <accum_factor_adj>0.1</accum_factor_adj>
 <n_melt_adj>200.0</n_melt_adj>
 <tfrz_adj>273.15</tfrz_adj>
+<fover_adj>0.5</fover_adj>
+<fdrai_adj>2.5</fdrai_adj>
 
 <!-- Nitrogen deposition streams namelist defaults -->
 <stream_year_first_ndep use_cn=".true."   sim_year="2000" >2000</stream_year_first_ndep>

@@ -2045,4 +2045,14 @@ Tuning factor for the relationship between SWE and snow cover fraction.
        group="elm_inparm" valid_values="" >
 Snow freezing temperature
 </entry>
+
+<entry id="fover_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Decay factor for surface runoff
+</entry>
+
+<entry id="fdrai_adj" type="real" category="elm_physics"
+       group="elm_inparm" valid_values="" >
+Decay factor for subsurface runoff
+</entry>
 </namelist_definition>
