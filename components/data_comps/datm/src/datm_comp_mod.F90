@@ -14,7 +14,7 @@ module datm_comp_mod
   use shr_file_mod   , only: shr_file_getunit, shr_file_freeunit
   use shr_cal_mod    , only: shr_cal_date2julian, shr_cal_ymdtod2string
   use shr_mpi_mod    , only: shr_mpi_bcast
-  use shr_precip_mod , only: shr_precip_partition_rain_snow_ramp
+  use shr_precip_mod , only: shr_precip_partition_rain_snow_ramp, shr_precip_partition_rain_snow_ramp_adj
   use shr_strdata_mod, only: shr_strdata_type, shr_strdata_pioinit, shr_strdata_init
   use shr_strdata_mod, only: shr_strdata_setOrbs, shr_strdata_print, shr_strdata_restRead
   use shr_strdata_mod, only: shr_strdata_advance, shr_strdata_restWrite
@@ -31,6 +31,7 @@ module datm_comp_mod
   use datm_shr_mod   , only: factorfn       ! namelist input
   use datm_shr_mod   , only: iradsw         ! namelist input
   use datm_shr_mod   , only: nullstr
+  use datm_shr_mod   , only: Tsnow_adj
 
   ! !PUBLIC TYPES:
 
@@ -1012,7 +1013,8 @@ CONTAINS
           endif
 
           !--- split precip between rain & snow ---
-          call shr_precip_partition_rain_snow_ramp(tbot, frac)
+          !call shr_precip_partition_rain_snow_ramp(tbot, frac)
+          call shr_precip_partition_rain_snow_ramp_adj(tbot, Tsnow_adj, frac)
           a2x%rAttr(ksc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(1.0_R8 - frac) )
           a2x%rAttr(ksl,n) = max(0.0_R8, a2x%rAttr(krl,n)*(1.0_R8 - frac) )
           a2x%rAttr(krc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(         frac) )

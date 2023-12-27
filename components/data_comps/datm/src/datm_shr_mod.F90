@@ -42,6 +42,7 @@ module datm_shr_mod
   integer(IN)   , public :: iradsw                ! radiation interval
   character(CL) , public :: factorFn              ! file containing correction factors
   logical       , public :: presaero              ! true => send valid prescribe aero fields to coupler
+  read(R8)      , public :: Tsnow_adj             ! Tsnow_adj
 
   ! variables obtained from namelist read
   character(CL) , public :: rest_file             ! restart filename
@@ -79,13 +80,14 @@ CONTAINS
     character(*), parameter :: F00   = "('(datm_comp_init) ',8a)"
     character(*), parameter :: F0L   = "('(datm_comp_init) ',a, l2)"
     character(*), parameter :: F01   = "('(datm_comp_init) ',a,5i8)"
+    character(*), parameter :: F02   = "('(datm_comp_init) ',a,2f10.4)"
     character(*), parameter :: subName = "(shr_datm_read_namelists) "
     !-------------------------------------------------------------------------------
 
     !----- define namelist -----
     namelist / datm_nml / &
          decomp, iradsw, factorFn, restfilm, restfils, presaero, bias_correct, &
-         anomaly_forcing, force_prognostic_true, wiso_datm
+         anomaly_forcing, force_prognostic_true, wiso_datm, Tsnow_adj
 
     !----------------------------------------------------------------------------
     ! Determine input filenamname
@@ -103,6 +105,7 @@ CONTAINS
     restfilm = trim(nullstr)
     restfils = trim(nullstr)
     presaero = .false.
+    Tsnow_adj = 1.0_r8
     force_prognostic_true = .false.
     if (my_task == master_task) then
        nunit = shr_file_getUnit() ! get unused unit number
@@ -121,6 +124,7 @@ CONTAINS
        write(logunit,F00)' restfilm = ',trim(restfilm)
        write(logunit,F00)' restfils = ',trim(restfils)
        write(logunit,F0L)' presaero = ',presaero
+       write(logunit,F02)' Tsnow_adj = ',Tsnow_adj
        write(logunit,F0L)' force_prognostic_true = ',force_prognostic_true
        write(logunit,F0L)' wiso_datm   = ', wiso_datm
        write(logunit,F01) 'inst_index  =  ',inst_index
@@ -134,6 +138,7 @@ CONTAINS
     call shr_mpi_bcast(restfilm,mpicom,'restfilm')
     call shr_mpi_bcast(restfils,mpicom,'restfils')
     call shr_mpi_bcast(presaero,mpicom,'presaero')
+    call shr_mpi_bcast(Tsnow_adj,mpicom,'Tsnow_adj')
     call shr_mpi_bcast(force_prognostic_true,mpicom,'force_prognostic_true')
     call shr_mpi_bcast(wiso_datm, mpicom, 'wiso_datm')
 
