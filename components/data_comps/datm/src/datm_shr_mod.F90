@@ -80,7 +80,7 @@ CONTAINS
     character(*), parameter :: F00   = "('(datm_comp_init) ',8a)"
     character(*), parameter :: F0L   = "('(datm_comp_init) ',a, l2)"
     character(*), parameter :: F01   = "('(datm_comp_init) ',a,5i8)"
-    character(*), parameter :: F02   = "('(datm_comp_init) ',a,2f10.4)"
+    character(*), parameter :: F02   = "('(datm_comp_init) ',a,f10.4)"
     character(*), parameter :: subName = "(shr_datm_read_namelists) "
     !-------------------------------------------------------------------------------
 
