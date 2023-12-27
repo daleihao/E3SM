@@ -42,7 +42,7 @@ module datm_shr_mod
   integer(IN)   , public :: iradsw                ! radiation interval
   character(CL) , public :: factorFn              ! file containing correction factors
   logical       , public :: presaero              ! true => send valid prescribe aero fields to coupler
-  read(R8)      , public :: Tsnow_adj             ! Tsnow_adj
+  real(R8)      , public :: Tsnow_adj             ! Tsnow_adj
 
   ! variables obtained from namelist read
   character(CL) , public :: rest_file             ! restart filename

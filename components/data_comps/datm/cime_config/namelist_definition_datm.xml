@@ -2435,7 +2435,7 @@
   </entry>
   
   <entry id="Tsnow_adj">
-    <type>real(30)</type>
+    <type>real</type>
     <category>datm</category>
     <group>datm_nml</group>
     <desc>
