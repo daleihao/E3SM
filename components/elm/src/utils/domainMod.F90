@@ -42,7 +42,6 @@ module domainMod
      logical          :: set        ! flag to check if domain is set
      logical          :: decomped   ! decomposed locally or global copy
 
-     real(r8),pointer :: stdev_elev(:)     ! standard deviation of elevation within a gridcell
      real(r8),pointer :: sky_view(:)       ! mean of (sky view factor / cos(slope))
      real(r8),pointer :: terrain_config(:) ! mean of (terrain configuration factor / cos(slope))
      real(r8),pointer :: sinsl_cosas(:)    ! sin(slope)*cos(aspect) / cos(slope)
@@ -130,7 +129,7 @@ contains
              domain%pftm(nb:ne),domain%area(nb:ne),domain%lonc(nb:ne), &
              domain%topo(nb:ne),domain%num_tunits_per_grd(nb:ne),domain%glcmask(nb:ne), &
              domain%xCell(nb:ne),domain%yCell(nb:ne), &
-             domain%stdev_elev(nb:ne),domain%sky_view(nb:ne),domain%terrain_config(nb:ne), &
+             domain%sky_view(nb:ne),domain%terrain_config(nb:ne), &
              domain%sinsl_cosas(nb:ne),domain%sinsl_sinas(nb:ne),stat=ier)
 
     if (ier /= 0) then
@@ -193,7 +192,6 @@ contains
     domain%yCell    = nan
     domain%area     = nan
     
-    domain%stdev_elev        = 0.0_r8
     domain%sky_view          = 1.0_r8
     domain%terrain_config    = 0.0_r8
     domain%sinsl_cosas       = 0.0_r8
@@ -241,7 +239,7 @@ end subroutine domain_init
             domain%pftm,domain%area,domain%lonc, &
             domain%topo,domain%num_tunits_per_grd,domain%glcmask, &
             domain%xCell,domain%yCell, &
-            domain%stdev_elev,domain%sky_view,domain%terrain_config, &
+            domain%sky_view,domain%terrain_config, &
             domain%sinsl_cosas,domain%sinsl_sinas,stat=ier)
        if (ier /= 0) then
           call shr_sys_abort('domain_clean ERROR: deallocate mask, frac, lat, lon, area ')
@@ -340,7 +338,6 @@ end subroutine domain_clean
     write(iulog,*) '  domain_check area      = ',minval(domain%area),maxval(domain%area)
     write(iulog,*) '  domain_check pftm      = ',minval(domain%pftm),maxval(domain%pftm)
     write(iulog,*) '  domain_check glcmask   = ',minval(domain%glcmask),maxval(domain%glcmask)
-    write(iulog,*) '  domain_check stdev_elev     = ',minval(domain%stdev_elev),maxval(domain%stdev_elev)
     write(iulog,*) '  domain_check sky_view       = ',minval(domain%sky_view),maxval(domain%sky_view)
     write(iulog,*) '  domain_check terrain_config = ',minval(domain%terrain_config),maxval(domain%terrain_config)
     write(iulog,*) '  domain_check sinsl_cosas    = ',minval(domain%sinsl_cosas),maxval(domain%sinsl_cosas)

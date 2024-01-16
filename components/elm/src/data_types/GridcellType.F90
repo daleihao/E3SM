@@ -45,7 +45,6 @@ module GridcellType
      integer , pointer :: pftf         (:) => null() ! ending pft index for each gridcell
      integer , pointer :: npfts        (:) => null() ! number of patches for each gridcell
 
-     real(r8), pointer :: stdev_elev   (:) => null()     ! standard deviation of elevation within a gridcell
      real(r8), pointer :: sky_view     (:) => null()     ! mean of (sky view factor / cos(slope))
      real(r8), pointer :: terrain_config (:) => null()   ! mean of (terrain configuration factor / cos(slope))
      real(r8), pointer :: sinsl_cosas  (:) => null()     ! sin(slope)*cos(aspect) / cos(slope)
@@ -109,7 +108,6 @@ contains
     allocate(this%pftf      (begg:endg)) ; this%pftf      (:) = ispval
     allocate(this%npfts     (begg:endg)) ; this%npfts     (:) = ispval
 
-    allocate(this%stdev_elev(begg:endg)) ; this%stdev_elev(:) = ispval        ! standard deviation of elevation within a gridcell
     allocate(this%sky_view  (begg:endg)) ; this%sky_view  (:) = ispval        ! mean of (sky view factor / cos(slope))
     allocate(this%terrain_config(begg:endg)) ; this%terrain_config(:) = ispval! mean of (terrain configuration factor / cos(slope))
     allocate(this%sinsl_cosas(begg:endg)) ; this%sinsl_cosas(:) = ispval      ! sin(slope)*cos(aspect) / cos(slope)
@@ -162,7 +160,6 @@ contains
     deallocate(this%froudenum        )
     deallocate(this%MaxElevation     )
     deallocate(this%landunit_indices )
-    deallocate(this%stdev_elev       ) 
     deallocate(this%sky_view         ) 
     deallocate(this%terrain_config   ) 
     deallocate(this%sinsl_cosas      )

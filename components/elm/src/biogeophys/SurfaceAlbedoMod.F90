@@ -1767,7 +1767,7 @@ contains
           lon            =>    grc_pp%lon                         , & ! Input:   longitude               
           pgridcell      =>    veg_pp%gridcell                    , & ! Input:   gridcell 
           pcolumn        =>    veg_pp%column                      , & ! Input:   column 
-          stdev_elev     =>    grc_pp%stdev_elev                  , & ! Input:   standard deviation of elevation 
+          stdev_elev     =>    col_pp%topo_std                    , & ! Input:   standard deviation of elevation
           sky_view       =>    grc_pp%sky_view                    , & ! Input:   sky view factor
           terrain_config =>    grc_pp%terrain_config              , & ! Input:   terrain configuration factor
 	  sinsl_cosas    =>    grc_pp%sinsl_cosas                 , & ! Input:   sin(slope) * cos(aspect)
@@ -1799,6 +1799,8 @@ contains
      do fp = 1,num_pft
         p = filter_pft(fp)
         g = pgridcell(p)
+        c = pcolumn(p)
+
         
         cosz = coszen(p)
         fd_top_adjust(p,1:numrad) = 1._r8
@@ -1808,7 +1810,7 @@ contains
         lon_180 = lon(g)
          if (lon_180 > pi) lon_180 = lon_180-2._r8*pi    
     
-         if (cosz > 0._r8 .and. abs(lat(g)) < 1.047_r8 .and. stdev_elev(g) > 0._r8) then
+         if (cosz > 0._r8 .and. stdev_elev(c) > 0._r8) then
             local_timeofday = next_tod + lon_180 / pi * 180._r8 * 240._r8
 
             if (local_timeofday >= 86400._r8) then
@@ -1853,10 +1855,10 @@ contains
                      coeff_rdir(2,izen+1) * terrain_config(g) + coeff_rdir(3,izen+1)
             f_rdir(p,1:numrad) = ftemp2 * dzen1 + ftemp1 * dzen2
 
-            ftemp1 = coeff_dif(1,izen) * stdev_elev(g) + &
+            ftemp1 = coeff_dif(1,izen) * stdev_elev(c) + &
                      coeff_dif(2,izen) * sky_view(g) + &
                      coeff_dif(3,izen) * solar_inc + coeff_dif(4,izen)
-            ftemp2 = coeff_dif(1,izen+1) * stdev_elev(g) + &
+            ftemp2 = coeff_dif(1,izen+1) * stdev_elev(c) + &
                      coeff_dif(2,izen+1) * sky_view(g) + &
                      coeff_dif(3,izen+1) * solar_inc + coeff_dif(4,izen+1)
             f_dif(p,1:numrad) = ftemp2 * dzen1 + ftemp1 * dzen2
