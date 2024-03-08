@@ -189,7 +189,7 @@ program mksurfdat
          mksrf_fgrvl,              &
          mksrf_fslp10,             &
          mksrf_fero,               &
-         mksrf_ftoprad,             &
+         mksrf_ftoprad,            &
          nglcec,                   &
          numpft,                   &
          soil_color,               &
@@ -226,7 +226,7 @@ program mksurfdat
          map_fgrvl,                &
          map_fslp10,               &
          map_fero,                 &
-         map_ftoprad,               &
+         map_ftoprad,              &
          outnc_large_files,        &
          outnc_double,             &
          outnc_dims,               &

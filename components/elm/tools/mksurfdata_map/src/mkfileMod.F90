@@ -15,7 +15,7 @@ contains
     use mkpftMod     , only : mkpftAtt
     use mksoilMod    , only : mksoilAtt
     use mkSedMod     , only : mksedAtt
-    use mktopradMod     , only : mktopradAtt
+    use mktopradMod  , only : mktopradAtt
     use mkharvestMod , only : mkharvest_fieldname, mkharvest_numtypes, mkharvest_longname
     use mkncdio      , only : check_ret, ncd_defvar
     use mkdomainMod  

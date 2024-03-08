@@ -63,7 +63,7 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
   integer           , intent(in) :: ndiag     ! unit number for diag out
   character(len=*)  , intent(in) :: varname   ! topo variable name
   real(r8)          , intent(out):: top_o(:)  ! output topography data
-  real(r8)          , intent(in):: nodata    ! default value
+  real(r8)          , intent(in) :: nodata    ! default value
 !
 !
 ! !CALLED FROM:
@@ -78,7 +78,7 @@ subroutine mktoprad(ldomain, mapfname, datfname, varname, ndiag, top_o, nodata)
   type(domain_type)     :: tdomain            ! local domain
   type(gridmap_type)    :: tgridmap           ! local gridmap
 
-  real(r8), allocatable :: top_i(:)          ! canyon_height to width ratio in
+  real(r8), allocatable :: top_i(:)           ! input top variable
   real(r8), allocatable :: mask_i(:)          ! input grid: mask (0, 1)
   integer  :: ns_i,ns_o                       ! indices
   integer  :: k,l,n,m,ni                      ! indices
