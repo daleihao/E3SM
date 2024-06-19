@@ -1012,6 +1012,8 @@ contains
        do fp = 1,num_nourbanp
           p = filter_nourbanp(fp)
           c = veg_pp%column(p)
+          g = veg_pp%gridcell(p)
+
           albd(p,ib) = albd(p,ib) * grc_pp%sky_view_factor(g)
           albi(p,ib) = albd(p,ib) * grc_pp%sky_view_factor(g)
           albgrd(c,ib) = albgrd(c,ib) * grc_pp%sky_view_factor(g)
@@ -1279,12 +1281,14 @@ contains
           )
 
     deg2rad = SHR_CONST_PI/180._r8
-    slope_rad = grc_pp%slope_degree(g) * deg2rad
     ! Calculate two-stream parameters that are independent of waveband:
     ! chil, gdir, twostext, avmu, and temp0 and temp2 (used for asu)
 
     do fp = 1,num_vegsol
        p = filter_vegsol(fp)
+       g = veg_pp%gridcell(p)
+
+       slope_rad = grc_pp%slope_degree(g) * deg2rad
        
        if use_ktop then
          elaislope = elai(p) * cos(slope_rad);

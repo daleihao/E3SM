@@ -543,8 +543,7 @@ contains
             endif
 
             ! Find horizion angle towards the sun
-            dd = nint(saa / (2._r8*SHR_CONST_PI) * ndir_horizon_angle * 2._r8)
-            dd = floor(dd / 2._r8) + 1
+            dd = nint(saa / (2._r8*SHR_CONST_PI) * ndir_horizon_angle) + 1
             if (dd > ndir_horizon_angle) dd = 1
             horizon_angle_twd_sun_rad = horizon_angle_deg(g,dd) * deg2rad
 
