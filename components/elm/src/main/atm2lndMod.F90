@@ -19,7 +19,10 @@ module atm2lndMod
   use decompMod      , only : bounds_type
   use atm2lndType    , only : atm2lnd_type
   use LandunitType   , only : lun_pp                
-  use ColumnType     , only : col_pp                
+  use ColumnType     , only : col_pp
+  use GridCellType   , only : grc_pp
+  use TopounitDataType, only: top_af
+  use lnd2atmType    , only : lnd2atm_type
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -28,6 +31,7 @@ module atm2lndMod
   !
   ! !PUBLIC MEMBER FUNCTIONS:
   public :: downscale_forcings           ! Downscale atm forcing fields from gridcell to column
+  public :: topographic_effects_on_radiation  ! Topographic effects on shortwave/longwave radiation
   !
   ! !PRIVATE MEMBER FUNCTIONS:
   private :: downscale_longwave          ! Downscale longwave radiation from gridcell to column
@@ -446,5 +450,149 @@ contains
     end associate
 
   end subroutine check_downscale_consistency
+
+  !-----------------------------------------------------------------------
+  subroutine topographic_effects_on_radiation(bounds, atm2lnd_vars, nextsw_cday, declin, lnd2atm_vars)
+    !
+    ! !DESCRIPTION:
+    ! Calculate Topographic effects on shortwave and longwave radiation
+    !
+    ! !USES:
+    use domainMod       , only : ldomain
+    use shr_orb_mod
+    use shr_const_mod   , only : SHR_CONST_PI
+    use elm_varpar      , only : numrad, ndir_horizon_angle
+    !
+    ! !ARGUMENTS:
+    type(bounds_type)  , intent(in)    :: bounds
+    type(atm2lnd_type) , intent(inout) :: atm2lnd_vars
+    type(lnd2atm_type) , intent(in)    :: lnd2atm_vars
+    real(r8)           , intent(in)    :: nextsw_cday        ! calendar day at Greenwich (1.00, ..., days/year)
+    real(r8)           , intent(in)    :: declin             ! declination angle (radians) for next time step
+
+    !
+    ! !LOCAL VARIABLES:
+    integer  :: g,topo    ! indices
+    integer  :: dd
+    real(r8) :: f_dir
+    real(r8) :: f_dif
+    real(r8) :: f_refl
+    real(r8) :: cossza
+    real(r8) :: sza
+    real(r8) :: saa
+    real(r8) :: cosinc
+    real(r8) :: slope_rad
+    read(r8) :: aspect_rad
+    read(r8) :: deg2rad
+    real(r8) :: horizon_mask
+    real(r8) :: sky_view_factor
+    real(r8) :: terrain_configuration_factor
+    real(r8) :: horizon_angle_twd_sun
+
+    character(len=*), parameter :: subname = 'topographic_effects_on_radiation'
+    !-----------------------------------------------------------------------
+
+    associate(&
+         ! Gridcell-level fields:
+         lat                => grc_pp%lat                                 , & ! Input:   latitude
+         lon                => grc_pp%lon                                 , & ! Input:   longitude
+         slope_deg          => grc_pp%slope_deg                           , &
+         aspect_deg         => grc_pp%aspect_deg                          , &
+         horizon_angle_deg  => grc_pp%horizon_angle_deg                   , &
+         sky_view_factor    => grc_pp%sky_view_factor                     , &
+         terrain_config_factor => grc_pp%terrain_config_factor            , &
+         albd               => lnd2atm_vars%albd_grc                      , & ! Input:  [real(r8) (:,:) ] surface albedo (direct)
+         albi               => lnd2atm_vars%albi_grc                      , & ! Input:  [real(r8) (:,:) ] surface albedo (diffuse)
+         eflx_lwrad_out_grc => lnd2atm_vars%eflx_lwrad_out_grc            , &
+         forc_solad_grc     => atm2lnd_vars%forc_solad_grc                , &
+         forc_solai_grc     => atm2lnd_vars%forc_solai_grc                , &
+         forc_solar_grc     => atm2lnd_vars%forc_solar_grc                , &
+         forc_lwrad_g       => atm2lnd_vars%forc_lwrad_not_downscaled_grc   &
+         )
+
+     deg2rad = SHR_CONST_PI/180._r8
+
+      ! Initialize column forcing (needs to be done for ALL active columns)
+     do g = bounds%begg, bounds%endg
+
+         ! calculate cosine of solar zenith angle
+         cossza = shr_orb_cosz(nextsw_cday, lat(g), lon(g), declin)
+
+         f_dir = 1._r8
+         f_dif = 1._r8
+         f_refl = 0._r8
+         ! scale shortwave radiation
+         if (cossza > 0._r8) then
+
+            ! solar zenith angle
+            sza = acos(cossza)
+
+            ! solar azimuth angle
+            saa = shr_orb_azimuth(nextsw_cday, lat(g), lon(g), declin,sza)
+            
+            slope_rad = slope_degree(g) * deg2rad
+            aspect_rad = aspect_degree(g) * deg2rad
+            ! calculat local solar zenith angle
+            cosinc = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
+            cosinc = max(-1._SHR_KIND_R8, min(cosinc, 1._SHR_KIND_R8))
+            
+            if (cosinc < 0._r8) then
+              f_dir = 0._r8
+            else
+              f_dir = cosinc / cossza / cos(slope_rad)
+            endif
+
+            ! Find horizion angle towards the sun
+            dd = nint(saa / (2._r8*SHR_CONST_PI) * ndir_horizon_angle * 2._r8)
+            dd = floor(dd / 2._r8) + 1
+            if (dd > ndir_horizon_angle) dd = 1
+            horizon_angle_twd_sun_rad = horizon_angle_deg(g,dd) * deg2rad
+
+            ! Check if sun is above horizon angle
+            if (cossza < sin(horizon_angle_twd_sun_rad)) then
+               f_dir = 0._r8
+            endif
+
+            f_dif = sky_view_factor(g) / cos(slope_rad)
+            if (f_dif < 0._r8) f_dif = 0._r8
+
+            forc_solar_grc(g) = 0._r8
+            do ib = 1, numrad
+               ! Calculate reflected radiation from adjacent terrain
+               f_refl = terrain_config_factor / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
+
+               if (f_refl < 0._r8) f_ref = 0._r8
+
+               ! scale direct solar radiation: vis & nir
+               forc_solad_grc(g,ib) = forc_solad_grc(g,ib) * f_dir
+               ! scale diffuse solar radiation: vis & nir
+               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * (f_dif + f_refl)
+
+               forc_solar_grc(g) = forc_solar_grc(g) + forc_solad_grc(g,ib) + forc_solai_grc(g,ib)
+            end
+
+         end if
+
+         ! scale longwave radiation
+         f_dif = sky_view_factor(g) / cos(slope_rad)
+         if (f_dif < 0._r8) f_dif = 0._r8
+         f_refl = terrain_config_factor / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
+         if (f_refl < 0._r8) f_ref = 0._r8
+
+         forc_lwrad_g(g) = forc_lwrad_g(g) * (f_dif + f_refl)
+
+         ! copy radiation values from gridcell to topounit
+         do topo = grc_pp%topi(g), grc_pp%topf(g)
+            top_af%solad(topo,:) = forc_solad_grc(g,:)
+            top_af%solai(topo,:) = forc_solai_grc(g,:)
+            top_af%solar(topo)   = forc_solar_grc(g)
+            top_af%lwrad(topo)   = forc_lwrad_g(g)
+         end do
+
+     end do
+
+     end associate
+
+  end subroutine topographic_effects_on_radiation
 
 end module atm2lndMod

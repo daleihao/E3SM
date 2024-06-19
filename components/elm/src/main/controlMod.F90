@@ -53,7 +53,7 @@ module controlMod
   use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
-  use elm_varctl              , only: use_top_solar_rad
+  use elm_varctl              , only: use_top_solar_rad, use_ktop
   use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
 
   !
@@ -316,7 +316,7 @@ contains
          use_erosion, ero_ccycle
 
     namelist /elm_inparm/ &
-         use_top_solar_rad
+         use_top_solar_rad, use_ktop
 
     namelist /elm_mosart/ &
          lnd_rof_coupling_nstep

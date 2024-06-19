@@ -176,6 +176,7 @@ module elm_driver
   use CNPBudgetMod                , only : CNPBudget_SetBeginningMonthlyStates, CNPBudget_SetEndingMonthlyStates
   use elm_varctl                  , only : do_budgets, budget_inst, budget_daily, budget_month
   use elm_varctl                  , only : budget_ann, budget_ltann, budget_ltend
+  use elm_varctl                  , only : use_ktop
 
   use timeinfoMod
   !
@@ -685,6 +686,12 @@ contains
        call downscale_forcings(bounds_clump, &
             filter(nc)%num_do_smb_c, filter(nc)%do_smb_c, &
             atm2lnd_vars)
+
+       if use_ktop then
+            call topographic_effects_on_radiation(bounds_clump, &
+                 atm2lnd_vars, nextsw_cday, declinp1, &
+                 lnd2atm_vars)
+       endif
 
        call t_stopf('drvinit')
 
