@@ -474,13 +474,7 @@ contains
     ! !LOCAL VARIABLES:
     integer  :: g,topo    ! indices
     integer  :: dd
-    real(r8) :: f_dir
-    real(r8) :: f_dif
-    real(r8) :: f_refl
     real(r8) :: cossza
-    real(r8) :: sza
-    real(r8) :: saa
-    real(r8) :: cosinc
     real(r8) :: slope_rad
     read(r8) :: aspect_rad
     read(r8) :: deg2rad
@@ -501,6 +495,14 @@ contains
          horizon_angle_deg  => grc_pp%horizon_angle_deg                   , &
          sky_view_factor    => grc_pp%sky_view_factor                     , &
          terrain_config_factor => grc_pp%terrain_config_factor            , &
+         f_short_dir        => atm2lnd_vars%f_short_dir                   , &
+         f_short_dif        => atm2lnd_vars%f_short_dif                   , &
+         f_short_refl       => atm2lnd_vars%f_short_refl                  , &
+         f_long_dif         => atm2lnd_vars%f_long_dif                    , &
+         f_long_refl        => atm2lnd_vars%f_long_refl                   , &
+         sza                => atm2lnd_vars%sza                           , &
+         saa                => atm2lnd_vars%saa                           , &
+         cosinc             => atm2lnd_vars%cosinc                        , &
          albd               => lnd2atm_vars%albd_grc                      , & ! Input:  [real(r8) (:,:) ] surface albedo (direct)
          albi               => lnd2atm_vars%albi_grc                      , & ! Input:  [real(r8) (:,:) ] surface albedo (diffuse)
          eflx_lwrad_out_grc => lnd2atm_vars%eflx_lwrad_out_grc            , &
@@ -518,67 +520,69 @@ contains
          ! calculate cosine of solar zenith angle
          cossza = shr_orb_cosz(nextsw_cday, lat(g), lon(g), declin)
 
-         f_dir = 1._r8
-         f_dif = 1._r8
-         f_refl = 0._r8
+         f_short_dir(g) = 1._r8
+         f_short_dif(g) = 1._r8
+         f_short_refl(g) = 0._r8
          ! scale shortwave radiation
          if (cossza > 0._r8) then
 
             ! solar zenith angle
-            sza = acos(cossza)
+            sza(g) = acos(cossza)
 
             ! solar azimuth angle
-            saa = shr_orb_azimuth(nextsw_cday, lat(g), lon(g), declin,sza)
+            saa(g) = shr_orb_azimuth(nextsw_cday, lat(g), lon(g), declin,sza(g))
             
-            slope_rad = slope_degree(g) * deg2rad
-            aspect_rad = aspect_degree(g) * deg2rad
+            slope_rad = slope_deg(g) * deg2rad
+            aspect_rad = aspect_deg(g) * deg2rad
             ! calculat local solar zenith angle
-            cosinc = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
-            cosinc = max(-1._SHR_KIND_R8, min(cosinc, 1._SHR_KIND_R8))
+            cosinc(g) = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza(g)) * cos(aspect_rad - saa(g))
+            cosinc(g) = max(-1._SHR_KIND_R8, min(cosinc(g), 1._SHR_KIND_R8))
             
-            if (cosinc < 0._r8) then
-              f_dir = 0._r8
+            if (cosinc(g) < 0._r8) then
+               f_short_dir(g) = 0._r8
             else
-              f_dir = cosinc / cossza / cos(slope_rad)
+               f_short_dir(g) = cosinc(g) / cossza / cos(slope_rad)
             endif
 
             ! Find horizion angle towards the sun
-            dd = nint(saa / (2._r8*SHR_CONST_PI) * ndir_horizon_angle) + 1
+            dd = nint(saa(g) / (2._r8*SHR_CONST_PI) * ndir_horizon_angle) + 1
             if (dd > ndir_horizon_angle) dd = 1
             horizon_angle_twd_sun_rad = horizon_angle_deg(g,dd) * deg2rad
 
             ! Check if sun is above horizon angle
             if (cossza < sin(horizon_angle_twd_sun_rad)) then
-               f_dir = 0._r8
+               f_short_dir(g) = 0._r8
             endif
 
-            f_dif = sky_view_factor(g) / cos(slope_rad)
-            if (f_dif < 0._r8) f_dif = 0._r8
+            f_short_dif(g) = sky_view_factor(g) / cos(slope_rad)
+            if (f_short_dif(g) < 0._r8) f_short_dif(g) = 0._r8
 
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
-               f_refl = terrain_config_factor / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
+               f_short_refl(g) = terrain_config_factor / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
 
-               if (f_refl < 0._r8) f_ref = 0._r8
+               if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
 
                ! scale direct solar radiation: vis & nir
-               forc_solad_grc(g,ib) = forc_solad_grc(g,ib) * f_dir
+               forc_solad_grc(g,ib) = forc_solad_grc(g,ib) * f_short_dir(g)
                ! scale diffuse solar radiation: vis & nir
-               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * (f_dif + f_refl)
+               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * (f_short_dir(g) + f_short_refl(g))
 
                forc_solar_grc(g) = forc_solar_grc(g) + forc_solad_grc(g,ib) + forc_solai_grc(g,ib)
             end
 
          end if
 
+         f_long_dif(g) = 1._r8
+         f_long_refl(g) = 0._r8
          ! scale longwave radiation
-         f_dif = sky_view_factor(g) / cos(slope_rad)
-         if (f_dif < 0._r8) f_dif = 0._r8
-         f_refl = terrain_config_factor / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
-         if (f_refl < 0._r8) f_ref = 0._r8
+         f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
+         if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
+         f_long_refl(g) = terrain_config_factor / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
+         if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
 
-         forc_lwrad_g(g) = forc_lwrad_g(g) * (f_dif + f_refl)
+         forc_lwrad_g(g) = forc_lwrad_g(g) * (f_long_dif(g) + f_long_refl(g))
 
          ! copy radiation values from gridcell to topounit
          do topo = grc_pp%topi(g), grc_pp%topf(g)

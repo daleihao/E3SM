@@ -251,8 +251,8 @@ contains
          ! solar azimuth angle
          saa = shr_orb_azimuth(nextsw_cday, grc_pp%lat(g), grc_pp%lon(g), declinp1, sza)
 
-         slope_rad = grc_pp%slope_degree(g) * deg2rad
-         aspect_rad = grc_pp%aspect_degree(g) * deg2rad
+         slope_rad = grc_pp%slope_deg(g) * deg2rad
+         aspect_rad = grc_pp%aspect_deg(g) * deg2rad
 
          cosinc_gcell(g) = cos(slope_rad) * coszen_gcell(g) + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
          cosinc_gcell(g) = max(-1._SHR_KIND_R8, min(cosinc_gcell, 1._SHR_KIND_R8))
@@ -1007,21 +1007,6 @@ contains
                                   coszen_patch(bounds%begp:bounds%endp), declinp1, surfalb_vars, .false.)
     endif
 
-    ! Adjust albedo because of topographic occlusion
-    do ib = 1,numrad
-       do fp = 1,num_nourbanp
-          p = filter_nourbanp(fp)
-          c = veg_pp%column(p)
-          g = veg_pp%gridcell(p)
-
-          albd(p,ib) = albd(p,ib) * grc_pp%sky_view_factor(g)
-          albi(p,ib) = albd(p,ib) * grc_pp%sky_view_factor(g)
-          albgrd(c,ib) = albgrd(c,ib) * grc_pp%sky_view_factor(g)
-          albgrd(c,ib) = albgrd(c,ib) * grc_pp%sky_view_factor(g)
-       end do
-    end do
-
-
     end associate
 
    end subroutine SurfaceAlbedo
@@ -1288,7 +1273,7 @@ contains
        p = filter_vegsol(fp)
        g = veg_pp%gridcell(p)
 
-       slope_rad = grc_pp%slope_degree(g) * deg2rad
+       slope_rad = grc_pp%slope_deg(g) * deg2rad
        
        if use_ktop then
          elaislope = elai(p) * cos(slope_rad);

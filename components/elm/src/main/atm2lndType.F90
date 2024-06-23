@@ -11,7 +11,7 @@ module atm2lndType
   use shr_megan_mod , only : shr_megan_mechcomps_n
   use elm_varpar    , only : numrad, ndst, nlevgrnd !ndst = number of dust bins.
   use elm_varcon    , only : rair, grav, cpair, hfus, tfrz, spval
-  use elm_varctl    , only : iulog, use_c13, use_cn, use_lch4, use_fates, use_fan
+  use elm_varctl    , only : iulog, use_c13, use_cn, use_lch4, use_fates, use_fan, use_ktop
   use seq_drydep_mod, only : n_drydep, drydep_method, DD_XLND
   use decompMod     , only : bounds_type
   use abortutils    , only : endrun
@@ -145,6 +145,15 @@ module atm2lndType
      real(r8) , pointer :: wind24_patch                 (:)   => null() ! patch 24-hour running mean of wind
      real(r8) , pointer :: t_mo_patch                   (:)   => null() ! patch 30-day average temperature (Kelvin)
      real(r8) , pointer :: t_mo_min_patch               (:)   => null() ! patch annual min of t_mo (Kelvin)
+
+     real(r8), pointer :: sza(:) => null()
+     real(r8), pointer :: saa(:) => null()
+     real(r8), pointer :: cosinc(:) => null()
+     real(r8), pointer :: f_short_dir(:) => null()
+     real(r8), pointer :: f_short_dif(:) => null()
+     real(r8), pointer :: f_short_refl(:) => null()
+     real(r8), pointer :: f_long_dif(:) => null()
+     real(r8), pointer :: f_long_refl(:) => null()
 
    contains
 
@@ -310,6 +319,17 @@ contains
        allocate(this%forc_ndep_nitr_grc         (begg:endg))        ; this%forc_ndep_nitr_grc            (:)   = ival
        allocate(this%forc_soilph_grc            (begg:endg))        ; this%forc_soilph_grc               (:)   = ival
     end if
+    
+    if ( use_ktop ) then
+       allocate(this%f_short_dir                (begg:endg))        ; this%f_short_dir                   (:)   = nan
+       allocate(this%f_short_dif                (begg:endg))        ; this%f_short_dif                   (:)   = nan
+       allocate(this%f_short_refl               (begg:endg))        ; this%f_short_refl                  (:)   = nan
+       allocate(this%f_long_dif                 (begg:endg))        ; this%f_long_dif                    (:)   = nan
+       allocate(this%f_long_refl                (begg:endg))        ; this%f_long_refl                   (:)   = nan
+       allocate(this%sza                        (begg:endg))        ; this%sza                           (:)   = nan
+       allocate(this%saa                        (begg:endg))        ; this%saa                           (:)   = nan
+       allocate(this%cosinc                     (begg:endg))        ; this%cosinc                        (:)   = nan
+    endif
 
   end subroutine InitAllocate
 
@@ -498,6 +518,48 @@ contains
     call hist_addfld1d (fname='FSD240', units='W/m2',  &
          avgflag='A', long_name='direct radiation (last 240hrs)', &
          ptr_patch=this%fsd240_patch, default='inactive')
+
+    if ( use_ktop ) then
+       this%sza(begg:endg) = spval
+       call hist_addfld1d (fname='SZA', units='radian',  &
+            avgflag='A', long_name='solar zenigh angle', &
+            ptr_gcell=this%sza, default='inactive')
+
+       this%saa(begg:endg) = spval
+       call hist_addfld1d (fname='SAA', units='radian',  &
+            avgflag='A', long_name='solar azimuth angle', &
+            ptr_gcell=this%saa, default='inactive')
+
+       this%cosinc(begg:endg) = spval
+       call hist_addfld1d (fname='COSINC', units='unitless',  &
+            avgflag='A', long_name='cosine of local solar incident angle', &
+            ptr_gcell=this%cosinc, default='inactive')
+
+       this%f_short_dir(begg:endg) = spval
+       call hist_addfld1d (fname='F_SHORT_DIR', units='unitless',  &
+            avgflag='A', long_name='f_short_dir', &
+            ptr_gcell=this%f_short_dir, default='inactive')
+    
+       this%f_short_dif(begg:endg) = spval
+       call hist_addfld1d (fname='F_SHORT_DIF', units='unitless',  &
+            avgflag='A', long_name='f_short_dif', &
+            ptr_gcell=this%f_short_dif, default='inactive')
+
+       this%f_short_refl(begg:endg) = spval
+       call hist_addfld1d (fname='F_SHORT_REFL', units='unitless',  &
+            avgflag='A', long_name='f_short_refl', &
+            ptr_gcell=this%f_short_refl, default='inactive')
+
+       this%f_long_dir(begg:endg) = spval
+       call hist_addfld1d (fname='F_LONG_DIR', units='unitless',  &
+            avgflag='A', long_name='f_long_dir', &
+            ptr_gcell=this%f_long_dir, default='inactive')
+
+       this%f_long_refl(begg:endg) = spval
+       call hist_addfld1d (fname='F_LONG_REFL', units='unitless',  &
+            avgflag='A', long_name='f_long_refl', &
+            ptr_gcell=this%f_long_refl, default='inactive')
+    endif
 
   end subroutine InitHistory
 
