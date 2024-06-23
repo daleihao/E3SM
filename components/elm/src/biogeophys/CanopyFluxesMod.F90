@@ -326,7 +326,7 @@ contains
          snl                  => col_pp%snl                                   , & ! Input:  [integer  (:)   ]  number of snow layers
          dayl                 => grc_pp%dayl                                  , & ! Input:  [real(r8) (:)   ]  daylength (s)
          max_dayl             => grc_pp%max_dayl                              , & ! Input:  [real(r8) (:)   ]  maximum daylength for this grid cell (s)
-         slope_deg         => grc_pp%slope_deg                                , &
+         slope_deg            => grc_pp%slope_deg                             , &
 
          forc_lwrad           => top_af%lwrad                              , & ! Input:  [real(r8) (:)   ]  downward infrared (longwave) radiation (W/m**2)                       
          forc_q               => top_as%qbot                               , & ! Input:  [real(r8) (:)   ]  atmospheric specific humidity (kg/kg)                                 
@@ -689,8 +689,8 @@ contains
 
          if (use_ktop) then
             slope_rad = slope_deg(g) * deg2rad
-            bir(p) = bir(p) / cos(slope_rad);
-            cir(p) = cir(p) / cos(slope_rad);
+            bir(p) = bir(p) / cos(slope_rad)
+            cir(p) = cir(p) / cos(slope_rad)
          endif
          ! Saturated vapor pressure, specific humidity, and their derivatives
          ! at the leaf surface
