@@ -337,7 +337,7 @@ contains
          ptr_col=this%coszen_col, default='inactive')
 
     this%cosinc_col(begc:endc) = spval
-    call hist_addfld1d (fname='COSINC', units='1', &
+    call hist_addfld1d (fname='COSINC2', units='1', &
          avgflag='A', long_name='cosine of solar incident angle (local surface)', &
         ptr_col=this%cosinc_col, default='inactive')
 
