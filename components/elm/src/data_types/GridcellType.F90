@@ -126,7 +126,7 @@ contains
     allocate(this%aspect_deg          (begg:endg)) ; this%aspect_deg           (:) = ispval
     allocate(this%horizon_angle_deg   (begg:endg,1:ndir_horizon_angle)) ; this%horizon_angle_deg(:,:) = ispval
     allocate(this%sky_view_factor     (begg:endg)) ; this%sky_view_factor      (:) = ispval
-    allocate(this%terrain_config_facto(begg:endg)) ; this%terrain_config_factor(:) = ispval
+    allocate(this%terrain_config_factor(begg:endg)) ; this%terrain_config_factor(:) = ispval
 
     ! This is initiailized in module DayLength
     allocate(this%max_dayl  (begg:endg)) ; this%max_dayl  (:) = spval
