@@ -1763,6 +1763,7 @@ contains
 
       do fc = 1,num_nolakec
          c = filter_nolakec(fc)
+         g = col_pp%gridcell(c)
          lwrad_emit(c)  =    emg(c) * sb * t_grnd(c)**4
          dlwrad_emit(c) = 4._r8*emg(c) * sb * t_grnd(c)**3
 

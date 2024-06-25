@@ -529,18 +529,21 @@ contains
             ! solar azimuth angle
             saa(g) = shr_orb_azimuth(nextsw_cday, lat(g), lon(g), declin,sza(g))
             
+            write(iulog,*) 'sza',sza
+            write(iulog,*) 'saa',saa
             slope_rad = slope_deg(g) * deg2rad
             aspect_rad = aspect_deg(g) * deg2rad
             ! calculat local solar zenith angle
             cosinc(g) = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza(g)) * cos(aspect_rad - saa(g))
             cosinc(g) = max(-1._r8, min(cosinc(g), 1._r8))
-            
+            write(iulog,*) 'cosinc',cosinc(g)
+            write(iulog,*) 'slope_rad',slope_rad
             if (cosinc(g) < 0._r8) then
                f_short_dir(g) = 0._r8
             else
                f_short_dir(g) = cosinc(g) / cossza / cos(slope_rad)
             endif
-
+            
             ! Find horizion angle towards the sun
             dd = nint(saa(g) / (2._r8*SHR_CONST_PI) * ndir_horizon_angle) + 1
             if (dd > ndir_horizon_angle) dd = 1
@@ -557,14 +560,14 @@ contains
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
-               f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
+               f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib))
 
                if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
 
                ! scale direct solar radiation: vis & nir
                forc_solad_grc(g,ib) = forc_solad_grc(g,ib) * f_short_dir(g)
                ! scale diffuse solar radiation: vis & nir
-               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * (f_short_dir(g) + f_short_refl(g))
+               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * f_short_dif(g) + f_short_refl(g)
 
                forc_solar_grc(g) = forc_solar_grc(g) + forc_solad_grc(g,ib) + forc_solai_grc(g,ib)
             end do
@@ -576,10 +579,10 @@ contains
          ! scale longwave radiation
          f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
          if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
-         f_long_refl(g) = terrain_config_factor(g) / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
+         f_long_refl(g) = terrain_config_factor(g) / cos(slope_rad) * eflx_lwrad_out_grc(g)
          if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
 
-         forc_lwrad_g(g) = forc_lwrad_g(g) * (f_long_dif(g) + f_long_refl(g))
+         forc_lwrad_g(g) = forc_lwrad_g(g) * f_long_dif(g) + f_long_refl(g)
 
          ! copy radiation values from gridcell to topounit
          do topo = grc_pp%topi(g), grc_pp%topf(g)
@@ -588,6 +591,12 @@ contains
             top_af%solar(topo)   = forc_solar_grc(g)
             top_af%lwrad(topo)   = forc_lwrad_g(g)
          end do
+
+         write(iulog,*) 'f_short_dir',f_short_dir(g)
+         write(iulog,*) 'f_short_dif',f_short_dif(g)
+         write(iulog,*) 'f_short_refl',f_short_refl(g)
+         write(iulog,*) 'f_long_dif',f_long_dif(g)
+         write(iulog,*) 'f_long_refl',f_long_refl(g)
 
      end do
 

@@ -979,7 +979,6 @@ contains
                tau(bounds%begp:bounds%endp, :), &
                canopystate_vars, surfalb_vars, &
                nextsw_cday, declinp1)
-
     endif
 
        ! Determine values for non-vegetated patches where coszen > 0
@@ -1006,6 +1005,15 @@ contains
        call Albedo_TOP_Adjustment(bounds, num_novegsol, filter_novegsol, nextsw_cday, &
                                   coszen_patch(bounds%begp:bounds%endp), declinp1, surfalb_vars, .false.)
     endif
+
+    do ib = 1,numrad
+        do fp = 1,num_nourbanp
+            p = filter_nourbanp(fp)
+
+            write(iulog,*) 'albd',albd(p,ib)
+            write(iulog,*) 'albi',albi(p,ib)
+        end do
+    end do
 
     end associate
 
