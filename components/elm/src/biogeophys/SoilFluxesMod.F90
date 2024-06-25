@@ -440,6 +440,7 @@ contains
                  +frac_h2osfc(c)*t_h2osfc_bef(c)**4)
 
             if (use_ktop) then
+               slope_rad = slope_deg(g) * deg2rad
                eflx_lwrad_out(p) = ulrad(p) &
                     + (1-frac_veg_nosno(p))*(1.-emg(c))*forc_lwrad(t) &
                     + (1-frac_veg_nosno(p))*emg(c)*sb*lw_grnd / cos(slope_rad) &
