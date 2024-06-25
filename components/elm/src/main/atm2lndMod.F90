@@ -521,7 +521,7 @@ contains
          f_short_dif(g) = 1._r8
          f_short_refl(g) = 0._r8
          ! scale shortwave radiation
-         if (cossza > 0._r8) then
+         if (cossza > 0.0872_r8) then ! just modify when SZA > 85 degree
 
             ! solar zenith angle
             sza(g) = acos(cossza)
@@ -538,6 +538,7 @@ contains
             cosinc(g) = max(-1._r8, min(cosinc(g), 1._r8))
             write(iulog,*) 'cosinc',cosinc(g)
             write(iulog,*) 'slope_rad',slope_rad
+            write(iulog,*) 'aspect_rad',aspect_rad
             if (cosinc(g) < 0._r8) then
                f_short_dir(g) = 0._r8
             else
@@ -557,6 +558,8 @@ contains
             f_short_dif(g) = sky_view_factor(g) / cos(slope_rad)
             if (f_short_dif(g) < 0._r8) f_short_dif(g) = 0._r8
 
+            write(iulog,*) 'forc_solar_grc',forc_solar_grc(g)
+            write(iulog,*) 'forc_lwrad_g',forc_lwrad_g(g)
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
@@ -591,7 +594,8 @@ contains
             top_af%solar(topo)   = forc_solar_grc(g)
             top_af%lwrad(topo)   = forc_lwrad_g(g)
          end do
-
+        
+         
          write(iulog,*) 'f_short_dir',f_short_dir(g)
          write(iulog,*) 'f_short_dif',f_short_dif(g)
          write(iulog,*) 'f_short_refl',f_short_refl(g)

@@ -256,7 +256,9 @@ contains
 
          cosinc_gcell(g) = cos(slope_rad) * coszen_gcell(g) + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
          cosinc_gcell(g) = max(-1._r8, min(cosinc_gcell(g), 1._r8))
-         if (cosinc_gcell(g) <= 0._r8) cosinc_gcell(g) = 0.001_r8 ! although direct solar radiation is zero, we need to calculate diffuse albedo in this case
+         write(iulog,*) 'cosinc_gcell',cosinc_gcell(g)
+         write(iulog,*) 'coszen_gcell',coszen_gcell(g)
+         if (cosinc_gcell(g) <= 0._r8) cosinc_gcell(g) = 0.1_r8 ! although direct solar radiation is zero, we need to calculate diffuse albedo in this case
        else
          cosinc_gcell(g) = coszen_gcell(g)
        endif
@@ -1006,6 +1008,7 @@ contains
                                   coszen_patch(bounds%begp:bounds%endp), declinp1, surfalb_vars, .false.)
     endif
 
+    write(iulog,*) 'albedo:'
     do ib = 1,numrad
         do fp = 1,num_nourbanp
             p = filter_nourbanp(fp)
