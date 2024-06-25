@@ -65,7 +65,7 @@ contains
     type(canopystate_type) , intent(in)    :: canopystate_vars
     type(energyflux_type)  , intent(inout) :: energyflux_vars
     real(r8) :: dtime                                              ! land model time step (sec)
-    read(r8) :: slope_rad, deg2rad
+    real(r8) :: slope_rad, deg2rad
 
     !
     ! !LOCAL VARIABLES:
@@ -163,7 +163,7 @@ contains
          eflx_lh_grnd            => veg_ef%eflx_lh_grnd      , & ! Output: [real(r8) (:)   ]  ground evaporation heat flux (W/m**2) [+ to atm]
          errsoi_col              => col_ef%errsoi            , & ! Output: [real(r8) (:)   ]  column-level soil/lake energy conservation error (W/m**2)
          errsoi_patch            => veg_ef%errsoi            , & ! Output: [real(r8) (:)   ]  pft-level soil/lake energy conservation error (W/m**2)
-         slope_deg               => grc_pp%slope_deg
+         slope_deg               => grc_pp%slope_deg           &
          )
 
       deg2rad = SHR_CONST_PI/180._r8

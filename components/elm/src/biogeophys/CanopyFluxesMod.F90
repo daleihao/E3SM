@@ -318,7 +318,7 @@ contains
     real(r8) :: tau_diff(bounds%begp:bounds%endp) ! Difference from previous iteration tau
     real(r8) :: prev_tau(bounds%begp:bounds%endp) ! Previous iteration tau
     real(r8) :: prev_tau_diff(bounds%begp:bounds%endp) ! Previous difference in iteration tau
-    read(r8) :: slope_rad, deg2rad
+    real(r8) :: slope_rad, deg2rad
     character(len=64) :: event !! timing event
     !------------------------------------------------------------------------------
 

@@ -82,7 +82,7 @@ module elm_driver
   !
   use filterMod              , only : setFilters
   !
-  use atm2lndMod             , only : downscale_forcings
+  use atm2lndMod             , only : downscale_forcings, topographic_effects_on_radiation
   use lnd2atmMod             , only : lnd2atm
   use lnd2glcMod             , only : lnd2glc_type
   !
@@ -687,7 +687,7 @@ contains
             filter(nc)%num_do_smb_c, filter(nc)%do_smb_c, &
             atm2lnd_vars)
 
-       if use_ktop then
+       if (use_ktop) then
             call topographic_effects_on_radiation(bounds_clump, &
                  atm2lnd_vars, nextsw_cday, declinp1, &
                  lnd2atm_vars)

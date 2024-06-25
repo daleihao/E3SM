@@ -550,10 +550,10 @@ contains
             avgflag='A', long_name='f_short_refl', &
             ptr_gcell=this%f_short_refl, default='inactive')
 
-       this%f_long_dir(begg:endg) = spval
-       call hist_addfld1d (fname='F_LONG_DIR', units='unitless',  &
-            avgflag='A', long_name='f_long_dir', &
-            ptr_gcell=this%f_long_dir, default='inactive')
+       this%f_long_dif(begg:endg) = spval
+       call hist_addfld1d (fname='F_LONG_DIF', units='unitless',  &
+            avgflag='A', long_name='f_long_dif', &
+            ptr_gcell=this%f_long_dif, default='inactive')
 
        this%f_long_refl(begg:endg) = spval
        call hist_addfld1d (fname='F_LONG_REFL', units='unitless',  &

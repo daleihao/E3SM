@@ -249,14 +249,6 @@ contains
        endif
        call surfrd_get_topo_for_solar_rad(ldomain, fsurdat)
     endif
-
-    if (fsurdat /= " " .and. use_ktop) then
-       if (masterproc) then
-          write(iulog,*) 'Attempting to read topo parameters for kTOP parameterization from ',trim(fsurdat)
-          call shr_sys_flush(iulog)
-       endif
-       call surfrd_ktop_data(ldomain, fsurdat)
-    endif
     
     !-------------------------------------------------------------------------
     ! Topounit
@@ -378,6 +370,14 @@ contains
     ! This is needed here for the following call to decompInit_glcp
 
     call initGridCells()
+
+    if (fsurdat /= " " .and. use_ktop) then
+       if (masterproc) then
+           write(iulog,*) 'Attempting to read topo parameters for kTOP parameterization from ',trim(fsurdat)
+           call shr_sys_flush(iulog)
+       endif
+       call surfrd_ktop_data(ldomain, fsurdat)
+    endif
 
     ! Set global seg maps for gridcells, topounits, landlunits, columns and patches
     !if(max_topounits > 1) then 

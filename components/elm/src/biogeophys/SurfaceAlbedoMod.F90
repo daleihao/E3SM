@@ -135,7 +135,7 @@ contains
     real(r8) :: ws              (bounds%begp:bounds%endp)                                 ! fraction of LAI+SAI that is SAI
     real(r8) :: blai(bounds%begp:bounds%endp)              ! lai buried by snow: tlai - elai
     real(r8) :: bsai(bounds%begp:bounds%endp)              ! sai buried by snow: tsai - esai
-    read(r8) :: sza,saa,deg2rad,slope_rad,aspect_rad
+    real(r8) :: sza,saa,deg2rad,slope_rad,aspect_rad
 
     real(r8) :: coszen_gcell    (bounds%begg:bounds%endg)                                 ! cosine solar zenith angle for next time step (grc)
     real(r8) :: coszen_patch    (bounds%begp:bounds%endp)                                 ! cosine solar zenith angle for next time step (pft)
@@ -245,7 +245,7 @@ contains
     do g = bounds%begg,bounds%endg
        coszen_gcell(g) = shr_orb_cosz (nextsw_cday, grc_pp%lat(g), grc_pp%lon(g), declinp1)
 
-       if use_ktop then
+       if (use_ktop) then
          ! solar zenith angle
          sza = acos(coszen_gcell(g))
          ! solar azimuth angle
@@ -255,10 +255,10 @@ contains
          aspect_rad = grc_pp%aspect_deg(g) * deg2rad
 
          cosinc_gcell(g) = cos(slope_rad) * coszen_gcell(g) + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
-         cosinc_gcell(g) = max(-1._SHR_KIND_R8, min(cosinc_gcell, 1._SHR_KIND_R8))
+         cosinc_gcell(g) = max(-1._r8, min(cosinc_gcell(g), 1._r8))
          if (cosinc_gcell(g) <= 0._r8) cosinc_gcell(g) = 0.001_r8 ! although direct solar radiation is zero, we need to calculate diffuse albedo in this case
        else
-         cosinc_gcell(g) = coszen_gcell(g);
+         cosinc_gcell(g) = coszen_gcell(g)
        endif
     end do
     do c = bounds%begc,bounds%endc
@@ -1181,7 +1181,7 @@ contains
      
      !
      ! !LOCAL VARIABLES:
-     integer  :: fp,p,c,iv        ! array indices
+     integer  :: fp,p,c,iv,g      ! array indices
      integer  :: ib               ! waveband number
      real(r8) :: cosz             ! 0.001 <= coszen <= 1.000
      real(r8) :: asu              ! single scattering albedo
@@ -1215,7 +1215,7 @@ contains
      real(r8) :: laisum                                            ! cumulative lai+sai for canopy layer (at middle of layer)
      real(r8) :: extkb                                             ! direct beam extinction coefficient
      real(r8) :: extkn                                             ! nitrogen allocation coefficient
-     read(r8) :: deg2rad,slope_rad
+     real(r8) :: deg2rad,slope_rad
      real(r8) :: elaislope(bounds%begp:bounds%endp)         ! elai projected to slope
      real(r8) :: esaislope(bounds%begp:bounds%endp)         ! esai projected to slope
      !-----------------------------------------------------------------------
@@ -1275,7 +1275,7 @@ contains
 
        slope_rad = grc_pp%slope_deg(g) * deg2rad
        
-       if use_ktop then
+       if (use_ktop) then
          elaislope = elai(p) * cos(slope_rad);
          esaislope = esai(p) * cos(slope_rad);
        else

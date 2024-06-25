@@ -1738,7 +1738,7 @@ contains
 
 ! !ARGUMENTS:
     implicit none
-    type(domain_type),intent(inout) :: domain   ! domain to init
+    type(domain_type),intent(in)    :: domain   ! domain to init
     character(len=*) ,intent(in)    :: filename ! grid filename
 !
 ! !CALLED FROM:
@@ -1772,9 +1772,15 @@ contains
        endif
     end if
 
+    write(iulog,*) 'start get fil', trim(filename)
+
     call getfil( filename, locfn, 0 )
+    write(iulog,*) 'locfn', trim(locfn)
     call ncd_pio_openfile (ncid, trim(locfn), 0)
+    write(iulog,*) 'openfile:', trim(locfn)
     call ncd_inqfdims(ncid, isgrid2d, ni, nj, ns)
+
+    write(iulog,*) 'dimension', isgrid2d
 
     if (domain%ns /= ns) then
        write(iulog,*) trim(subname),' ERROR: fsurdat file mismatch ns',&
@@ -1804,21 +1810,24 @@ contains
        endif
     enddo
 
+    write(iulog,*) 'Check dimension ndir_horizon_angle'
     call check_dim(ncid, 'ndir_horizon_angle', ndir_horizon_angle)
 
-    call ncd_io(ncid=ncid, varname='slope_deg', flag='read', data=grc_pp%slope_deg, &
+    write(iulog,*) 'Start to read slope_deg'
+    call ncd_io(ncid=ncid, varname='SLOPE_DEG', flag='read', data=grc_pp%slope_deg, &
          dim1name=grlnd, readvar=readvar)
+    write(iulog,*) 'Start to read aspect_deg'
     if (.not. readvar) call endrun( trim(subname)//' ERROR: slope_deg NOT on fsurdat file' )
-    call ncd_io(ncid=ncid, varname='aspect_deg', flag='read', data=grc_pp%aspect_deg, &
+    call ncd_io(ncid=ncid, varname='ASPECT_DEG', flag='read', data=grc_pp%aspect_deg, &
          dim1name=grlnd, readvar=readvar)
     if (.not. readvar) call endrun( trim(subname)//' ERROR: aspect_deg NOT on fsurdat file' )
-    call ncd_io(ncid=ncid, varname='sky_view_factor', flag='read', data=grc_pp%sky_view_factor, &
+    call ncd_io(ncid=ncid, varname='SKY_VIEW_FACTOR', flag='read', data=grc_pp%sky_view_factor, &
          dim1name=grlnd, readvar=readvar)
     if (.not. readvar) call endrun( trim(subname)//' ERROR: sky_view_factor NOT on fsurdat file' )
-    call ncd_io(ncid=ncid, varname='terrain_config_factor', flag='read', data=grc_pp%terrain_config_factor, &
+    call ncd_io(ncid=ncid, varname='TERRAIN_CONFIG_FACTOR', flag='read', data=grc_pp%terrain_config_factor, &
          dim1name=grlnd, readvar=readvar)
     if (.not. readvar) call endrun( trim(subname)//' ERROR: terrain_config_factor NOT on fsurdat file' )
-    call ncd_io(ncid=ncid, varname='horizon_angle_deg', flag='read', data=grc_pp%horizon_angle_deg, &
+    call ncd_io(ncid=ncid, varname='HORIZON_ANGLE_DEG', flag='read', data=grc_pp%horizon_angle_deg, &
          dim1name=grlnd, readvar=readvar)
     If (.not. readvar) call endrun( trim(subname)//' ERROR: horizon_angle_deg NOT on fsurdat file' )
 

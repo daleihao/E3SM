@@ -1702,7 +1702,7 @@ contains
     real(r8) :: eflx_gnet_snow                                         !
     real(r8) :: eflx_gnet_soil                                         !
     real(r8) :: eflx_gnet_h2osfc                                       !
-    read(r8) :: slope_rad, deg2rad
+    real(r8) :: slope_rad, deg2rad
     !-----------------------------------------------------------------------
 
     ! Enforce expected array sizes

@@ -473,15 +473,12 @@ contains
     !
     ! !LOCAL VARIABLES:
     integer  :: g,topo    ! indices
-    integer  :: dd
+    integer  :: dd,ib
     real(r8) :: cossza
     real(r8) :: slope_rad
-    read(r8) :: aspect_rad
-    read(r8) :: deg2rad
-    real(r8) :: horizon_mask
-    real(r8) :: sky_view_factor
-    real(r8) :: terrain_configuration_factor
-    real(r8) :: horizon_angle_twd_sun
+    real(r8) :: aspect_rad
+    real(r8) :: deg2rad
+    real(r8) :: horizon_angle_twd_sun_rad
 
     character(len=*), parameter :: subname = 'topographic_effects_on_radiation'
     !-----------------------------------------------------------------------
@@ -536,7 +533,7 @@ contains
             aspect_rad = aspect_deg(g) * deg2rad
             ! calculat local solar zenith angle
             cosinc(g) = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza(g)) * cos(aspect_rad - saa(g))
-            cosinc(g) = max(-1._SHR_KIND_R8, min(cosinc(g), 1._SHR_KIND_R8))
+            cosinc(g) = max(-1._r8, min(cosinc(g), 1._r8))
             
             if (cosinc(g) < 0._r8) then
                f_short_dir(g) = 0._r8
@@ -560,7 +557,7 @@ contains
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
-               f_short_refl(g) = terrain_config_factor / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
+               f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib)) / forc_solai_grc(g,ib)
 
                if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
 
@@ -570,7 +567,7 @@ contains
                forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * (f_short_dir(g) + f_short_refl(g))
 
                forc_solar_grc(g) = forc_solar_grc(g) + forc_solad_grc(g,ib) + forc_solai_grc(g,ib)
-            end
+            end do
 
          end if
 
@@ -579,7 +576,7 @@ contains
          ! scale longwave radiation
          f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
          if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
-         f_long_refl(g) = terrain_config_factor / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
+         f_long_refl(g) = terrain_config_factor(g) / cos(slope_rad) * eflx_lwrad_out_grc(g) / forc_lwrad_g(g)
          if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
 
          forc_lwrad_g(g) = forc_lwrad_g(g) * (f_long_dif(g) + f_long_refl(g))

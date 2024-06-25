@@ -111,7 +111,7 @@ contains
     real(r8) :: vol_ice      ! partial volume of ice lens in layer
     real(r8) :: vol_liq      ! partial volume of liquid water in layer
     real(r8) :: fh2o_eff(bounds%begc:bounds%endc) ! effective surface water fraction (i.e. seen by atm)
-    read(r8) :: slope_rad, deg2rad
+    real(r8) :: slope_rad, deg2rad
     !------------------------------------------------------------------------------
 
     associate(                                                          &
