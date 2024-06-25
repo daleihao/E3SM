@@ -1774,11 +1774,11 @@ contains
          if (use_ktop) then
             deg2rad = SHR_CONST_PI/180._r8
             slope_rad = slope_deg(g) * deg2rad
-            lwrad_emit(c) = lwrad_emit(c) * cos(slope_rad)
-            dlwrad_emit(c) = dlwrad_emit(c) * cos(slope_rad)
-            lwrad_emit_snow(c) = lwrad_emit_snow(c) * cos(slope_rad)
-            lwrad_emit_soil(c) = lwrad_emit_soil(c) * cos(slope_rad)
-            lwrad_emit_h2osfc(c) = lwrad_emit_h2osfc(c) * cos(slope_rad)
+            lwrad_emit(c) = lwrad_emit(c) / cos(slope_rad)
+            dlwrad_emit(c) = dlwrad_emit(c) / cos(slope_rad)
+            lwrad_emit_snow(c) = lwrad_emit_snow(c) / cos(slope_rad)
+            lwrad_emit_soil(c) = lwrad_emit_soil(c) / cos(slope_rad)
+            lwrad_emit_h2osfc(c) = lwrad_emit_h2osfc(c) / cos(slope_rad)
          endif
       end do
 

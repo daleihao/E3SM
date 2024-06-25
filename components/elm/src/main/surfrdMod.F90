@@ -1772,15 +1772,9 @@ contains
        endif
     end if
 
-    write(iulog,*) 'start get fil', trim(filename)
-
     call getfil( filename, locfn, 0 )
-    write(iulog,*) 'locfn', trim(locfn)
     call ncd_pio_openfile (ncid, trim(locfn), 0)
-    write(iulog,*) 'openfile:', trim(locfn)
     call ncd_inqfdims(ncid, isgrid2d, ni, nj, ns)
-
-    write(iulog,*) 'dimension', isgrid2d
 
     if (domain%ns /= ns) then
        write(iulog,*) trim(subname),' ERROR: fsurdat file mismatch ns',&

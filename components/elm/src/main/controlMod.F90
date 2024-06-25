@@ -878,6 +878,7 @@ contains
     call mpi_bcast (more_vertlayers,1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_top_solar_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! TOP solar radiation parameterization
+    call mpi_bcast (use_ktop, 1, MPI_LOGICAL, 0, mpicom, ier)  ! kTOP radiation parameterization
     
     ! glacier_mec variables
     call mpi_bcast (create_glacier_mec_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
@@ -1066,7 +1067,13 @@ contains
     else
         write(iulog,*) '   use_top_solar_rad is False, so do not run TOP solar radiation parameterization'
     end if
-    
+
+    if (use_ktop) then
+        write(iulog,*) '  use kTOP radiation parameterization instead of PP'
+    else
+        write(iulog,*) '   use_ktop is False, so do not run use_ktop radiation parameterization'
+    end if
+
     if (use_cn) then
        if (suplnitro /= suplnNon)then
           write(iulog,*) '   Supplemental Nitrogen mode is set to run over Patches: ', &
@@ -1182,7 +1189,8 @@ contains
     write(iulog,*) '   more vertical layers = ', more_vertlayers
     
     write(iulog,*) '   Sub-grid topographic effects on solar radiation   = ', use_top_solar_rad  ! TOP solar radiation parameterization
-     
+    write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop  ! kTOP radiation parameterization
+
     if (nsrest == nsrContinue) then
        write(iulog,*) 'restart warning:'
        write(iulog,*) '   Namelist not checked for agreement with initial run.'
