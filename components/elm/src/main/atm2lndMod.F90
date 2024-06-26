@@ -517,6 +517,12 @@ contains
          ! calculate cosine of solar zenith angle
          cossza = shr_orb_cosz(nextsw_cday, lat(g), lon(g), declin)
 
+         slope_rad = slope_deg(g) * deg2rad
+         aspect_rad = aspect_deg(g) * deg2rad
+
+         write(iulog,*) 'slope_rad',slope_rad
+         write(iulog,*) 'aspect_rad',aspect_rad
+
          f_short_dir(g) = 1._r8
          f_short_dif(g) = 1._r8
          f_short_refl(g) = 0._r8
@@ -531,14 +537,12 @@ contains
             
             write(iulog,*) 'sza',sza
             write(iulog,*) 'saa',saa
-            slope_rad = slope_deg(g) * deg2rad
-            aspect_rad = aspect_deg(g) * deg2rad
+
             ! calculat local solar zenith angle
             cosinc(g) = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza(g)) * cos(aspect_rad - saa(g))
             cosinc(g) = max(-1._r8, min(cosinc(g), 1._r8))
             write(iulog,*) 'cosinc',cosinc(g)
-            write(iulog,*) 'slope_rad',slope_rad
-            write(iulog,*) 'aspect_rad',aspect_rad
+           
             if (cosinc(g) < 0._r8) then
                f_short_dir(g) = 0._r8
             else
