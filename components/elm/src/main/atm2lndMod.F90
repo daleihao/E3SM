@@ -526,8 +526,11 @@ contains
          f_short_dir(g) = 1._r8
          f_short_dif(g) = 1._r8
          f_short_refl(g) = 0._r8
+         sza(g) = nan
+         saa(g) = nan
+         cosinc(g) = nan
          ! scale shortwave radiation
-         if (cossza > 0.0872_r8) then ! just modify when SZA > 85 degree
+         if (cossza > 0.01_r8) then ! just modify when SZA > 85 degree 0.0872_r8
 
             ! solar zenith angle
             sza(g) = acos(cossza)
@@ -568,7 +571,9 @@ contains
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
                f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib))
-
+               
+               write(iulog,*) 'albd',albd(g,ib)
+               write(iulog,*) 'albi',albi(g,ib)
                if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
 
                ! scale direct solar radiation: vis & nir
@@ -586,9 +591,10 @@ contains
          ! scale longwave radiation
          f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
          if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
-         f_long_refl(g) = terrain_config_factor(g) / cos(slope_rad) * eflx_lwrad_out_grc(g)
+         f_long_refl(g) = terrain_config_factor(g) * eflx_lwrad_out_grc(g)
          if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
-
+         
+         write(iulog,*) 'eflx_lwrad_out_grc',eflx_lwrad_out_grc(g)
          forc_lwrad_g(g) = forc_lwrad_g(g) * f_long_dif(g) + f_long_refl(g)
 
          ! copy radiation values from gridcell to topounit
