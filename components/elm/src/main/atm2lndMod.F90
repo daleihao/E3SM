@@ -530,7 +530,7 @@ contains
          saa(g) = nan
          cosinc(g) = nan
          ! scale shortwave radiation
-         if (cossza > 0.01_r8) then ! just modify when SZA > 85 degree 0.0872_r8
+         if (cossza > 0.0872_r8) then ! just modify when SZA > 85 degree 0.0872_r8
 
             ! solar zenith angle
             sza(g) = acos(cossza)
