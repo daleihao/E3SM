@@ -13,7 +13,7 @@ module CanopyTemperatureMod
   use shr_kind_mod         , only : r8 => shr_kind_r8
   use shr_const_mod        , only : SHR_CONST_PI
   use decompMod            , only : bounds_type
-  use elm_varctl           , only : iulog, use_fates, use_ktop
+  use elm_varctl           , only : iulog, use_fates, use_ktop_surf
   use PhotosynthesisMod    , only : Photosynthesis, PhotosynthesisTotal, Fractionation
   use elm_instMod          , only : alm_fates
   use SurfaceResistanceMod , only : calc_soilevap_stress
@@ -444,7 +444,7 @@ contains
          ! Vegetation Emissivity
 
          avmuir = 1._r8
-         if (use_ktop) then
+         if (use_ktop_surf) then
             slope_rad = grc_pp%slope_deg(g) * deg2rad
             emv(p) = 1._r8-exp(-(elai(p)+esai(p))*cos(slope_rad)/avmuir)
          else

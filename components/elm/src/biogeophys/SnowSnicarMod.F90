@@ -1812,7 +1812,7 @@ contains
      use elm_varpar       , only : nlevsno, numrad
      use elm_time_manager , only : get_nstep
      use shr_const_mod    , only : SHR_CONST_PI
-     use elm_varctl       , only : snow_shape, snicar_atm_type, use_dust_snow_internal_mixing, use_ktop
+     use elm_varctl       , only : snow_shape, snicar_atm_type, use_dust_snow_internal_mixing, use_ktop_surf
      !
      ! !ARGUMENTS:
      integer           , intent(in)  :: flg_snw_ice                                        ! flag: =1 when called from CLM, =2 when called from CSIM
@@ -2269,7 +2269,7 @@ contains
                 lon_coord         = 0
              endif ! end if flg_snw_ice == 1
 
-             if (use_ktop) then
+             if (use_ktop_surf) then
                 slope_rad = grc_pp%slope_deg(g_idx) * deg2rad
                 h2osno_liq_lcl = h2osno_liq_lcl * cos(slope_rad)
                 h2osno_ice_lcl = h2osno_ice_lcl * cos(slope_rad)

@@ -625,7 +625,8 @@ this mask will have smb calculated over the entire global land surface
 <use_top_solar_rad>.false.</use_top_solar_rad>
 
 <!-- namelist for ktop -->
-<use_ktop>.false.</use_ktop>
+<use_ktop_rad>.false.</use_ktop_rad>
+<use_ktop_surf>.false.</use_ktop_surf>
 
 <!-- SNICAR (SNow, ICe, and Aerosol Radiative model) datasets -->
 <!--  ***********  Resolution independent:   ***********  -->

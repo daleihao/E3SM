@@ -367,7 +367,8 @@ module elm_varctl
   character(len = SHR_KIND_CS), public :: precip_downscaling_method  = 'ERMM' ! Precip downscaling method values can be ERMM or FNM
   logical, public :: use_lake_wat_storage = .false.
   logical, public :: use_top_solar_rad   = .false.  ! TOP : sub-grid topographic effect on surface solar radiation
-  logical, public :: use_ktop            = .false.  ! kTOP : grid-scale topographic effect on shortwave and longwave radiation
+  logical, public :: use_ktop_rad        = .false.  ! kTOP : grid-scale topographic effect on shortwave and longwave radiation
+  logical, public :: use_ktop_surf       = .false.  ! kTOP : grid-scale topographic effect on shortwave and longwave radiation
 
   !----------------------------------------------------------
   ! Fan controls (use_fan)

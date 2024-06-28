@@ -86,7 +86,7 @@ contains
     use filterMod                 , only: allocFilters
     use reweightMod               , only: reweight_wrapup
     use topounit_varcon           , only: max_topounits, has_topounit, topounit_varcon_init
-    use elm_varctl                , only: use_top_solar_rad, use_ktop
+    use elm_varctl                , only: use_top_solar_rad, use_ktop_rad
     !
     ! !LOCAL VARIABLES:
     integer           :: ier                     ! error status
@@ -371,7 +371,7 @@ contains
 
     call initGridCells()
 
-    if (fsurdat /= " " .and. use_ktop) then
+    if (fsurdat /= " " .and. use_ktop_rad) then
        if (masterproc) then
            write(iulog,*) 'Attempting to read topo parameters for kTOP parameterization from ',trim(fsurdat)
            call shr_sys_flush(iulog)

@@ -53,7 +53,7 @@ module controlMod
   use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
-  use elm_varctl              , only: use_top_solar_rad, use_ktop
+  use elm_varctl              , only: use_top_solar_rad, use_ktop_rad, use_ktop_surf
   use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
 
   !
@@ -316,7 +316,7 @@ contains
          use_erosion, ero_ccycle
 
     namelist /elm_inparm/ &
-         use_top_solar_rad, use_ktop
+         use_top_solar_rad, use_ktop_rad, use_ktop_surf
 
     namelist /elm_mosart/ &
          lnd_rof_coupling_nstep
@@ -878,7 +878,8 @@ contains
     call mpi_bcast (more_vertlayers,1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_top_solar_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! TOP solar radiation parameterization
-    call mpi_bcast (use_ktop, 1, MPI_LOGICAL, 0, mpicom, ier)  ! kTOP radiation parameterization
+    call mpi_bcast (use_ktop_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! kTOP radiation parameterization
+    call mpi_bcast (use_ktop_surf, 1, MPI_LOGICAL, 0, mpicom, ier) ! kTOP radiation parameterization
     
     ! glacier_mec variables
     call mpi_bcast (create_glacier_mec_landunit, 1, MPI_LOGICAL, 0, mpicom, ier)
@@ -1068,10 +1069,16 @@ contains
         write(iulog,*) '   use_top_solar_rad is False, so do not run TOP solar radiation parameterization'
     end if
 
-    if (use_ktop) then
+    if (use_ktop_rad) then
         write(iulog,*) '  use kTOP radiation parameterization instead of PP'
     else
-        write(iulog,*) '   use_ktop is False, so do not run use_ktop radiation parameterization'
+        write(iulog,*) '   use_ktop_rad is False, so do not run use_ktop_rad radiation parameterization'
+    end if
+
+    if (use_ktop_surf) then
+        write(iulog,*) '  use kTOP radiation parameterization instead of PP'
+    else
+        write(iulog,*) '   use_ktop_surf is False, so do not run use_ktop_surf radiation parameterization'
     end if
 
     if (use_cn) then
@@ -1189,7 +1196,8 @@ contains
     write(iulog,*) '   more vertical layers = ', more_vertlayers
     
     write(iulog,*) '   Sub-grid topographic effects on solar radiation   = ', use_top_solar_rad  ! TOP solar radiation parameterization
-    write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop  ! kTOP radiation parameterization
+    write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop_rad   ! kTOP radiation parameterization
+    write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop_surf  ! kTOP radiation parameterization
 
     if (nsrest == nsrContinue) then
        write(iulog,*) 'restart warning:'

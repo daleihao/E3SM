@@ -14,7 +14,7 @@ module SurfaceAlbedoMod
   use landunit_varcon   , only : istsoil, istcrop, istdlak
   use elm_varcon        , only : grlnd, namep, namet
   use elm_varpar        , only : numrad, nlevcan, nlevsno, nlevcan
-  use elm_varctl        , only : fsurdat, iulog, subgridflag, use_snicar_frc, use_fates, use_snicar_ad, use_top_solar_rad, use_ktop
+  use elm_varctl        , only : fsurdat, iulog, subgridflag, use_snicar_frc, use_fates, use_snicar_ad, use_top_solar_rad, use_ktop_surf
   use VegetationPropertiesType    , only : veg_vp
   use SnowSnicarMod     , only : sno_nbr_aer, SNICAR_RT, SNICAR_AD_RT, DO_SNO_AER, DO_SNO_OC
   use AerosolType       , only : aerosol_type
@@ -245,7 +245,7 @@ contains
     do g = bounds%begg,bounds%endg
        coszen_gcell(g) = shr_orb_cosz (nextsw_cday, grc_pp%lat(g), grc_pp%lon(g), declinp1)
 
-       if (use_ktop) then
+       if (use_ktop_surf) then
          ! solar zenith angle
          sza = acos(coszen_gcell(g))
          ! solar azimuth angle
@@ -256,8 +256,8 @@ contains
 
          cosinc_gcell(g) = cos(slope_rad) * coszen_gcell(g) + sin(slope_rad) * sin(sza) * cos(aspect_rad - saa)
          cosinc_gcell(g) = max(-1._r8, min(cosinc_gcell(g), 1._r8))
-         write(iulog,*) 'cosinc_gcell',cosinc_gcell(g)
-         write(iulog,*) 'coszen_gcell',coszen_gcell(g)
+         !write(iulog,*) 'cosinc_gcell',cosinc_gcell(g)
+         !write(iulog,*) 'coszen_gcell',coszen_gcell(g)
          if (cosinc_gcell(g) <= 0._r8) cosinc_gcell(g) = 0.1_r8 ! although direct solar radiation is zero, we need to calculate diffuse albedo in this case
        else
          cosinc_gcell(g) = coszen_gcell(g)
@@ -1286,7 +1286,7 @@ contains
 
        slope_rad = grc_pp%slope_deg(g) * deg2rad
        
-       if (use_ktop) then
+       if (use_ktop_surf) then
          elaislope = elai(p) * cos(slope_rad);
          esaislope = esai(p) * cos(slope_rad);
        else

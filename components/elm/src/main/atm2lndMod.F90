@@ -520,8 +520,8 @@ contains
          slope_rad = slope_deg(g) * deg2rad
          aspect_rad = aspect_deg(g) * deg2rad
 
-         write(iulog,*) 'slope_rad',slope_rad
-         write(iulog,*) 'aspect_rad',aspect_rad
+         !write(iulog,*) 'slope_rad',slope_rad
+         !write(iulog,*) 'aspect_rad',aspect_rad
 
          f_short_dir(g) = 1._r8
          f_short_dif(g) = 1._r8
@@ -538,13 +538,13 @@ contains
             ! solar azimuth angle
             saa(g) = shr_orb_azimuth(nextsw_cday, lat(g), lon(g), declin,sza(g))
             
-            write(iulog,*) 'sza',sza
-            write(iulog,*) 'saa',saa
+            !write(iulog,*) 'sza',sza
+            !write(iulog,*) 'saa',saa
 
             ! calculat local solar zenith angle
             cosinc(g) = cos(slope_rad) * cossza + sin(slope_rad) * sin(sza(g)) * cos(aspect_rad - saa(g))
             cosinc(g) = max(-1._r8, min(cosinc(g), 1._r8))
-            write(iulog,*) 'cosinc',cosinc(g)
+            !write(iulog,*) 'cosinc',cosinc(g)
            
             if (cosinc(g) < 0._r8) then
                f_short_dir(g) = 0._r8
@@ -565,8 +565,8 @@ contains
             f_short_dif(g) = sky_view_factor(g) / cos(slope_rad)
             if (f_short_dif(g) < 0._r8) f_short_dif(g) = 0._r8
 
-            write(iulog,*) 'forc_solar_grc',forc_solar_grc(g)
-            write(iulog,*) 'forc_lwrad_g',forc_lwrad_g(g)
+            !write(iulog,*) 'forc_solar_grc',forc_solar_grc(g)
+            !write(iulog,*) 'forc_lwrad_g',forc_lwrad_g(g)
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
@@ -594,7 +594,7 @@ contains
          f_long_refl(g) = terrain_config_factor(g) * eflx_lwrad_out_grc(g)
          if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
          
-         write(iulog,*) 'eflx_lwrad_out_grc',eflx_lwrad_out_grc(g)
+         !write(iulog,*) 'eflx_lwrad_out_grc',eflx_lwrad_out_grc(g)
          forc_lwrad_g(g) = forc_lwrad_g(g) * f_long_dif(g) + f_long_refl(g)
 
          ! copy radiation values from gridcell to topounit
@@ -606,11 +606,11 @@ contains
          end do
         
          
-         write(iulog,*) 'f_short_dir',f_short_dir(g)
-         write(iulog,*) 'f_short_dif',f_short_dif(g)
-         write(iulog,*) 'f_short_refl',f_short_refl(g)
-         write(iulog,*) 'f_long_dif',f_long_dif(g)
-         write(iulog,*) 'f_long_refl',f_long_refl(g)
+         !write(iulog,*) 'f_short_dir',f_short_dir(g)
+         !write(iulog,*) 'f_short_dif',f_short_dif(g)
+         !write(iulog,*) 'f_short_refl',f_short_refl(g)
+         !write(iulog,*) 'f_long_dif',f_long_dif(g)
+         !write(iulog,*) 'f_long_refl',f_long_refl(g)
 
      end do
 

@@ -11,7 +11,7 @@ module atm2lndType
   use shr_megan_mod , only : shr_megan_mechcomps_n
   use elm_varpar    , only : numrad, ndst, nlevgrnd !ndst = number of dust bins.
   use elm_varcon    , only : rair, grav, cpair, hfus, tfrz, spval
-  use elm_varctl    , only : iulog, use_c13, use_cn, use_lch4, use_fates, use_fan, use_ktop
+  use elm_varctl    , only : iulog, use_c13, use_cn, use_lch4, use_fates, use_fan, use_ktop_rad
   use seq_drydep_mod, only : n_drydep, drydep_method, DD_XLND
   use decompMod     , only : bounds_type
   use abortutils    , only : endrun
@@ -320,7 +320,7 @@ contains
        allocate(this%forc_soilph_grc            (begg:endg))        ; this%forc_soilph_grc               (:)   = ival
     end if
     
-    if ( use_ktop ) then
+    if ( use_ktop_rad ) then
        allocate(this%f_short_dir                (begg:endg))        ; this%f_short_dir                   (:)   = nan
        allocate(this%f_short_dif                (begg:endg))        ; this%f_short_dif                   (:)   = nan
        allocate(this%f_short_refl               (begg:endg))        ; this%f_short_refl                  (:)   = nan
@@ -519,7 +519,7 @@ contains
          avgflag='A', long_name='direct radiation (last 240hrs)', &
          ptr_patch=this%fsd240_patch, default='inactive')
 
-    if ( use_ktop ) then
+    if ( use_ktop_rad ) then
        this%sza(begg:endg) = spval
        call hist_addfld1d (fname='SZA', units='radian',  &
             avgflag='A', long_name='solar zenigh angle', &
