@@ -1008,15 +1008,15 @@ contains
                                   coszen_patch(bounds%begp:bounds%endp), declinp1, surfalb_vars, .false.)
     endif
 
-    write(iulog,*) 'albedo:'
-    do ib = 1,numrad
-        do fp = 1,num_nourbanp
-            p = filter_nourbanp(fp)
-
-            write(iulog,*) 'albd',albd(p,ib)
-            write(iulog,*) 'albi',albi(p,ib)
-        end do
-    end do
+    !write(iulog,*) 'albedo:'
+    !do ib = 1,numrad
+    !    do fp = 1,num_nourbanp
+    !        p = filter_nourbanp(fp)
+    !
+    !        write(iulog,*) 'albd',albd(p,ib)
+    !        write(iulog,*) 'albi',albi(p,ib)
+    !    end do
+    !end do
 
     end associate
 
