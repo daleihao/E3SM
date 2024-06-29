@@ -572,8 +572,8 @@ contains
                ! Calculate reflected radiation from adjacent terrain
                f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib))
                
-               write(iulog,*) 'albd',albd(g,ib)
-               write(iulog,*) 'albi',albi(g,ib)
+               !write(iulog,*) 'albd',albd(g,ib)
+               !write(iulog,*) 'albi',albi(g,ib)
                if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
 
                ! scale direct solar radiation: vis & nir
