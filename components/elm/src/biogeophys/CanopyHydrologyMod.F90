@@ -257,9 +257,6 @@ contains
        
        dtime = get_step_size()
 
-       dtime2 = dtime_mod
-       secs = secs_curr
-
        do gg = bounds%begg,bounds%endg
           irrigated_ppg(gg) = 0
        end do
@@ -647,15 +644,6 @@ contains
 
           end if !end of do_capsnow construct
 
-          ! set frac_sno_modis ! MODIS 10:30 (local solar time)
-          local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime2)*dtime
-          local_secp1 = mod(local_secp1,isecspday)
-          if (local_secp1 == 37800) then
-             frac_sno_modis(c) = frac_sno(c)
-          else
-             frac_sno_modis(c) = spval
-          endif
-
           ! set frac_sno_eff variable
           if (ltype(l) == istsoil .or. ltype(l) == istcrop) then
              if (subgridflag ==1) then 
@@ -728,7 +716,23 @@ contains
        call FracH2oSfc(bounds, num_nolakec, filter_nolakec, &
              col_wf%qflx_h2osfc2topsoi, dtime)
 
-     end associate 
+       dtime2 = dtime_mod
+       secs = secs_curr
+       do f = 1, num_nolakec
+          c = filter_nolakec(f)
+          g = cgridcell(c)
+
+          ! set frac_sno_modis ! MODIS 10:30 (local solar time)
+          local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime2)*dtime2
+          local_secp1 = mod(local_secp1,isecspday)
+          if (local_secp1 == 37800) then
+             frac_sno_modis(c) = frac_sno(c)
+          else
+             frac_sno_modis(c) = spval
+          endif
+       end do
+
+     end associate
 
    end subroutine CanopyHydrology
 
