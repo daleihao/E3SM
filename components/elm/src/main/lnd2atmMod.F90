@@ -128,28 +128,22 @@ contains
        lnd2atm_vars%t_rad_grc(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
     end do
     
-    local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime)*dtime
-    local_secp1 = mod(local_secp1,isecspday)
-    ! MODIS 10:30 (local solar time)
-    if (local_secp1 == 37800) then
-        do g = bounds%begg,bounds%endg
-            lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
-        end do
-    else
-        do g = bounds%begg,bounds%endg
-            lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = spval
-        end do
-    end if
-    ! 22:30 (local solar time)
-    if (local_secp1 == 81000) then
-        do g = bounds%begg,bounds%endg
-            lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
-        end do
-    else
-        do g = bounds%begg,bounds%endg
-            lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = spval
-        end do
-    end if
+    do g = bounds%begg,bounds%endg
+       local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime)*dtime
+       local_secp1 = mod(local_secp1,isecspday)
+       ! MODIS 10:30 (local solar time)
+       if (local_secp1 == 37800) then
+           lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
+       else
+           lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = spval
+       endif
+       ! 22:30 (local solar time)
+       if (local_secp1 == 81000) then
+          lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
+       else
+          lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = spval
+       end if
+    end do
 
     ! Calculate topounit level eflx_lwrad_out_topo for downscaling purpose
     if (use_atm_downscaling_to_topunit) then
