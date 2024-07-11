@@ -65,6 +65,7 @@ contains
     ! !USES:
       !$acc routine seq
     use elm_varcon, only : sb
+    use timeinfoMod
 
     !
     ! !ARGUMENTS:

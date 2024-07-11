@@ -345,7 +345,7 @@ contains
   subroutine InitHistory(this, bounds)
     !
     ! !USES:
-    use histFileMod, only : hist_addfld1d
+    use histFileMod, only : hist_addfld1d, hist_addfld2d
     !
     ! !ARGUMENTS:
     class(atm2lnd_type) :: this
