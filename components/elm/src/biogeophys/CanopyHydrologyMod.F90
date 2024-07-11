@@ -29,7 +29,7 @@ module CanopyHydrologyMod
   use elm_varcon        , only : snw_rds_min
   use pftvarcon         , only : irrigated
   use GridcellType      , only : grc_pp
-  use timeinfoMod, only : dtime_mod
+  use timeinfoMod       , only : dtime_mod, secs_curr
   !
   ! !PUBLIC TYPES:
   implicit none
@@ -113,7 +113,7 @@ contains
      ! temperature in the subroutine clm\_leaftem.f90, not in this subroutine.
      !
      ! !USES:
-     use elm_varcon         , only : hfus, denice, zlnd, rpi, spval, tfrz
+     use elm_varcon         , only : hfus, denice, zlnd, rpi, spval, tfrz, degpsec, isecspday
      use column_varcon      , only : icol_roof, icol_sunwall, icol_shadewall
      use landunit_varcon    , only : istcrop, istice, istwet, istsoil, istice_mec, istdlak
      use elm_varctl         , only : subgridflag
@@ -171,6 +171,8 @@ contains
      real(r8) :: newsnow(bounds%begc:bounds%endc)
      real(r8) :: snowmelt(bounds%begc:bounds%endc)
      integer  :: j
+     real(r8) :: dtime2
+     integer  ::  secs, local_secp1
 	 
      !--------------------------------------------------- ! initializing variables used to adjust irrigation on local processer
      real(r8) :: qflx_irrig_grid(bounds%begg:bounds%endg)      ! irrigation at grid level [mm/s] 
@@ -219,6 +221,7 @@ contains
           int_snow             => col_ws%int_snow             , & ! Output: [real(r8) (:)   ]  integrated snowfall [mm]                
           frac_sno_eff         => col_ws%frac_sno_eff         , & ! Output: [real(r8) (:)   ]  eff. fraction of ground covered by snow (0 to 1)
           frac_sno             => col_ws%frac_sno             , & ! Output: [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
+          frac_sno_modis       => col_ws%frac_sno_modis       , & ! Output: [real(r8) (:)   ]  fraction of ground covered by snow (0 to 1)
           frac_h2osfc          => col_ws%frac_h2osfc          , & ! Output: [real(r8) (:)   ]  fraction of ground covered by surface water (0 to 1)
           frac_iceold          => col_ws%frac_iceold          , & ! Output: [real(r8) (:,:) ]  fraction of ice relative to the tot water
           h2osoi_ice           => col_ws%h2osoi_ice           , & ! Output: [real(r8) (:,:) ]  ice lens (kg/m2)                      
@@ -253,6 +256,9 @@ contains
        ! Compute time step
        
        dtime = get_step_size()
+
+       dtime2 = dtime_mod
+       secs = secs_curr
 
        do gg = bounds%begg,bounds%endg
           irrigated_ppg(gg) = 0
@@ -640,6 +646,15 @@ contains
              dz_snowf = (snow_depth(c) - temp_snow_depth) / dtime
 
           end if !end of do_capsnow construct
+
+          ! set frac_sno_modis ! MODIS 10:30 (local solar time)
+          local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime2)*dtime
+          local_secp1 = mod(local_secp1,isecspday)
+          if (local_secp1 == 37800) then
+             frac_sno_modis(c) = frac_sno(c)
+          else
+             frac_sno_modis(c) = spval
+          endif
 
           ! set frac_sno_eff variable
           if (ltype(l) == istsoil .or. ltype(l) == istcrop) then

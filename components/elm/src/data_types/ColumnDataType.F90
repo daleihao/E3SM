@@ -147,6 +147,7 @@ module ColumnDataType
     ! Area fractions
     real(r8), pointer :: frac_sno           (:)   => null() ! fraction of ground covered by snow (0 to 1)
     real(r8), pointer :: frac_sno_eff       (:)   => null() ! fraction of ground covered by snow (0 to 1)
+    real(r8), pointer :: frac_sno_modis     (:)   => null() ! fraction of ground covered by snow (0 to 1)
     real(r8), pointer :: frac_iceold        (:,:) => null() ! fraction of ice relative to the tot water (-nlevsno+1:nlevgrnd)
     real(r8), pointer :: frac_h2osfc        (:)   => null() ! fractional area with surface water greater than zero
     real(r8), pointer :: frac_h2osfc_act    (:)   => null() ! actural fractional area with surface water greater than zero
@@ -1421,6 +1422,7 @@ contains
     allocate(this%do_capsnow         (begc:endc))
     allocate(this%frac_sno           (begc:endc))                     ; this%frac_sno           (:)   = spval
     allocate(this%frac_sno_eff       (begc:endc))                     ; this%frac_sno_eff       (:)   = spval
+    allocate(this%frac_sno_modis     (begc:endc))                     ; this%frac_sno_modis     (:)   = spval
     allocate(this%frac_iceold        (begc:endc,-nlevsno+1:nlevgrnd)) ; this%frac_iceold        (:,:) = spval
     allocate(this%frac_h2osfc        (begc:endc))                     ; this%frac_h2osfc        (:)   = spval
     allocate(this%frac_h2osfc_act    (begc:endc))                     ; this%frac_h2osfc_act    (:)   = spval
@@ -1573,6 +1575,11 @@ contains
     call hist_addfld1d (fname='FSNO_EFF',  units='1',  &
          avgflag='A', long_name='effective fraction of ground covered by snow', &
          ptr_col=this%frac_sno_eff, c2l_scale_type='urbanf')!, default='inactive')
+
+    this%frac_sno_modis(begc:endc) = spval
+    call hist_addfld1d (fname='FSNO_MODIS',  units='1',  &
+         avgflag='A', long_name='fraction of ground covered by snow (MODIS)', &
+         ptr_col=this%frac_sno_modis, c2l_scale_type='urbanf')
 
     if (use_cn)then
        this%frac_iceold(begc:endc,:) = spval
