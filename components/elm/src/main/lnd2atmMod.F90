@@ -11,7 +11,7 @@ module lnd2atmMod
   use shr_megan_mod        , only : shr_megan_mechcomps_n
   use shr_fan_mod          , only : shr_fan_to_atm
   use elm_varpar           , only : numrad, ndst, nlevgrnd, nlevsno, nlevsoi !ndst = number of dust bins.
-  use elm_varcon           , only : rair, grav, cpair, hfus, tfrz, spval
+  use elm_varcon           , only : rair, grav, cpair, hfus, tfrz, spval, degpsec, isecspday
   use elm_varctl           , only : iulog, use_c13, use_cn, use_lch4, use_voc, use_fates, use_atm_downscaling_to_topunit, use_fan
   use elm_varctl           , only : use_lnd_rof_two_way
   use tracer_varcon        , only : is_active_betr_bgc
@@ -75,6 +75,8 @@ contains
     !
     ! !LOCAL VARIABLES:
     integer :: g, t                                    ! index
+    real(r8)  :: dtime
+    integer   ::  secs, local_secp1
     !------------------------------------------------------------------------
     associate( &
       h2osno => col_ws%h2osno  , &
@@ -88,6 +90,9 @@ contains
       eflx_lwrad_out => veg_ef%eflx_lwrad_out , &
       eflx_lwrad_out_grc => lnd2atm_vars%eflx_lwrad_out_grc   &
       )
+
+    dtime = dtime_mod
+    secs = secs_curr
 
     call c2g(bounds, &
          h2osno    (bounds%begc:bounds%endc) , &
@@ -122,6 +127,29 @@ contains
        lnd2atm_vars%t_rad_grc(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
     end do
     
+    local_secp1 = secs + nint((grc_pp%londeg(g)/degpsec)/dtime)*dtime
+    local_secp1 = mod(local_secp1,isecspday)
+    ! MODIS 10:30 (local solar time)
+    if (local_secp1 == 37800) then
+        do g = bounds%begg,bounds%endg
+            lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
+        end do
+    else
+        do g = bounds%begg,bounds%endg
+            lnd2atm_vars%t_rad_grc_MODIS_daytime(g) = spval
+        end do
+    end if
+    ! 22:30 (local solar time)
+    if (local_secp1 == 81000) then
+        do g = bounds%begg,bounds%endg
+            lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = sqrt(sqrt(eflx_lwrad_out_grc(g)/sb))
+        end do
+    else
+        do g = bounds%begg,bounds%endg
+            lnd2atm_vars%t_rad_grc_MODIS_nighttime(g) = spval
+        end do
+    end if
+
     ! Calculate topounit level eflx_lwrad_out_topo for downscaling purpose
     if (use_atm_downscaling_to_topunit) then
        call p2t(bounds, &
@@ -175,6 +203,7 @@ contains
     real(r8), parameter :: amCO2 = amC + 2.0_r8*amO ! Atomic mass number for CO2
     ! The following converts g of C to kg of CO2
     real(r8), parameter :: convertgC2kgCO2 = 1.0e-3_r8 * (amCO2/amC)
+
     !------------------------------------------------------------------------
     associate( &
       t_ref2m     => veg_es%t_ref2m , &

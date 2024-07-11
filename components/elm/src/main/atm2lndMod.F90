@@ -506,13 +506,22 @@ contains
          forc_solad_grc     => atm2lnd_vars%forc_solad_grc                , &
          forc_solai_grc     => atm2lnd_vars%forc_solai_grc                , &
          forc_solar_grc     => atm2lnd_vars%forc_solar_grc                , &
-         forc_lwrad_g       => atm2lnd_vars%forc_lwrad_not_downscaled_grc   &
+         forc_lwrad_g       => atm2lnd_vars%forc_lwrad_not_downscaled_grc , &
+         forc_solad_grc_pp  => atm2lnd_vars%forc_solad_grc_pp                , &
+         forc_solai_grc_pp  => atm2lnd_vars%forc_solai_grc_pp                , &
+         forc_solar_grc_pp  => atm2lnd_vars%forc_solar_grc_pp                , &
+         forc_lwrad_g_pp    => atm2lnd_vars%forc_lwrad_not_downscaled_grc_pp   &
          )
 
      deg2rad = SHR_CONST_PI/180._r8
 
       ! Initialize column forcing (needs to be done for ALL active columns)
      do g = bounds%begg, bounds%endg
+
+         forc_solad_grc_pp(g,:) = forc_solad_grc(g,:)
+         forc_solai_grc_pp(g,:) = forc_solai_grc(g,:)
+         forc_solar_grc_pp(g) = forc_solar_grc(g)
+         forc_lwrad_g_pp(g) = forc_lwrad_g(g)
 
          ! calculate cosine of solar zenith angle
          cossza = shr_orb_cosz(nextsw_cday, lat(g), lon(g), declin)
@@ -525,7 +534,7 @@ contains
 
          f_short_dir(g) = 1._r8
          f_short_dif(g) = 1._r8
-         f_short_refl(g) = 0._r8
+         f_short_refl(g,:) = 0._r8
          sza(g) = nan
          saa(g) = nan
          cosinc(g) = nan
@@ -570,16 +579,16 @@ contains
             forc_solar_grc(g) = 0._r8
             do ib = 1, numrad
                ! Calculate reflected radiation from adjacent terrain
-               f_short_refl(g) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib))
+               f_short_refl(g,ib) = terrain_config_factor(g) / cos(slope_rad) * (albd(g,ib) * forc_solad_grc(g,ib) + albi(g,ib) * forc_solai_grc(g,ib))
                
                !write(iulog,*) 'albd',albd(g,ib)
                !write(iulog,*) 'albi',albi(g,ib)
-               if (f_short_refl(g) < 0._r8) f_short_refl(g) = 0._r8
+               if (f_short_refl(g,ib) < 0._r8) f_short_refl(g,ib) = 0._r8
 
                ! scale direct solar radiation: vis & nir
                forc_solad_grc(g,ib) = forc_solad_grc(g,ib) * f_short_dir(g)
                ! scale diffuse solar radiation: vis & nir
-               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * f_short_dif(g) + f_short_refl(g)
+               forc_solai_grc(g,ib) = forc_solai_grc(g,ib) * f_short_dif(g) + f_short_refl(g,ib)
 
                forc_solar_grc(g) = forc_solar_grc(g) + forc_solad_grc(g,ib) + forc_solai_grc(g,ib)
             end do

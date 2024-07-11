@@ -29,6 +29,8 @@ module lnd2atmType
 
      ! lnd->atm
      real(r8), pointer :: t_rad_grc          (:)   => null() ! radiative temperature (Kelvin)
+     real(r8), pointer :: t_rad_grc_MODIS_daytime   (:)   => null() ! radiative temperature (Kelvin)
+     real(r8), pointer :: t_rad_grc_MODIS_nighttime (:)   => null() ! radiative temperature (Kelvin)
      real(r8), pointer :: t_ref2m_grc        (:)   => null() ! 2m surface air temperature (Kelvin)
      real(r8), pointer :: q_ref2m_grc        (:)   => null() ! 2m surface specific humidity (kg/kg)
      real(r8), pointer :: u_ref10m_grc       (:)   => null() ! 10m surface wind speed (m/sec)
@@ -119,6 +121,8 @@ contains
     begg = bounds%begg; endg= bounds%endg
 
     allocate(this%t_rad_grc            (begg:endg))            ; this%t_rad_grc            (:) =ival
+    allocate(this%t_rad_grc_MODIS_daytime   (begg:endg))       ; this%t_rad_grc_MODIS_daytime      (:) =ival
+    allocate(this%t_rad_grc_MODIS_nighttime (begg:endg))       ; this%t_rad_grc_MODIS_nighttime    (:) =ival
     allocate(this%t_ref2m_grc          (begg:endg))            ; this%t_ref2m_grc          (:) =ival
     allocate(this%q_ref2m_grc          (begg:endg))            ; this%q_ref2m_grc          (:) =ival
     allocate(this%u_ref10m_grc         (begg:endg))            ; this%u_ref10m_grc         (:) =ival
@@ -201,6 +205,21 @@ contains
     call hist_addfld1d (fname='FSH', units='W/m^2',  &
          avgflag='A', long_name='sensible heat', &
          ptr_lnd=this%eflx_sh_tot_grc)
+
+    this%t_rad_grc(begg:endg) = spval
+    call hist_addfld1d (fname='t_rad_grc', units='K',  &
+         avgflag='A', long_name='radiative temperature', &
+         ptr_lnd=this%t_rad_grc)
+
+    this%t_rad_grc_MODIS_daytime(begg:endg) = spval
+    call hist_addfld1d (fname='t_rad_grc_MODIS_daytime', units='K',  &
+         avgflag='A', long_name='radiative temperature MODIS daytime', &
+         ptr_lnd=this%t_rad_grc_MODIS_daytime)
+
+    this%t_rad_grc_MODIS_nighttime(begg:endg) = spval
+    call hist_addfld1d (fname='t_rad_grc_MODIS_nighttime', units='K',  &
+         avgflag='A', long_name='radiative temperature MODIS nighttime', &
+         ptr_lnd=this%t_rad_grc_MODIS_nighttime)
        
     this%qflx_rofliq_grc(begg:endg) = 0._r8
     call hist_addfld1d (fname='QRUNOFF',  units='mm/s',  &

@@ -151,9 +151,13 @@ module atm2lndType
      real(r8), pointer :: cosinc(:) => null()
      real(r8), pointer :: f_short_dir(:) => null()
      real(r8), pointer :: f_short_dif(:) => null()
-     real(r8), pointer :: f_short_refl(:) => null()
+     real(r8), pointer :: f_short_refl(:,:) => null()
      real(r8), pointer :: f_long_dif(:) => null()
      real(r8), pointer :: f_long_refl(:) => null()
+     real(r8), pointer :: forc_solad_grc_pp (:,:) => null() ! direct beam radiation (numrad) (vis=forc_sols , nir=forc_soll )
+     real(r8), pointer :: forc_solai_grc_pp (:,:) => null() ! diffuse radiation (numrad) (vis=forc_solsd, nir=forc_solld)
+     real(r8), pointer :: forc_solar_grc_pp (:)   => null() ! incident solar radiation
+     real(r8), pointer :: forc_lwrad_not_downscaled_grc_pp (:)   => null()
 
    contains
 
@@ -321,14 +325,18 @@ contains
     end if
     
     if ( use_ktop_rad ) then
-       allocate(this%f_short_dir                (begg:endg))        ; this%f_short_dir                   (:)   = nan
-       allocate(this%f_short_dif                (begg:endg))        ; this%f_short_dif                   (:)   = nan
-       allocate(this%f_short_refl               (begg:endg))        ; this%f_short_refl                  (:)   = nan
+       allocate(this%f_short_dir                (begg:endg)) ; this%f_short_dir                          (:)   = nan
+       allocate(this%f_short_dif                (begg:endg)) ; this%f_short_dif                          (:)   = nan
+       allocate(this%f_short_refl               (begg:endg,numrad)) ; this%f_short_refl                  (:,:)   = nan
        allocate(this%f_long_dif                 (begg:endg))        ; this%f_long_dif                    (:)   = nan
        allocate(this%f_long_refl                (begg:endg))        ; this%f_long_refl                   (:)   = nan
        allocate(this%sza                        (begg:endg))        ; this%sza                           (:)   = nan
        allocate(this%saa                        (begg:endg))        ; this%saa                           (:)   = nan
        allocate(this%cosinc                     (begg:endg))        ; this%cosinc                        (:)   = nan
+       allocate(this%forc_solad_grc_pp          (begg:endg,numrad)) ; this%forc_solad_grc_pp             (:,:) = ival
+       allocate(this%forc_solai_grc_pp          (begg:endg,numrad)) ; this%forc_solai_grc_pp             (:,:) = ival
+       allocate(this%forc_solar_grc_pp          (begg:endg))        ; this%forc_solar_grc_pp             (:)   = ival
+       allocate(this%forc_lwrad_not_downscaled_grc_pp (begg:endg))  ; this%forc_lwrad_not_downscaled_grc_pp (:)   = ival
     endif
 
   end subroutine InitAllocate
@@ -545,8 +553,8 @@ contains
             avgflag='A', long_name='f_short_dif', &
             ptr_gcell=this%f_short_dif, default='inactive')
 
-       this%f_short_refl(begg:endg) = spval
-       call hist_addfld1d (fname='F_SHORT_REFL', units='unitless',  &
+       this%f_short_refl(begg:endg,:) = spval
+       call hist_addfld2d (fname='F_SHORT_REFL', units='unitless', type2d='numrad',  &
             avgflag='A', long_name='f_short_refl', &
             ptr_gcell=this%f_short_refl, default='inactive')
 
@@ -559,6 +567,27 @@ contains
        call hist_addfld1d (fname='F_LONG_REFL', units='unitless',  &
             avgflag='A', long_name='f_long_refl', &
             ptr_gcell=this%f_long_refl, default='inactive')
+
+       this%forc_solad_grc_pp(begg:endg,:) = spval
+       call hist_addfld2d (fname='forc_solad_grc_pp', units='unitless', type2d='numrad',  &
+            avgflag='A', long_name='forc_solad_grc_pp', &
+            ptr_gcell=this%forc_solad_grc_pp, default='inactive')
+
+       this%forc_solai_grc_pp(begg:endg,:) = spval
+       call hist_addfld2d (fname='forc_solai_grc_pp', units='unitless', type2d='numrad',  &
+            avgflag='A', long_name='forc_solai_grc_pp', &
+            ptr_gcell=this%forc_solai_grc_pp, default='inactive')
+
+       this%forc_solar_grc_pp(begg:endg) = spval
+       call hist_addfld1d (fname='SWdown_PP', units='W/m^2',  &
+            avgflag='A', long_name='atmospheric incident solar radiation (PP)', &
+            ptr_gcell=this%forc_solar_grc_pp, default='inactive')
+
+       this%forc_lwrad_not_downscaled_grc_pp(begg:endg) = spval
+       call hist_addfld1d (fname='LWdown_PP', units='W/m^2',  &
+            avgflag='A', long_name='atmospheric longwave radiation (PP)', &
+            ptr_gcell=this%forc_lwrad_not_downscaled_grc_pp, default='inactive')
+
     endif
 
   end subroutine InitHistory
