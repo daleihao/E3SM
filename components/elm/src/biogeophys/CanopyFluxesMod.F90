@@ -14,7 +14,7 @@ module CanopyFluxesMod
   use shr_log_mod           , only : errMsg => shr_log_errMsg
   use abortutils            , only : endrun
   use elm_varctl            , only : iulog, use_cn, use_lch4, use_c13, use_c14, use_fates
-  use elm_varctl            , only : use_hydrstress, use_ktop_rad
+  use elm_varctl            , only : use_hydrstress, use_ktop_rad, use_ktop_lw
   use elm_varpar            , only : nlevgrnd, nlevsno
   use elm_varcon            , only : namep
   use pftvarcon             , only : nbrdlf_dcd_tmp_shrub, nsoybean , nsoybeanirrig
@@ -687,7 +687,7 @@ contains
          bir(p) = - (2._r8-emv(p)*(1._r8-emg(c))) * emv(p) * sb
          cir(p) =   emv(p)*emg(c)*sb
 
-         if (use_ktop_rad) then
+         if (use_ktop_rad .and. use_ktop_lw) then
             slope_rad = slope_deg(g) * deg2rad
             bir(p) = bir(p) / cos(slope_rad)
             cir(p) = cir(p) / cos(slope_rad)
@@ -1251,7 +1251,7 @@ contains
 
          ! Downward longwave radiation below the canopy
 
-         if (use_ktop_rad) then
+         if (use_ktop_rad .and. use_ktop_lw) then
             slope_rad = slope_deg(g) * deg2rad
             dlrad(p) = (1._r8-emv(p))*emg(c)*forc_lwrad(t) + &
                   emv(p)*emg(c)*sb*tlbef(p)**3*(tlbef(p) + 4._r8*dt_veg(p))/cos(slope_rad)
@@ -1260,7 +1260,7 @@ contains
                   emv(p)*emg(c)*sb*tlbef(p)**3*(tlbef(p) + 4._r8*dt_veg(p))
          endif
          ! Upward longwave radiation above the canopy
-         if (use_ktop_rad) then
+         if (use_ktop_rad .and. use_ktop_lw) then
             slope_rad = slope_deg(g) * deg2rad
             ulrad(p) = ((1._r8-emg(c))*(1._r8-emv(p))*(1._r8-emv(p))*forc_lwrad(t) &
                 + emv(p)*(1._r8+(1._r8-emg(c))*(1._r8-emv(p)))*sb*tlbef(p)**3*(tlbef(p) + &

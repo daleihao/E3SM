@@ -462,6 +462,7 @@ contains
     use shr_orb_mod
     use shr_const_mod   , only : SHR_CONST_PI
     use elm_varpar      , only : numrad, ndir_horizon_angle
+    use elm_varctl      , only : use_ktop_lw
     !
     ! !ARGUMENTS:
     type(bounds_type)  , intent(in)    :: bounds
@@ -597,14 +598,17 @@ contains
 
          f_long_dif(g) = 1._r8
          f_long_refl(g) = 0._r8
-         ! scale longwave radiation
-         f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
-         if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
-         f_long_refl(g) = terrain_config_factor(g) * eflx_lwrad_out_grc(g)
-         if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
+
+         if (use_ktop_lw) then
+            ! scale longwave radiation
+            f_long_dif(g) = sky_view_factor(g) / cos(slope_rad)
+            if (f_long_dif(g) < 0._r8) f_long_dif(g) = 0._r8
+            f_long_refl(g) = terrain_config_factor(g) * eflx_lwrad_out_grc(g)
+            if (f_long_refl(g) < 0._r8) f_long_refl(g) = 0._r8
          
-         !write(iulog,*) 'eflx_lwrad_out_grc',eflx_lwrad_out_grc(g)
-         forc_lwrad_g(g) = forc_lwrad_g(g) * f_long_dif(g) + f_long_refl(g)
+            !write(iulog,*) 'eflx_lwrad_out_grc',eflx_lwrad_out_grc(g)
+            forc_lwrad_g(g) = forc_lwrad_g(g) * f_long_dif(g) + f_long_refl(g)
+         end if
 
          ! copy radiation values from gridcell to topounit
          do topo = grc_pp%topi(g), grc_pp%topf(g)

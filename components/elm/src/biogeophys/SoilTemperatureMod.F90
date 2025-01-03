@@ -12,7 +12,7 @@ module SoilTemperatureMod
   use shr_infnan_mod    , only : nan => shr_infnan_nan
   use decompMod         , only : bounds_type
   use abortutils        , only : endrun
-  use elm_varctl        , only : iulog, use_ktop_rad
+  use elm_varctl        , only : iulog, use_ktop_rad, use_ktop_lw
   use elm_varcon        , only : spval
   use UrbanParamsType   , only : urbanparams_type
   use atm2lndType       , only : atm2lnd_type
@@ -1772,7 +1772,7 @@ contains
          lwrad_emit_soil(c)    =    emg(c) * sb * t_soisno(c,1)**4
          lwrad_emit_h2osfc(c)  =    emg(c) * sb * t_h2osfc(c)**4
 
-         if (use_ktop_rad) then
+         if (use_ktop_rad .and. use_ktop_lw) then
             deg2rad = SHR_CONST_PI/180._r8
             slope_rad = slope_deg(g) * deg2rad
             lwrad_emit(c) = lwrad_emit(c) / cos(slope_rad)

@@ -8,7 +8,7 @@ module SoilFluxesMod
   use shr_log_mod	, only : errMsg => shr_log_errMsg
   use decompMod		, only : bounds_type
   use abortutils	, only : endrun
-  use elm_varctl	, only : iulog, use_extrasnowlayers, use_ktop_rad
+  use elm_varctl	, only : iulog, use_extrasnowlayers, use_ktop_rad, use_ktop_lw
   use perfMod_GPU
   use elm_varpar	, only : nlevsno, nlevgrnd, nlevurb, max_patch_per_col
   use atm2lndType	, only : atm2lnd_type
@@ -288,7 +288,7 @@ contains
                  +(1._r8-frac_sno_eff(c)-frac_h2osfc(c))*tssbef(c,1)**4 &
                  +frac_h2osfc(c)*t_h2osfc_bef(c)**4)
             
-            if (use_ktop_rad) then
+            if (use_ktop_rad .and. use_ktop_lw) then
                slope_rad = slope_deg(g) * deg2rad
                eflx_soil_grnd(p) = ((1._r8- frac_sno_eff(c))*sabg_soil(p) + frac_sno_eff(c)*sabg_snow(p)) + dlrad(p) &
                     + (1-frac_veg_nosno(p))*emg(c)*forc_lwrad(t) &
@@ -439,7 +439,7 @@ contains
                  +(1._r8-frac_sno_eff(c)-frac_h2osfc(c))*tssbef(c,1)**4 &
                  +frac_h2osfc(c)*t_h2osfc_bef(c)**4)
 
-            if (use_ktop_rad) then
+            if (use_ktop_rad .and. use_ktop_lw) then
                slope_rad = slope_deg(g) * deg2rad
                eflx_lwrad_out(p) = ulrad(p) &
                     + (1-frac_veg_nosno(p))*(1.-emg(c))*forc_lwrad(t) &

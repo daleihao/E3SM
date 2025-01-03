@@ -368,7 +368,8 @@ module elm_varctl
   logical, public :: use_lake_wat_storage = .false.
   logical, public :: use_top_solar_rad   = .false.  ! TOP : sub-grid topographic effect on surface solar radiation
   logical, public :: use_ktop_rad        = .false.  ! kTOP : grid-scale topographic effect on shortwave and longwave radiation
-  logical, public :: use_ktop_surf       = .false.  ! kTOP : grid-scale topographic effect on shortwave and longwave radiation
+  logical, public :: use_ktop_lw         = .false.  ! kTOP : grid-scale topographic effect on longwave radiation
+  logical, public :: use_ktop_surf       = .false.  ! kTOP : grid-scale topographic effect on surface albedo and emissivity
 
   !----------------------------------------------------------
   ! Fan controls (use_fan)

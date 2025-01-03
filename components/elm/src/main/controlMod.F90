@@ -53,7 +53,7 @@ module controlMod
   use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
   use elm_varctl              , only: add_temperature, add_co2
   use elm_varctl              , only: const_climate_hist
-  use elm_varctl              , only: use_top_solar_rad, use_ktop_rad, use_ktop_surf
+  use elm_varctl              , only: use_top_solar_rad, use_ktop_rad, use_ktop_lw, use_ktop_surf
   use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
 
   !
@@ -316,7 +316,7 @@ contains
          use_erosion, ero_ccycle
 
     namelist /elm_inparm/ &
-         use_top_solar_rad, use_ktop_rad, use_ktop_surf
+         use_top_solar_rad, use_ktop_rad, use_ktop_lw, use_ktop_surf
 
     namelist /elm_mosart/ &
          lnd_rof_coupling_nstep
@@ -879,6 +879,7 @@ contains
     call mpi_bcast (const_climate_hist, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_top_solar_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! TOP solar radiation parameterization
     call mpi_bcast (use_ktop_rad, 1, MPI_LOGICAL, 0, mpicom, ier)  ! kTOP radiation parameterization
+    call mpi_bcast (use_ktop_lw, 1, MPI_LOGICAL, 0, mpicom, ier)  ! kTOP radiation parameterization
     call mpi_bcast (use_ktop_surf, 1, MPI_LOGICAL, 0, mpicom, ier) ! kTOP radiation parameterization
     
     ! glacier_mec variables
@@ -1074,6 +1075,12 @@ contains
     else
         write(iulog,*) '   use_ktop_rad is False, so do not run use_ktop_rad radiation parameterization'
     end if
+    
+    if (use_ktop_lw) then
+        write(iulog,*) '  use kTOP radiation parameterization instead of PP'
+    else
+        write(iulog,*) '   use_ktop_lw is False, so do not run use_ktop_lw radiation parameterization'
+    end if
 
     if (use_ktop_surf) then
         write(iulog,*) '  use kTOP radiation parameterization instead of PP'
@@ -1197,6 +1204,7 @@ contains
     
     write(iulog,*) '   Sub-grid topographic effects on solar radiation   = ', use_top_solar_rad  ! TOP solar radiation parameterization
     write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop_rad   ! kTOP radiation parameterization
+    write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop_lw   ! kTOP radiation parameterization
     write(iulog,*) '   Grid-scale topographic effects on radiation (kTOP)  = ', use_ktop_surf  ! kTOP radiation parameterization
 
     if (nsrest == nsrContinue) then
