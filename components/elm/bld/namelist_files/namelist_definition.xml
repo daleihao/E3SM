@@ -641,6 +641,11 @@ If TRUE, TOP solar radiation parameterization will be activated, which considers
 If TRUE, kTOP radiation parameterization will be activated, which considers the effects of grid-scale topography.
 </entry>
 
+<entry id="use_ktop_lw" type="logical" category="elm_physics"
+       group="elm_inparm" valid_values="" value=".false.">
+If TRUE, kTOP radiation parameterization will be activated, which considers the effects of grid-scale topography.
+</entry>
+
 <entry id="use_ktop_surf" type="logical" category="elm_physics"
        group="elm_inparm" valid_values="" value=".false.">
 If TRUE, kTOP radiation parameterization will be activated, which considers the effects of grid-scale topography.
