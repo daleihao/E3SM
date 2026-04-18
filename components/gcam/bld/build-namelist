@@ -375,7 +375,6 @@ if (defined $opts{'infile'}) {
 }
 
 #-----------------------------------------------------------------------------------------------
-
 # Process the -use_case arg.
 # Declare global symbol $uc_defaults even if it's not defined, because we check whether it's
 # defined before using it in the get_default_value method below.
