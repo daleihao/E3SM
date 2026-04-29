@@ -42,6 +42,16 @@ module controlMod
   use FanMod                  , only: nh4_ads_coef
   use AllocationMod           , only: nu_com_phosphatase,nu_com_nfix
   use seq_drydep_mod          , only: drydep_method, DD_XLND, n_drydep
+  use elm_varctl              , only: forest_fert_exp
+  use elm_varctl              , only: ECA_Pconst_RGspin
+  use elm_varctl              , only: NFIX_PTASE_plant
+  use elm_varctl              , only : use_pheno_flux_limiter
+  use elm_varctl              , only: startdate_add_temperature, startdate_add_co2
+  use elm_varctl              , only: add_temperature, add_co2
+  use elm_varctl              , only: const_climate_hist
+  use elm_varctl              , only: use_top_solar_rad
+  use elm_varctl              , only: snow_shape, snicar_atm_type, use_dust_snow_internal_mixing
+  use elm_varctl              , only: use_gcam_landuse
   use EcosystemBalanceCheckMod, only: bgc_balance_check_tolerance => balance_check_tolerance
   use elm_varpar              , only: elmfates_carbon_only
   use elm_varpar              , only: elmfates_cnp
@@ -333,6 +343,8 @@ contains
           fates_lu_transition_logic,                    &
           fates_history_dimlevel
 
+    namelist /elm_inparm / use_gcam_landuse
+    
     namelist /elm_inparm / use_betr
 
     namelist /elm_inparm / use_lai_streams
@@ -885,6 +897,7 @@ contains
     call mpi_bcast (fates_paramfile, len(fates_paramfile) , MPI_CHARACTER, 0, mpicom, ier)
     call mpi_bcast (fluh_timeseries, len(fluh_timeseries) , MPI_CHARACTER, 0, mpicom, ier)
     call mpi_bcast (flandusepftdat, len(flandusepftdat) , MPI_CHARACTER, 0, mpicom, ier)
+    call mpi_bcast (use_gcam_landuse, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_fates_planthydro, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_fates_cohort_age_tracking, 1, MPI_LOGICAL, 0, mpicom, ier)
     call mpi_bcast (use_fates_ed_st3, 1, MPI_LOGICAL, 0, mpicom, ier)
@@ -1342,6 +1355,7 @@ contains
        write(iulog, *) '    fates_paramfile = ', fates_paramfile
        write(iulog, *) '    fluh_timeseries = ', trim(fluh_timeseries)
        write(iulog, *) '    flandusepftdat = ', trim(flandusepftdat)
+       write(iulog, *) '    use_gcam_landuse = ', use_gcam_landuse
        write(iulog, *) '    use_fates_planthydro = ', use_fates_planthydro
        write(iulog, *) '    use_fates_tree_damage = ', use_fates_tree_damage
        write(iulog, *) '    use_fates_cohort_age_tracking = ',use_fates_cohort_age_tracking

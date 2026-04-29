@@ -682,6 +682,7 @@ this mask will have smb calculated over the entire global land surface
 
 <!-- Use the radiation parameterization for fine-scale topographic effects -->
 <use_finetop_rad>.false.</use_finetop_rad>
+<use_gcam_landuse>.true.</use_gcam_landuse>
 
 <!-- SNICAR (SNow, ICe, and Aerosol Radiative model) datasets -->
 <!--  ***********  Resolution independent:   ***********  -->
